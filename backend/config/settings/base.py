@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     # Local
     "core",
     "apps.accounts",
+    "apps.properties",
 ]
 
 if USE_POSTGIS:
@@ -150,6 +151,9 @@ SPECTACULAR_SETTINGS = {
         {"name": "Health", "description": "Service health checks"},
         {"name": "Auth", "description": "Authentication and registration"},
         {"name": "Profile", "description": "User profile and preferences"},
+        {"name": "Properties", "description": "Public property search and listings"},
+        {"name": "Landlord Properties", "description": "Landlord property management"},
+        {"name": "Saved Properties", "description": "Tenant saved homes"},
     ],
 }
 
@@ -189,6 +193,11 @@ FRONTEND_PASSWORD_RESET_URL = env(
     "FRONTEND_PASSWORD_RESET_URL",
     default="http://localhost:3000/reset-password",
 )
+
+# Media storage — local by default; S3/Cloudinary can be wired in Phase 11
+AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default="")
+AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="")
+CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
 
 LOGGING = {
     "version": 1,
