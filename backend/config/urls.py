@@ -14,6 +14,8 @@ from apps.verification.urls.verification import (
 )
 from apps.applications.urls.applications import tenant_urlpatterns as application_tenant_urlpatterns
 from apps.applications.urls.applications import landlord_urlpatterns as application_landlord_urlpatterns
+from apps.leases.urls.leases import landlord_urlpatterns as lease_landlord_urlpatterns
+from apps.leases.urls.leases import tenant_urlpatterns as lease_tenant_urlpatterns
 from apps.properties.urls.properties import landlord_urlpatterns, saved_urlpatterns
 from core.views import HealthCheckView
 
@@ -32,6 +34,8 @@ urlpatterns = [
     path("api/v1/inspector/verification/", include(verification_inspector_urlpatterns)),
     path("api/v1/admin/verification/", include(verification_admin_urlpatterns)),
     path("api/v1/community-reports/", include(verification_community_urlpatterns)),
+    path("api/v1/leases/", include(lease_tenant_urlpatterns)),
+    path("api/v1/landlord/leases/", include(lease_landlord_urlpatterns)),
 ]
 
 if settings.DEBUG:

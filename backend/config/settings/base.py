@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "apps.properties",
     "apps.applications",
     "apps.verification",
+    "apps.leases",
 ]
 
 if USE_POSTGIS:
@@ -161,6 +162,8 @@ SPECTACULAR_SETTINGS = {
         {"name": "Verification", "description": "Inspector verification queue and scoring"},
         {"name": "Admin Verification", "description": "Admin verification pipeline stats"},
         {"name": "Community Reports", "description": "Property community reports"},
+        {"name": "Leases", "description": "Tenant lease contracts and signatures"},
+        {"name": "Landlord Leases", "description": "Landlord lease management"},
     ],
 }
 

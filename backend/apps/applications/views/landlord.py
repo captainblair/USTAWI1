@@ -23,6 +23,7 @@ from apps.applications.services.workflow import (
     mark_under_review,
     reject_application,
 )
+from apps.leases.services.workflow import LeaseWorkflowError, create_lease_from_application
 from core.pagination import StandardResultsSetPagination
 
 
@@ -107,7 +108,7 @@ class LandlordApplicationReviewView(APIView):
 class LandlordApplicationApproveView(APIView):
     permission_classes = [IsAuthenticated, IsLandlordAgentOrAdmin, IsApplicationLandlord]
 
-    @extend_schema(tags=["Landlord Applications"], summary="Approve application")
+    @extend_schema(tags=["Landlord Applications"], summary="Approve application", request=ApproveApplicationSerializer)
     def post(self, request, pk):
         application = RentalApplication.objects.get(pk=pk, property__owner=request.user)
         serializer = ApproveApplicationSerializer(data=request.data)
@@ -118,16 +119,24 @@ class LandlordApplicationApproveView(APIView):
                 actor=request.user,
                 notes=serializer.validated_data.get("notes", ""),
             )
+            lease = None
+            try:
+                lease = create_lease_from_application(application, actor=request.user)
+            except LeaseWorkflowError:
+                pass
         except ApplicationWorkflowError as exc:
             return Response(
                 {"success": False, "error": {"message": str(exc)}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        data = {"id": str(application.id), "status": application.status}
+        if lease:
+            data["lease_id"] = str(lease.id)
         return Response(
             {
                 "success": True,
-                "message": "Application approved.",
-                "data": {"id": str(application.id), "status": application.status},
+                "message": "Application approved. Lease created for signature.",
+                "data": data,
             }
         )
 
