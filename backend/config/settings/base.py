@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "apps.verification",
     "apps.leases",
     "apps.payments",
+    "apps.maintenance",
 ]
 
 if USE_POSTGIS:
@@ -167,6 +168,8 @@ SPECTACULAR_SETTINGS = {
         {"name": "Landlord Leases", "description": "Landlord lease management"},
         {"name": "Payments", "description": "Tenant rent payments and receipts"},
         {"name": "Landlord Payments", "description": "Landlord payment collection and billing"},
+        {"name": "Maintenance", "description": "Tenant maintenance requests"},
+        {"name": "Landlord Maintenance", "description": "Landlord maintenance management"},
     ],
 }
 
