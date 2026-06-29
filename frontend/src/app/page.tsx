@@ -1,3 +1,5 @@
+import { HomeAppPromo } from "@/components/home/home-app-promo";
+import { HomeContact, HomeTestimonials } from "@/components/home/home-sections";
 import { WireframeHero } from "@/components/home/wireframe-hero";
 import { WireframeMainPanel } from "@/components/home/wireframe-main-panel";
 import { WireframeNav } from "@/components/home/wireframe-nav";
@@ -12,12 +14,15 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8f8fa] to-white">
+    <div className="min-h-screen bg-ustawi-cream">
       <div className="relative">
         <WireframeNav />
         <WireframeHero />
         <WireframeMainPanel featured={featured} />
       </div>
+      <HomeTestimonials />
+      <HomeAppPromo />
+      <HomeContact />
     </div>
   );
 }

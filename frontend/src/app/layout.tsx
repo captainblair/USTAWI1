@@ -1,12 +1,12 @@
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { SiteChrome } from "@/components/layout/site-chrome";
 import { QueryProvider } from "@/components/providers/query-provider";
 import "./globals.css";
 
-const plusJakarta = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata = {
@@ -17,8 +17,8 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${plusJakarta.variable} h-full scroll-smooth`}>
-      <body className="min-h-full flex flex-col bg-white font-sans text-ustawi-navy antialiased">
+    <html lang="en" className={`${poppins.variable} h-full scroll-smooth`}>
+      <body className="min-h-full flex flex-col bg-white font-sans font-normal leading-relaxed text-ustawi-navy antialiased">
         <QueryProvider>
           <SiteChrome>{children}</SiteChrome>
         </QueryProvider>

@@ -1,28 +1,53 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { UstawiLogo } from "@/components/brand/ustawi-logo";
 import { Button } from "@/components/ui/button";
+import { APP_NAV_LINKS } from "@/lib/navigation";
+import { cn } from "@/lib/utils";
 
 export function Header() {
+  const pathname = usePathname();
+
+  function isActive(link: (typeof APP_NAV_LINKS)[number]) {
+    if (link.matchPath) {
+      return pathname === link.matchPath || pathname.startsWith(`${link.matchPath}/`);
+    }
+    return false;
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-ustawi-border bg-white/95 backdrop-blur-md">
-      <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-[80px] max-w-7xl items-center px-4 sm:px-6 lg:px-8">
         <UstawiLogo variant="nav" />
 
-        <nav className="hidden items-center gap-8 lg:flex">
-          <Link href="/properties" className="text-sm font-medium text-ustawi-navy/80 hover:text-ustawi-navy">
-            Search
-          </Link>
-          <Link href="/#how-it-works" className="text-sm font-medium text-ustawi-navy/80 hover:text-ustawi-navy">
-            How it works
-          </Link>
+        <nav className="ml-10 hidden flex-1 items-center gap-8 lg:flex">
+          {APP_NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "text-[15px] font-medium text-ustawi-navy/70 transition hover:text-ustawi-navy",
+                isActive(link) && "font-semibold text-ustawi-navy",
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="hidden text-sm font-medium text-ustawi-navy/80 sm:block">
+        <div className="ml-auto flex items-center gap-6">
+          <Link
+            href="/login"
+            className="hidden text-[15px] font-medium text-ustawi-navy/75 sm:block hover:text-ustawi-navy"
+          >
             Login
           </Link>
           <Link href="/register">
-            <Button size="sm">Login/Register</Button>
+            <Button size="sm" className="min-w-[110px] px-5">
+              Register
+            </Button>
           </Link>
         </div>
       </div>

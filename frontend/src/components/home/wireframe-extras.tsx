@@ -23,7 +23,7 @@ export function WireframeTestimonials() {
                   <p className="truncate text-xs text-ustawi-muted">{item.line1}</p>
                   <p className="truncate text-xs text-ustawi-muted">{item.line2}</p>
                 </div>
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ustawi-gradient shadow-ustawi-red" />
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ustawi-red shadow-ustawi-red" />
               </li>
             </ScrollReveal>
           ))}

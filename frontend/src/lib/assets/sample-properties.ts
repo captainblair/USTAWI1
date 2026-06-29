@@ -58,7 +58,7 @@ export const SAMPLE_PROPERTIES: SampleProperty[] = [
   },
 ];
 
-export const LOGO_PATH = "/images/logo/logov.png";
+export const LOGO_PATH = "/images/logo/best.png";
 
 /** Full-bleed hero — Karen villa at dusk */
 export const HERO_IMAGE =

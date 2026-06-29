@@ -1,0 +1,22 @@
+export type NavLink = {
+  href: string;
+  label: string;
+  matchPath?: string;
+  matchHash?: string;
+  external?: boolean;
+};
+
+/** Homepage navbar — wireframe-inspired, Nenasasa-style */
+export const HOME_NAV_LINKS: NavLink[] = [
+  { href: "/#how-it-works", label: "How it works", matchHash: "how-it-works" },
+  { href: "/#testimonials", label: "Testimonials", matchHash: "testimonials" },
+  { href: "/#contact", label: "Contact", matchHash: "contact" },
+];
+
+/** Inner pages — extended navigation */
+export const APP_NAV_LINKS: NavLink[] = [
+  { href: "/properties", label: "Search", matchPath: "/properties" },
+  { href: "/#how-it-works", label: "How it works", matchHash: "how-it-works" },
+  { href: "/#testimonials", label: "Testimonials", matchHash: "testimonials" },
+  { href: "/#contact", label: "Contact", matchHash: "contact" },
+];

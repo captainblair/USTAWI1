@@ -2,17 +2,17 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #0a1128;
-  --ustawi-navy: #0a1128;
-  --ustawi-navy-hero: #0c1630;
-  --ustawi-navy-light: #152d4a;
-  --ustawi-red-start: #ff6b5a;
-  --ustawi-red-mid: #ef2438;
-  --ustawi-red-end: #b8061c;
-  --ustawi-red-hover-end: #9e0618;
-  --ustawi-panel: #f4f4f6;
+  --foreground: #1f2b6c;
+  --ustawi-navy: #1f2b6c;
+  --ustawi-navy-light: #2a3a85;
+  --ustawi-navy-muted: #4a5580;
+  --ustawi-red: #ef3d32;
+  --ustawi-red-hover: #e03126;
+  --ustawi-red-active: #c92d23;
+  --ustawi-coral-light: #fdeae8;
+  --ustawi-panel: #f7f8fc;
   --ustawi-muted: #6b7280;
-  --ustawi-border: #e5e7eb;
+  --ustawi-border: #e8eaf2;
   --ustawi-success: #059669;
 }
 
@@ -21,14 +21,16 @@
   --color-foreground: var(--foreground);
   --color-ustawi-navy: var(--ustawi-navy);
   --color-ustawi-navy-light: var(--ustawi-navy-light);
-  --color-ustawi-red: var(--ustawi-red-mid);
-  --color-ustawi-red-hover: var(--ustawi-red-hover-end);
+  --color-ustawi-red: #ef3d32;
+  --color-ustawi-red-hover: #e03126;
+  --color-ustawi-red-active: #c92d23;
+  --color-ustawi-coral-light: var(--ustawi-coral-light);
   --color-ustawi-cream: var(--ustawi-panel);
-  --color-ustawi-sand: #ececef;
+  --color-ustawi-sand: #eef0f6;
   --color-ustawi-muted: var(--ustawi-muted);
   --color-ustawi-border: var(--ustawi-border);
   --color-ustawi-success: var(--ustawi-success);
-  --font-sans: var(--font-plus-jakarta);
+  --font-sans: var(--font-poppins);
 }
 
 * {
@@ -42,35 +44,23 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
 }
 
-/* Wireframe red gradient — bright coral top-left → deep crimson bottom-right */
 .bg-ustawi-gradient {
-  background: linear-gradient(
-    155deg,
-    var(--ustawi-red-start) 0%,
-    var(--ustawi-red-mid) 42%,
-    var(--ustawi-red-end) 100%
-  );
+  background-color: #ef3d32;
 }
 
-.bg-ustawi-gradient:hover {
-  background: linear-gradient(
-    155deg,
-    #ff7d6e 0%,
-    var(--ustawi-red-mid) 42%,
-    var(--ustawi-red-hover-end) 100%
-  );
-}
-
-.text-gradient-red {
-  background: linear-gradient(135deg, var(--ustawi-red-start), var(--ustawi-red-end));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.text-gradient-coral {
+  color: #ef3d32;
 }
 
 .shadow-ustawi-red {
-  box-shadow: 0 4px 14px rgba(238, 43, 58, 0.35);
+  box-shadow: 0 4px 16px rgba(239, 61, 50, 0.22);
+}
+
+.shadow-soft {
+  box-shadow: 0 1px 0 rgba(31, 43, 108, 0.06), 0 4px 24px rgba(31, 43, 108, 0.05);
 }
