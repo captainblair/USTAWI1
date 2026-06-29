@@ -21,8 +21,9 @@ from apps.payments.urls.payments import tenant_urlpatterns as payment_tenant_url
 from apps.payments.urls.payments import webhook_urlpatterns as payment_webhook_urlpatterns
 from apps.maintenance.urls.maintenance import landlord_urlpatterns as maintenance_landlord_urlpatterns
 from apps.maintenance.urls.maintenance import tenant_urlpatterns as maintenance_tenant_urlpatterns
-from apps.support.urls.support import admin_urlpatterns as support_admin_urlpatterns
+from apps.analytics.urls.analytics import urlpatterns as analytics_urlpatterns
 from apps.support.urls.support import user_urlpatterns as support_user_urlpatterns
+from apps.support.urls.support import admin_urlpatterns as support_admin_urlpatterns
 from apps.properties.urls.properties import landlord_urlpatterns, saved_urlpatterns
 from core.views import HealthCheckView
 
@@ -51,6 +52,7 @@ urlpatterns = [
     path("api/v1/notifications/", include("apps.notifications.urls.notifications")),
     path("api/v1/support/", include(support_user_urlpatterns)),
     path("api/v1/admin/support/", include(support_admin_urlpatterns)),
+    path("api/v1/analytics/", include(analytics_urlpatterns)),
 ]
 
 if settings.DEBUG:

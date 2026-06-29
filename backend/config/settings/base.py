@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "apps.maintenance",
     "apps.notifications",
     "apps.support",
+    "apps.analytics",
 ]
 
 if USE_POSTGIS:
@@ -175,6 +176,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "Notifications", "description": "In-app notifications and activity feed"},
         {"name": "Support", "description": "Disputes, support cases, and knowledge base"},
         {"name": "Admin Support", "description": "Admin support case management"},
+        {"name": "Analytics", "description": "Dashboard KPIs and chart data"},
     ],
 }
 
