@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "apps.payments",
     "apps.maintenance",
     "apps.notifications",
+    "apps.support",
 ]
 
 if USE_POSTGIS:
@@ -172,6 +173,8 @@ SPECTACULAR_SETTINGS = {
         {"name": "Maintenance", "description": "Tenant maintenance requests"},
         {"name": "Landlord Maintenance", "description": "Landlord maintenance management"},
         {"name": "Notifications", "description": "In-app notifications and activity feed"},
+        {"name": "Support", "description": "Disputes, support cases, and knowledge base"},
+        {"name": "Admin Support", "description": "Admin support case management"},
     ],
 }
 
