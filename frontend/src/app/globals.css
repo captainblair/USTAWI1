@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #0a1128;
+  --ustawi-navy: #0a1128;
+  --ustawi-navy-hero: #0c1630;
+  --ustawi-navy-light: #152d4a;
+  --ustawi-red-start: #ff6b5a;
+  --ustawi-red-mid: #ef2438;
+  --ustawi-red-end: #b8061c;
+  --ustawi-red-hover-end: #9e0618;
+  --ustawi-panel: #f4f4f6;
+  --ustawi-muted: #6b7280;
+  --ustawi-border: #e5e7eb;
+  --ustawi-success: #059669;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-ustawi-navy: var(--ustawi-navy);
+  --color-ustawi-navy-light: var(--ustawi-navy-light);
+  --color-ustawi-red: var(--ustawi-red-mid);
+  --color-ustawi-red-hover: var(--ustawi-red-hover-end);
+  --color-ustawi-cream: var(--ustawi-panel);
+  --color-ustawi-sand: #ececef;
+  --color-ustawi-muted: var(--ustawi-muted);
+  --color-ustawi-border: var(--ustawi-border);
+  --color-ustawi-success: var(--ustawi-success);
+  --font-sans: var(--font-plus-jakarta);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+}
+
+/* Wireframe red gradient — bright coral top-left → deep crimson bottom-right */
+.bg-ustawi-gradient {
+  background: linear-gradient(
+    155deg,
+    var(--ustawi-red-start) 0%,
+    var(--ustawi-red-mid) 42%,
+    var(--ustawi-red-end) 100%
+  );
+}
+
+.bg-ustawi-gradient:hover {
+  background: linear-gradient(
+    155deg,
+    #ff7d6e 0%,
+    var(--ustawi-red-mid) 42%,
+    var(--ustawi-red-hover-end) 100%
+  );
+}
+
+.text-gradient-red {
+  background: linear-gradient(135deg, var(--ustawi-red-start), var(--ustawi-red-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.shadow-ustawi-red {
+  box-shadow: 0 4px 14px rgba(238, 43, 58, 0.35);
+}

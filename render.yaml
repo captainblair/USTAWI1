@@ -4,7 +4,7 @@ services:
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: free
+    plan: starter
     healthCheckPath: /api/health/
     envVars:
       - key: DJANGO_SETTINGS_MODULE
@@ -12,6 +12,8 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
+        value: "false"
+      - key: USE_POSTGIS
         value: "false"
       - key: DATABASE_URL
         fromDatabase:
@@ -27,14 +29,69 @@ services:
           type: redis
           name: ustawi-redis
           property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: ustawi-redis
+          property: connectionString
       - key: ALLOWED_HOSTS
         sync: false
       - key: CORS_ALLOWED_ORIGINS
         sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: SENTRY_ENVIRONMENT
+        value: production
+      - key: MPESA_CALLBACK_URL
+        sync: false
+
+  - type: worker
+    name: ustawi-worker
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    dockerCommand: celery -A config worker --loglevel=info --concurrency=2
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: ustawi-api
+          envVarKey: SECRET_KEY
+      - key: DEBUG
+        value: "false"
+      - key: USE_POSTGIS
+        value: "false"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ustawi-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ustawi-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: ustawi-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: ustawi-redis
+          property: connectionString
+
+  - type: redis
+    name: ustawi-redis
+    plan: starter
+    ipAllowList: []
 
 databases:
   - name: ustawi-db
-    plan: free
+    plan: starter
     postgresMajorVersion: "16"
-
-# Note: Add Redis via Render dashboard and link as ustawi-redis

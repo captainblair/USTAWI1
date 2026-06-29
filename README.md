@@ -4,7 +4,7 @@
 
 Ustawi is a verified rental and housing platform (PropTech) built for Nairobi and Kenya's broader housing market. It helps tenants find safe, verified homes while giving landlords and agents reliable tools for property management, tenant screening, and rent collection.
 
-This repository contains the full-stack Ustawi platform. **Phase 1 (backend foundation & authentication) is complete.** The frontend and remaining backend phases are planned and documented below.
+This repository contains the full-stack Ustawi platform. **All 11 backend phases are complete.** The Next.js frontend is next — built page-by-page against the wireframes and API endpoints below.
 
 ---
 
@@ -14,12 +14,12 @@ This repository contains the full-stack Ustawi platform. **Phase 1 (backend foun
 - [Platform Modules](#platform-modules)
 - [Technology Stack](#technology-stack)
 - [Repository Structure](#repository-structure)
-- [Backend (Phase 1 — Complete)](#backend-phase-1--complete)
+- [Backend (Phases 1–11 — Complete)](#backend-phases-111--complete)
 - [Frontend (Planned)](#frontend-planned)
 - [Development Phases Roadmap](#development-phases-roadmap)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
-- [API Reference (Phase 1)](#api-reference-phase-1)
+- [API Reference](#api-reference)
 - [Docker Workflow](#docker-workflow)
 - [Deployment](#deployment)
 - [Security & Compliance](#security--compliance)
@@ -42,13 +42,13 @@ This repository contains the full-stack Ustawi platform. **Phase 1 (backend foun
 
 | Module | Description | Status |
 |--------|-------------|--------|
-| Homepage & Search | Map-based search, filters (price, safety, amenities), featured listings | Backend: Phase 2 |
-| Property Listings | Photos, documents, safety scores, virtual tours | Backend: Phase 2–4 |
-| Tenant Portal | Applications, leases, M-Pesa rent, maintenance, dashboard | Backend: Phase 3–7 |
-| Landlord / Agent Portal | Property CRUD, application inbox, analytics, billing | Backend: Phase 2–10 |
-| Inspector / Admin | Verification queue, safety scoring, platform management | Backend: Phase 4, 10 |
-| Community & Insights | Utility reports, forums, safety alerts | Backend: Post-MVP |
-| Blog / Resources | Tenant rights, market trends, maintenance tips | Backend: Post-MVP |
+| Homepage & Search | Map-based search, filters (price, safety, amenities), featured listings | Backend ✅ · Frontend pending |
+| Property Listings | Photos, documents, safety scores, virtual tours | Backend ✅ · Frontend pending |
+| Tenant Portal | Applications, leases, M-Pesa rent, maintenance, dashboard | Backend ✅ · Frontend pending |
+| Landlord / Agent Portal | Property CRUD, application inbox, analytics, billing | Backend ✅ · Frontend pending |
+| Inspector / Admin | Verification queue, safety scoring, platform management | Backend ✅ · Frontend pending |
+| Community & Insights | Utility reports, forums, safety alerts | Post-MVP |
+| Blog / Resources | Tenant rights, market trends, maintenance tips | Post-MVP |
 
 ---
 
@@ -60,8 +60,8 @@ This repository contains the full-stack Ustawi platform. **Phase 1 (backend foun
 |-------|-------------|
 | Framework | Django 5.x + Django REST Framework |
 | Auth | JWT (`djangorestframework-simplejwt`) + token blacklist |
-| Database | PostgreSQL + PostGIS (geo search in Phase 2+) |
-| Cache / Queue | Redis + Celery (configured, tasks in later phases) |
+| Database | PostgreSQL + PostGIS (geo search) |
+| Cache / Queue | Redis + Celery (notifications, M-Pesa callbacks) |
 | API Docs | drf-spectacular (OpenAPI 3 / Swagger) |
 | SMS / OTP | Africa's Talking |
 | File Storage | Local (dev) → S3 / Cloudinary (production) |
@@ -93,13 +93,24 @@ ustawi/
 │   ├── config/                 # Settings (dev / staging / prod), URLs, WSGI
 │   ├── core/                   # Shared utilities, RBAC, pagination, health check
 │   ├── apps/
-│   │   └── accounts/           # Users, auth, profiles, OTP (Phase 1)
+│   │   ├── accounts/           # Users, auth, profiles, privacy
+│   │   ├── properties/         # Listings, search, PostGIS, media
+│   │   ├── applications/       # Rental applications, screening
+│   │   ├── verification/       # Inspector queue, safety scores
+│   │   ├── leases/             # Digital leases, signatures
+│   │   ├── payments/           # M-Pesa, invoices, receipts
+│   │   ├── maintenance/        # Maintenance requests
+│   │   ├── notifications/      # In-app, email, SMS alerts
+│   │   ├── support/            # Disputes, knowledge base, live chat
+│   │   └── analytics/          # Dashboard KPIs, charts, recommendations
+│   ├── docs/                   # PRODUCTION.md, Postman collection
 │   ├── requirements/           # base.txt, dev.txt, prod.txt
 │   ├── Dockerfile
 │   ├── manage.py
 │   └── .env.example            # Copy to .env — never commit .env
-├── frontend/                   # Next.js app (Phase 2 of project — not yet started)
+├── frontend/                   # Next.js app (not yet started)
 ├── docker-compose.yml          # PostGIS + Redis + Django web
+├── .github/workflows/          # CI (lint, test, migrate check)
 ├── render.yaml                 # Render deployment blueprint
 ├── images/                     # Wireframes & sample assets (gitignored for now)
 └── README.md
@@ -107,45 +118,99 @@ ustawi/
 
 ---
 
-## Backend (Phase 1 — Complete)
+## Backend (Phases 1–11 — Complete)
+
+### Phase summary
+
+| Phase | Focus | Status |
+|-------|--------|--------|
+| 1 | Foundation & Authentication | ✅ Complete |
+| 2 | Properties, Media & Search | ✅ Complete |
+| 3 | Rental Applications & Screening | ✅ Complete |
+| 4 | Verification & Safety Scoring | ✅ Complete |
+| 5 | Leases & Document Management | ✅ Complete |
+| 6 | Payments & Billing (M-Pesa) | ✅ Complete |
+| 7 | Maintenance Requests | ✅ Complete |
+| 8 | Notifications & Activity Feed | ✅ Complete |
+| 9 | Support & Disputes | ✅ Complete |
+| 10 | Analytics & Dashboard APIs | ✅ Complete |
+| 11 | Production Hardening & Render Deploy | ✅ Complete |
 
 ### What's implemented
 
-- **Project scaffold** — Django 5, DRF, Docker Compose, multi-environment settings
-- **Custom User model** — UUID primary key, email login, Kenyan phone support
-- **Roles** — `TENANT`, `LANDLORD`, `AGENT`, `INSPECTOR`, `ADMIN`
-- **UserProfile** — name, avatar, address, DOB, verification flags
-- **NotificationPreference** — email/SMS toggles (stub for Phase 8)
-- **Multi-step registration** — role → profile → phone OTP → account created
-- **Phone OTP** — Africa's Talking integration with dev-mode fallback
-- **JWT auth** — login, logout (token blacklist), refresh, password reset
-- **RBAC** — `IsTenant`, `IsLandlord`, `IsInspector`, `IsAdmin` permission classes
-- **Login activity logging** — IP, user agent, location, timestamp
-- **Django Admin** — full user and session management
-- **API standards** — `/api/v1/` versioning, pagination, unified error format
-- **OpenAPI docs** — interactive Swagger UI at `/api/docs/`
-- **Health check** — `/api/health/` for Render and monitoring
+**Phase 1 — Auth & profiles**
+- Custom User model (UUID, email login, Kenyan phone, roles)
+- Multi-step registration with phone OTP (Africa's Talking + dev fallback)
+- JWT auth with refresh rotation, blacklist, password reset
+- RBAC (`IsTenant`, `IsLandlord`, `IsInspector`, `IsAdmin`)
+- Login activity logging, notification preferences
 
-### Backend apps (planned)
+**Phase 2 — Properties**
+- Property CRUD, gallery images, amenities, neighborhoods
+- Public search with filters, geo radius/bbox (PostGIS), featured listings
+- Landlord property management, saved properties
+- Redis caching on search, featured, and filter metadata
+
+**Phase 3 — Applications**
+- Tenant rental applications with documents and screening score
+- Landlord application inbox, approve/reject workflow
+
+**Phase 4 — Verification**
+- Inspector verification queue, safety scoring, approve/reject
+- Community reports, admin pipeline stats
+- Auto-creates verification case on property publish
+
+**Phase 5 — Leases**
+- Digital lease lifecycle, documents, addenda, e-signatures
+- Auto-create lease on application approval → property occupied
+
+**Phase 6 — Payments**
+- Invoices, M-Pesa Daraja STK Push (dev-mode simulation)
+- Payment receipts, landlord billing, Celery callback processing
+
+**Phase 7 — Maintenance**
+- Tenant maintenance requests with photos, landlord assignment workflow
+
+**Phase 8 — Notifications**
+- In-app notifications, activity feed, channel dispatch (email/SMS stubs)
+- Triggers wired across applications, payments, maintenance, leases
+
+**Phase 9 — Support**
+- Support cases, attachments, messaging, knowledge base, live chat
+- Admin support management
+
+**Phase 10 — Analytics**
+- Tenant, landlord, and admin dashboard APIs (KPIs + chart data)
+- Time-series chart endpoints, property recommendation engine
+
+**Phase 11 — Production hardening**
+- DRF rate limiting, CORS/CSRF for Vercel, security headers
+- Upload validation (Pillow + PDF checks)
+- Kenya DPA: data export + account deletion endpoints
+- Structured JSON logging, Sentry integration, Redis caching
+- `render.yaml` (web + worker + Postgres + Redis), GitHub Actions CI
+- Production docs + Postman collection
+
+### Backend apps
 
 | App | Phase | Purpose |
 |-----|-------|---------|
-| `accounts` | 1 ✅ | Users, auth, profiles |
-| `properties` | 2 | Listings, search, PostGIS, media |
-| `applications` | 3 | Rental applications, screening |
-| `verification` | 4 | Inspector queue, safety scores |
-| `leases` | 5 | Digital leases, documents |
-| `payments` | 6 | M-Pesa, invoices, receipts |
-| `maintenance` | 7 | Maintenance requests |
-| `notifications` | 8 | In-app, email, SMS alerts |
-| `support` | 9 | Disputes, knowledge base |
-| `analytics` | 10 | Dashboard KPIs, charts |
+| `accounts` | 1, 11 ✅ | Users, auth, profiles, privacy |
+| `properties` | 2 ✅ | Listings, search, PostGIS, media |
+| `applications` | 3 ✅ | Rental applications, screening |
+| `verification` | 4 ✅ | Inspector queue, safety scores |
+| `leases` | 5 ✅ | Digital leases, documents |
+| `payments` | 6 ✅ | M-Pesa, invoices, receipts |
+| `maintenance` | 7 ✅ | Maintenance requests |
+| `notifications` | 8 ✅ | In-app, email, SMS alerts |
+| `support` | 9 ✅ | Disputes, knowledge base |
+| `analytics` | 10 ✅ | Dashboard KPIs, charts |
 
 ---
 
-## Frontend (Planned)
+## Frontend (Next)
 
-The frontend will be a **Next.js 15** application deployed on **Vercel**, consuming the Django REST API.
+The frontend will be a **Next.js 15** application deployed on **Vercel**, consuming the Django REST API at `/api/v1/`.
 
 ### Wireframe pages (~21)
 
@@ -179,25 +244,14 @@ Wireframes live in `images/` (gitignored until ready for the repo).
 
 ## Development Phases Roadmap
 
-### Backend phases
+All backend phases are complete. Frontend development is next.
 
-| Phase | Focus | Status |
-|-------|--------|--------|
-| 1 | Foundation & Authentication | ✅ Complete |
-| 2 | Properties, Media & Search | Pending |
-| 3 | Rental Applications & Screening | Pending |
-| 4 | Verification & Safety Scoring | Pending |
-| 5 | Leases & Document Management | Pending |
-| 6 | Payments & Billing (M-Pesa) | Pending |
-| 7 | Maintenance Requests | Pending |
-| 8 | Notifications & Activity Feed | Pending |
-| 9 | Support & Disputes | Pending |
-| 10 | Analytics & Dashboard APIs | Pending |
-| 11 | Production Hardening & Render Deploy | Pending |
-
-### Frontend
-
-Starts after backend Phase 1 approval, built page-by-page against the wireframes and API endpoints.
+| Track | Status |
+|-------|--------|
+| Backend (Phases 1–11) | ✅ Complete |
+| Frontend (Next.js 15) | 🔜 Next |
+| Render deploy | Blueprint ready — connect when ready |
+| Vercel deploy | After frontend scaffold |
 
 ---
 
@@ -283,6 +337,7 @@ Copy `backend/.env.example` to `backend/.env`. **Never commit `.env`.**
 | `DATABASE_URL` | Database connection string | See `.env.example` |
 | `REDIS_URL` | Redis cache URL | `redis://localhost:6379/0` |
 | `CORS_ALLOWED_ORIGINS` | Frontend origins (Vercel) | `http://localhost:3000` |
+| `CSRF_TRUSTED_ORIGINS` | Trusted CSRF origins | Same as CORS |
 | `JWT_ACCESS_TOKEN_LIFETIME_MINUTES` | Access token TTL | `60` |
 | `JWT_REFRESH_TOKEN_LIFETIME_DAYS` | Refresh token TTL | `7` |
 | `AFRICAS_TALKING_USERNAME` | SMS API username | blank = dev OTP mode |
@@ -291,6 +346,10 @@ Copy `backend/.env.example` to `backend/.env`. **Never commit `.env`.**
 | `OTP_LENGTH` | OTP digit count | `6` |
 | `OTP_EXPIRY_MINUTES` | OTP validity | `10` |
 | `FRONTEND_PASSWORD_RESET_URL` | Reset link base URL | `http://localhost:3000/reset-password` |
+| `SENTRY_DSN` | Error monitoring (production) | blank |
+| `MPESA_CONSUMER_KEY` | M-Pesa Daraja credentials | blank = dev simulation |
+
+See `backend/docs/PRODUCTION.md` for the full production variable list.
 
 ### Dev OTP mode
 
@@ -298,17 +357,19 @@ When Africa's Talking credentials are blank, OTP codes are logged to the console
 
 ---
 
-## API Reference (Phase 1)
+## API Reference
 
 Base URL: `http://localhost:8000` (Docker) or `http://localhost:8001` (local)
 
-Interactive docs: **`/api/docs/`**
+Interactive docs: **`/api/docs/`** · Postman: **`backend/docs/postman/Ustawi-API.postman_collection.json`**
+
+> The API spans all 11 backend phases. Use Swagger for the full endpoint list grouped by tag (Properties, Leases, Payments, Analytics, etc.).
 
 ### Health
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| GET | `/api/health/` | None | Service + database health |
+| GET | `/api/health/` | None | Service, database, and cache health |
 
 ### Authentication
 
@@ -334,6 +395,8 @@ Interactive docs: **`/api/docs/`**
 | GET | `/api/v1/profile/notifications/` | Bearer | Notification preferences |
 | PATCH | `/api/v1/profile/notifications/` | Bearer | Update preferences |
 | GET | `/api/v1/profile/login-activity/` | Bearer | Login history (last 20) |
+| GET | `/api/v1/profile/data-export/` | Bearer | Export personal data (Kenya DPA) |
+| POST | `/api/v1/profile/delete-account/` | Bearer | Delete / anonymize account |
 
 ### Registration flow example
 
@@ -436,9 +499,11 @@ You **do not** need `--build` on every restart — only when `Dockerfile` or `re
 
 ### Render checklist
 
+See **`backend/docs/PRODUCTION.md`** for the full deployment guide.
+
 1. Connect GitHub repo to Render
-2. Apply `render.yaml` or create Web Service from `backend/Dockerfile`
-3. Add managed PostgreSQL (PostGIS) and Redis
+2. Apply `render.yaml` (web + Celery worker + Postgres + Redis)
+3. Set `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS` for your Vercel domain
 4. Set environment variables from `.env.example`
 5. Set `DJANGO_SETTINGS_MODULE=config.settings.production`
 6. Health check path: `/api/health/`
@@ -449,36 +514,40 @@ You **do not** need `--build` on every restart — only when `Dockerfile` or `re
 
 - JWT with refresh token rotation and blacklist on logout
 - Role-based access control (RBAC) on all protected endpoints
+- DRF rate limiting (stricter on auth/OTP endpoints)
 - Password validation (min 8 chars, Django validators)
 - Phone verification via OTP before account activation
 - Login activity audit trail (IP, location, user agent)
-- CORS restricted to configured frontend origins
-- Kenya Data Protection Act alignment (export/delete endpoints in Phase 11)
-- OWASP best practices, rate limiting (Phase 11)
+- CORS + CSRF restricted to configured frontend origins
+- Security headers (HSTS, `X-Frame-Options`, `Referrer-Policy`)
+- Upload validation (Pillow image + PDF magic-byte checks)
+- Kenya Data Protection Act — data export and account deletion endpoints
+- Structured JSON logging and Sentry integration (production)
 
 ---
 
-## External Integrations (planned)
+## External Integrations
 
-| Service | Purpose | Phase |
-|---------|---------|-------|
-| M-Pesa Daraja | Rent payments (STK Push) | 6 |
-| Africa's Talking | SMS / OTP | 1 ✅ |
-| Mapbox / Google Maps | Property maps | 2 (frontend) |
-| Resend / AWS SES | Transactional email | 1 ✅ (console dev) |
-| S3 / Cloudinary | Property photos & documents | 2 |
-| Firebase / FCM | Push notifications | 8 |
+| Service | Purpose | Status |
+|---------|---------|--------|
+| M-Pesa Daraja | Rent payments (STK Push) | ✅ Backend (dev simulation without credentials) |
+| Africa's Talking | SMS / OTP | ✅ Integrated (console fallback in dev) |
+| Mapbox / Google Maps | Property maps | Frontend |
+| Resend / AWS SES | Transactional email | ✅ Console backend in dev |
+| S3 / Cloudinary | Property photos & documents | Env stubs ready |
+| Sentry | Error monitoring | ✅ Integrated (set `SENTRY_DSN`) |
+| Firebase / FCM | Push notifications | Post-MVP |
 
 ---
 
 ## Contributing
 
-Development is phased. Each backend phase requires approval before the next begins.
+Backend phases 1–11 are complete. Frontend contributions welcome.
 
 1. Fork / branch from `main`
-2. Follow existing code conventions in `backend/`
+2. Follow existing code conventions in `backend/` and `frontend/`
 3. Never commit `.env` or secrets
-4. Run migrations and test via `/api/docs/` before opening a PR
+4. Run `ruff check .`, `python manage.py test`, and verify via `/api/docs/` before opening a PR
 
 ---
 
