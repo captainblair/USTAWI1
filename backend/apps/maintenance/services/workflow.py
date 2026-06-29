@@ -66,6 +66,9 @@ def create_maintenance_request(tenant, lease: Lease, data: dict) -> MaintenanceR
         MaintenanceUpdateType.CREATED,
         message="Maintenance request submitted.",
     )
+    from apps.notifications.services.triggers import notify_maintenance_created
+
+    notify_maintenance_created(request_obj)
     return request_obj
 
 
@@ -89,6 +92,13 @@ def assign_technician(request_obj: MaintenanceRequest, actor, name: str, phone: 
         old_status=old_status,
         new_status=request_obj.status,
         metadata={"technician_name": name, "technician_phone": phone},
+    )
+    from apps.notifications.services.triggers import notify_maintenance_updated
+
+    notify_maintenance_updated(
+        request_obj,
+        note or f"Technician {name} has been assigned to your request.",
+        request_obj.tenant,
     )
     return request_obj
 
@@ -120,6 +130,14 @@ def update_status(request_obj: MaintenanceRequest, actor, new_status: str, messa
         message=message or f"Status updated to {new_status}.",
         old_status=old_status,
         new_status=new_status,
+    )
+    from apps.notifications.services.triggers import notify_maintenance_updated
+
+    recipient = request_obj.tenant if actor.id == request_obj.landlord_id else request_obj.landlord
+    notify_maintenance_updated(
+        request_obj,
+        message or f"Status updated to {new_status}.",
+        recipient,
     )
     return request_obj
 

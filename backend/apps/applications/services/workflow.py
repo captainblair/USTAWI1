@@ -33,6 +33,9 @@ def submit_application(application: RentalApplication, actor) -> RentalApplicati
         actor=actor,
         message="Application submitted for landlord review.",
     )
+    from apps.notifications.services.triggers import notify_application_submitted
+
+    notify_application_submitted(application)
     return application
 
 
@@ -68,6 +71,13 @@ def mark_under_review(application: RentalApplication, actor) -> RentalApplicatio
         actor=actor,
         message="Landlord started reviewing this application.",
     )
+    from apps.notifications.services.triggers import notify_application_status
+
+    notify_application_status(
+        application,
+        "Under Review",
+        f"Your application for {application.property.title} is being reviewed.",
+    )
     return application
 
 
@@ -86,6 +96,13 @@ def approve_application(application: RentalApplication, actor, notes: str = "") 
         actor=actor,
         message="Application approved by landlord.",
         metadata={"notes": notes} if notes else {},
+    )
+    from apps.notifications.services.triggers import notify_application_status
+
+    notify_application_status(
+        application,
+        "Approved",
+        f"Your application for {application.property.title} was approved. Sign your lease next.",
     )
     return application
 
@@ -108,5 +125,12 @@ def reject_application(
         actor=actor,
         message=reason or "Application rejected by landlord.",
         metadata={"reason": reason} if reason else {},
+    )
+    from apps.notifications.services.triggers import notify_application_status
+
+    notify_application_status(
+        application,
+        "Rejected",
+        reason or f"Your application for {application.property.title} was not approved.",
     )
     return application

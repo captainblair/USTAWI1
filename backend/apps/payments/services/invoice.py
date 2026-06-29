@@ -66,6 +66,13 @@ def get_or_create_current_invoice(lease: Lease) -> Invoice:
     if not created and invoice.status == InvoiceStatus.PENDING and today > invoice.due_date:
         invoice.status = InvoiceStatus.OVERDUE
         invoice.save(update_fields=["status", "updated_at"])
+        from apps.notifications.services.triggers import notify_rent_due
+
+        notify_rent_due(invoice)
+    elif created:
+        from apps.notifications.services.triggers import notify_rent_due
+
+        notify_rent_due(invoice)
 
     return invoice
 

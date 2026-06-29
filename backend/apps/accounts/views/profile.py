@@ -52,7 +52,11 @@ class NotificationPreferenceView(APIView):
             status=status.HTTP_200_OK,
         )
 
-    @extend_schema(tags=["Profile"], summary="Update notification preferences")
+    @extend_schema(
+        tags=["Profile"],
+        summary="Update notification preferences",
+        request=NotificationPreferenceSerializer,
+    )
     def patch(self, request):
         prefs, _ = NotificationPreference.objects.get_or_create(user=request.user)
         serializer = NotificationPreferenceSerializer(prefs, data=request.data, partial=True)

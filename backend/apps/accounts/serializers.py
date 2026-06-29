@@ -64,6 +64,8 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
             "email_rent_reminders",
             "email_application_updates",
             "email_maintenance_alerts",
+            "email_payment_updates",
+            "email_system_alerts",
             "sms_rent_reminders",
             "sms_application_updates",
             "sms_maintenance_alerts",

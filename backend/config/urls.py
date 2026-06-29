@@ -46,6 +46,7 @@ urlpatterns = [
     path("api/v1/landlord/payments/", include(payment_landlord_urlpatterns)),
     path("api/v1/maintenance/", include(maintenance_tenant_urlpatterns)),
     path("api/v1/landlord/maintenance/", include(maintenance_landlord_urlpatterns)),
+    path("api/v1/notifications/", include("apps.notifications.urls.notifications")),
 ]
 
 if settings.DEBUG:

@@ -168,6 +168,11 @@ def process_mpesa_callback(payment_id: str, payload: dict) -> Payment:
     mark_invoice_paid(payment.invoice)
     _create_receipt(payment)
 
+    from apps.notifications.services.triggers import notify_payment_completed
+
+    payment.refresh_from_db()
+    notify_payment_completed(payment)
+
     from apps.payments.tasks import send_payment_receipt_email_task
 
     send_payment_receipt_email_task.delay(str(payment.id))

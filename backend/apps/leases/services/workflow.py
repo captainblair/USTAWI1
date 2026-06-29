@@ -76,6 +76,22 @@ def create_lease_from_application(
         file=_placeholder_pdf(lease),
         uploaded_by=actor,
     )
+
+    from apps.notifications.models import NotificationCategory
+    from apps.notifications.services.dispatch import send_notification
+
+    send_notification(
+        lease.tenant,
+        NotificationCategory.SYSTEM,
+        "Lease ready for signature",
+        f"Your lease for {prop.title} is ready. Please review and sign.",
+        reference_type="lease",
+        reference_id=lease.id,
+        action_path=f"/leases/{lease.id}",
+        event_type="lease_created",
+        email_subject="Lease ready for signature",
+        email_body=f"Your lease for {prop.title} is ready to sign on Ustawi.",
+    )
     return lease
 
 

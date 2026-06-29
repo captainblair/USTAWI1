@@ -105,6 +105,8 @@ class NotificationPreference(TimeStampedModel):
     email_rent_reminders = models.BooleanField(default=True)
     email_application_updates = models.BooleanField(default=True)
     email_maintenance_alerts = models.BooleanField(default=True)
+    email_payment_updates = models.BooleanField(default=True)
+    email_system_alerts = models.BooleanField(default=True)
 
     sms_rent_reminders = models.BooleanField(default=False)
     sms_application_updates = models.BooleanField(default=True)
