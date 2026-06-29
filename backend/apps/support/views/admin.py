@@ -18,8 +18,8 @@ from apps.support.services.workflow import (
     add_case_message,
     update_case_status,
 )
-from core.permissions import IsAdmin
 from core.pagination import StandardResultsSetPagination
+from core.permissions import IsAdmin
 
 
 class AdminSupportCaseListView(APIView):

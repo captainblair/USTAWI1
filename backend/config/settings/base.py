@@ -54,6 +54,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "core.middleware.SecurityHeadersMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -132,6 +133,17 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ),
     "EXCEPTION_HANDLER": "core.exceptions.custom_exception_handler",
+    "DEFAULT_THROTTLE_CLASSES": (
+        "core.throttling.AnonBurstRateThrottle",
+        "core.throttling.UserBurstRateThrottle",
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "100/hour",
+        "anon_burst": "30/minute",
+        "user": "1000/hour",
+        "user_burst": "120/minute",
+        "auth": "10/minute",
+    },
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
     "DEFAULT_VERSION": "v1",
     "ALLOWED_VERSIONS": ["v1"],
@@ -159,6 +171,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "Health", "description": "Service health checks"},
         {"name": "Auth", "description": "Authentication and registration"},
         {"name": "Profile", "description": "User profile and preferences"},
+        {"name": "Privacy", "description": "Data export and account deletion (Kenya DPA)"},
         {"name": "Properties", "description": "Public property search and listings"},
         {"name": "Landlord Properties", "description": "Landlord property management"},
         {"name": "Saved Properties", "description": "Tenant saved homes"},
@@ -182,6 +195,7 @@ SPECTACULAR_SETTINGS = {
 
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"])
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=CORS_ALLOWED_ORIGINS)
 
 REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 
@@ -193,7 +207,7 @@ CACHES = {
 }
 
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/1")
-CELERY_RESULT_BACKEND = env("CELERY_BROKER_URL", default="redis://localhost:6379/1")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/2")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -232,6 +246,10 @@ FRONTEND_PASSWORD_RESET_URL = env(
 AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default="")
 AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="")
 CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
+
+SENTRY_DSN = env("SENTRY_DSN", default="")
+SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT", default="development")
+SENTRY_TRACES_SAMPLE_RATE = env.float("SENTRY_TRACES_SAMPLE_RATE", default=0.1)
 
 LOGGING = {
     "version": 1,

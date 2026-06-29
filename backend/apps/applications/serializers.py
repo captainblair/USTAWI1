@@ -114,9 +114,9 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        from apps.applications.services.workflow import ApplicationWorkflowError, submit_application
-        from apps.applications.services.screening import log_event
         from apps.applications.models import ApplicationEventType
+        from apps.applications.services.screening import log_event
+        from apps.applications.services.workflow import ApplicationWorkflowError, submit_application
 
         references_data = validated_data.pop("references", [])
         submit_flag = validated_data.pop("submit", False)

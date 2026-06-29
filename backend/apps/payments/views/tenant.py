@@ -13,7 +13,7 @@ from apps.payments.serializers import (
     PaymentHistorySerializer,
     PaymentReceiptSerializer,
 )
-from apps.payments.services.invoice import get_or_create_current_invoice, get_rent_due_summary
+from apps.payments.services.invoice import get_rent_due_summary
 from apps.payments.services.workflow import PaymentWorkflowError, initiate_rent_payment
 from core.pagination import StandardResultsSetPagination
 

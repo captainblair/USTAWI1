@@ -153,7 +153,7 @@ class PropertyDetailSerializer(PropertyListSerializer):
         return SafetyScoreSerializer(record).data
 
     def get_community_reports(self, obj):
-        from apps.verification.models import CommunityReport, CommunityReportStatus
+        from apps.verification.models import CommunityReportStatus
         from apps.verification.serializers import CommunityReportSerializer
 
         reports = obj.community_reports.filter(

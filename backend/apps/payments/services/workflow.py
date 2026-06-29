@@ -1,5 +1,4 @@
 import secrets
-from decimal import Decimal
 
 from django.core.files.base import ContentFile
 from django.db import transaction

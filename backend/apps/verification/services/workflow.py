@@ -5,7 +5,6 @@ from django.utils import timezone
 from apps.properties.models import PropertyStatus
 from apps.verification.models import (
     AuditLog,
-    DocumentReviewStatus,
     SafetyFactorType,
     SafetyScore,
     SafetyScoreFactor,

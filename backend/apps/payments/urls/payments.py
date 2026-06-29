@@ -8,9 +8,9 @@ from apps.payments.views.landlord import (
 )
 from apps.payments.views.tenant import (
     TenantInvoiceListView,
-    TenantPayRentView,
     TenantPaymentHistoryView,
     TenantPaymentStatusView,
+    TenantPayRentView,
     TenantReceiptDetailView,
     TenantRentDueView,
 )

@@ -5,7 +5,7 @@ from django.db.models import Q
 from apps.applications.models import RentalApplication
 from apps.leases.models import Lease, LeaseStatus
 from apps.properties.filters import get_public_queryset
-from apps.properties.models import PropertyStatus, SavedProperty
+from apps.properties.models import SavedProperty
 from apps.properties.serializers import PropertyListSerializer
 
 PRICE_RANGE_FACTOR = Decimal("0.20")

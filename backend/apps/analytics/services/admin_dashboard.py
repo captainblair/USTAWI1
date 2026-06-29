@@ -1,20 +1,20 @@
 from decimal import Decimal
 
 from django.db.models import Count, Sum
-from django.db.models.functions import Coalesce, TruncMonth
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.leases.models import Lease, LeaseStatus
-from apps.payments.models import Payment, PaymentStatus
-from apps.properties.models import Property, PropertyStatus
-from apps.verification.models import VerificationCase, VerificationCaseStatus
-from apps.verification.services.analytics import get_pipeline_stats
 from apps.analytics.services.timeseries import (
     occupancy_donut,
     revenue_timeseries,
     user_growth_timeseries,
 )
+from apps.leases.models import Lease, LeaseStatus
+from apps.payments.models import Payment, PaymentStatus
+from apps.properties.models import Property, PropertyStatus
+from apps.verification.models import VerificationCase, VerificationCaseStatus
+from apps.verification.services.analytics import get_pipeline_stats
 
 
 def get_admin_dashboard(request=None) -> dict:

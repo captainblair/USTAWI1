@@ -1,0 +1,165 @@
+{
+  "info": {
+    "name": "Ustawi API",
+    "description": "Ustawi verified rental platform API. Set `base_url` and `access_token` collection variables after login.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8001"},
+    {"key": "access_token", "value": ""}
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "url": "{{base_url}}/api/health/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const token = json.data?.tokens?.access || json.data?.access;",
+                  "if (token) pm.collectionVariables.set('access_token', token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tenant2@test.com\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/auth/login/"
+          }
+        },
+        {
+          "name": "Me",
+          "request": {"method": "GET", "url": "{{base_url}}/api/v1/auth/me/"}
+        }
+      ]
+    },
+    {
+      "name": "Profile & Privacy",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {"method": "GET", "url": "{{base_url}}/api/v1/profile/"}
+        },
+        {
+          "name": "Data Export",
+          "request": {"method": "GET", "url": "{{base_url}}/api/v1/profile/data-export/"}
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"SecurePass123!\",\n  \"reason\": \"Testing deletion flow\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/profile/delete-account/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Properties",
+      "item": [
+        {
+          "name": "Search Properties",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/properties/?city=Nairobi&ordering=-safety_score",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "properties", ""],
+              "query": [
+                {"key": "city", "value": "Nairobi"},
+                {"key": "ordering", "value": "-safety_score"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Featured Properties",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/properties/featured/"
+          }
+        },
+        {
+          "name": "Filter Metadata",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/properties/filters/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Tenant Dashboard",
+          "request": {"method": "GET", "url": "{{base_url}}/api/v1/analytics/tenant/dashboard/"}
+        },
+        {
+          "name": "Landlord Dashboard",
+          "request": {"method": "GET", "url": "{{base_url}}/api/v1/analytics/landlord/dashboard/"}
+        },
+        {
+          "name": "Admin Dashboard",
+          "request": {"method": "GET", "url": "{{base_url}}/api/v1/analytics/admin/dashboard/"}
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {"method": "GET", "url": "{{base_url}}/api/v1/notifications/"}
+        }
+      ]
+    },
+    {
+      "name": "Support",
+      "item": [
+        {
+          "name": "Knowledge Base",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/support/knowledge-base/"
+          }
+        }
+      ]
+    }
+  ]
+}

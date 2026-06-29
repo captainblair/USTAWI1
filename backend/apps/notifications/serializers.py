@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.notifications.models import ActivityEvent, Notification, NotificationCategory
+from apps.notifications.models import ActivityEvent, Notification
 
 
 class NotificationSerializer(serializers.ModelSerializer):

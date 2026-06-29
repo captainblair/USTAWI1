@@ -1,9 +1,9 @@
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from apps.leases.models import Lease
 from apps.maintenance.models import (
     MAX_PHOTO_SIZE_BYTES,
-    MAX_PHOTOS_PER_REQUEST,
     MaintenanceCategory,
     MaintenancePhoto,
     MaintenanceRequest,
@@ -11,11 +11,16 @@ from apps.maintenance.models import (
     MaintenanceUpdate,
     MaintenanceUrgency,
 )
+from core.upload_validation import validate_image_upload
 
 
 def validate_photo_size(image):
     if image.size > MAX_PHOTO_SIZE_BYTES:
         raise serializers.ValidationError("Each photo must be 10 MB or smaller.")
+    try:
+        validate_image_upload(image, max_size_bytes=MAX_PHOTO_SIZE_BYTES)
+    except DjangoValidationError as exc:
+        raise serializers.ValidationError(list(exc.messages)) from exc
     return image
 
 

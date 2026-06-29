@@ -2,11 +2,11 @@ from django.utils import timezone
 
 from apps.leases.models import Lease, LeaseStatus
 from apps.maintenance.models import (
+    MAX_PHOTOS_PER_REQUEST,
     MaintenanceRequest,
     MaintenanceStatus,
     MaintenanceUpdate,
     MaintenanceUpdateType,
-    MAX_PHOTOS_PER_REQUEST,
 )
 
 ACTIVE_LEASE_STATUSES = (LeaseStatus.ACTIVE, LeaseStatus.EXPIRING_SOON)

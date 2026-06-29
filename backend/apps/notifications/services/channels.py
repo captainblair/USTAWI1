@@ -1,8 +1,9 @@
+from django.conf import settings
+from django.core.mail import send_mail
+
 from apps.accounts.models import NotificationPreference
 from apps.accounts.services.africas_talking import AfricasTalkingSMSService
 from apps.notifications.models import NotificationCategory
-from django.conf import settings
-from django.core.mail import send_mail
 
 
 def should_send_email(prefs: NotificationPreference, category: str) -> bool:

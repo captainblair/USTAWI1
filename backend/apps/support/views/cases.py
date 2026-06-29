@@ -1,16 +1,14 @@
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.support.models import KnowledgeBaseArticle, SupportCase
+from apps.support.models import CaseAttachment, SupportCase
 from apps.support.serializers import (
     CaseAttachmentSerializer,
     CaseMessageCreateSerializer,
-    KnowledgeBaseArticleSerializer,
-    KnowledgeBaseListSerializer,
     SupportCaseCreateSerializer,
     SupportCaseDetailSerializer,
     SupportCaseListSerializer,
@@ -21,7 +19,6 @@ from apps.support.services.workflow import (
     create_support_case,
     validate_attachments,
 )
-from apps.support.models import CaseAttachment
 from core.pagination import StandardResultsSetPagination
 
 

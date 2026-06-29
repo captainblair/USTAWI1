@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from apps.applications.models import ApplicationEvent, ApplicationEventType, RentalApplication
+from apps.applications.models import ApplicationEvent, RentalApplication
 
 
 def calculate_screening(application: RentalApplication) -> dict:

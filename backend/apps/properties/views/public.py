@@ -1,15 +1,21 @@
 from django.db.models import F
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.properties.filters import PropertyFilter, build_filter_metadata, get_public_queryset
-from apps.properties.models import Property, PropertyStatus
+from apps.properties.models import Property
 from apps.properties.serializers import PropertyDetailSerializer, PropertyListSerializer
+from apps.properties.services.cache import (
+    CACHE_TIMEOUT_FEATURED,
+    CACHE_TIMEOUT_FILTERS,
+    CACHE_TIMEOUT_SEARCH,
+    get_cached_response,
+    serialize_for_cache,
+    set_cached_response,
+)
 from apps.properties.services.geo import filter_by_bbox, filter_by_radius
 from core.pagination import StandardResultsSetPagination
 
@@ -42,9 +48,13 @@ class PropertyListView(APIView):
         ],
     )
     def get(self, request):
+        cache_params = dict(request.query_params)
+        cached = get_cached_response("search", cache_params)
+        if cached is not None:
+            return Response(cached)
+
         qs = get_public_queryset()
 
-        # Geo filters
         lat = request.query_params.get("lat")
         lng = request.query_params.get("lng")
         radius = request.query_params.get("radius")
@@ -71,7 +81,10 @@ class PropertyListView(APIView):
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(qs, request)
         serializer = PropertyListSerializer(page, many=True, context={"request": request})
-        return paginator.get_paginated_response(serializer.data)
+        response = paginator.get_paginated_response(serializer.data)
+        payload = serialize_for_cache(response.data)
+        set_cached_response("search", cache_params, payload, CACHE_TIMEOUT_SEARCH)
+        return Response(payload)
 
 
 class PropertyDetailView(APIView):
@@ -107,13 +120,18 @@ class FeaturedPropertyListView(APIView):
 
     @extend_schema(tags=["Properties"], summary="List featured properties")
     def get(self, request):
+        cached = get_cached_response("featured", {})
+        if cached is not None:
+            return Response(cached)
+
         qs = get_public_queryset().filter(is_featured=True).order_by("-safety_score")[:12]
-        return Response(
-            {
-                "success": True,
-                "data": PropertyListSerializer(qs, many=True, context={"request": request}).data,
-            }
-        )
+        payload = {
+            "success": True,
+            "data": PropertyListSerializer(qs, many=True, context={"request": request}).data,
+        }
+        payload = serialize_for_cache(payload)
+        set_cached_response("featured", {}, payload, CACHE_TIMEOUT_FEATURED)
+        return Response(payload)
 
 
 class PropertyFilterMetadataView(APIView):
@@ -125,4 +143,11 @@ class PropertyFilterMetadataView(APIView):
         summary="Filter metadata for search UI and empty states",
     )
     def get(self, request):
-        return Response({"success": True, "data": build_filter_metadata()})
+        cached = get_cached_response("filters", {})
+        if cached is not None:
+            return Response(cached)
+
+        payload = {"success": True, "data": build_filter_metadata()}
+        payload = serialize_for_cache(payload)
+        set_cached_response("filters", {}, payload, CACHE_TIMEOUT_FILTERS)
+        return Response(payload)

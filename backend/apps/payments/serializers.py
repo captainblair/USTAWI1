@@ -7,7 +7,6 @@ from apps.payments.models import (
     PaymentReceipt,
     PayoutMethod,
     PayoutMethodType,
-    SubscriptionPlan,
 )
 
 

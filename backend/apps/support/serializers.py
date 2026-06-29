@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from apps.support.models import (
@@ -5,18 +6,22 @@ from apps.support.models import (
     CaseAttachment,
     CaseMessage,
     KnowledgeBaseArticle,
-    KnowledgeBaseCategory,
     LiveChatMessage,
     LiveChatSession,
     SupportCase,
     SupportCaseCategory,
     SupportCaseStatus,
 )
+from core.upload_validation import validate_document_upload
 
 
 def validate_attachment_size(file):
     if file.size > MAX_ATTACHMENT_SIZE_BYTES:
         raise serializers.ValidationError("Each attachment must be 10 MB or smaller.")
+    try:
+        validate_document_upload(file, max_size_bytes=MAX_ATTACHMENT_SIZE_BYTES)
+    except DjangoValidationError as exc:
+        raise serializers.ValidationError(list(exc.messages)) from exc
     return file
 
 

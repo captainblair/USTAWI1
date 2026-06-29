@@ -1,9 +1,8 @@
+from apps.analytics.services.timeseries import application_status_chart
 from apps.applications.models import ApplicationStatus, RentalApplication
 from apps.leases.models import Lease, LeaseStatus
 from apps.payments.models import Payment, PaymentStatus
 from apps.payments.services.invoice import get_rent_due_summary
-from apps.analytics.services.timeseries import application_status_chart
-
 
 ACTIVE_LEASE_STATUSES = (LeaseStatus.ACTIVE, LeaseStatus.EXPIRING_SOON)
 

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -29,7 +30,7 @@ from apps.accounts.services.registration import (
     log_login_activity,
     update_registration_profile,
 )
-from django.conf import settings
+from core.throttling import AuthRateThrottle
 
 User = get_user_model()
 
@@ -37,6 +38,7 @@ User = get_user_model()
 class RegisterRoleView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [AuthRateThrottle]
 
     @extend_schema(tags=["Auth"], summary="Step 1 — Select registration role", request=RegisterRoleSerializer)
     def post(self, request):
@@ -63,6 +65,7 @@ class RegisterRoleView(APIView):
 class RegisterProfileView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [AuthRateThrottle]
 
     @extend_schema(tags=["Auth"], summary="Step 2 — Submit profile and credentials", request=RegisterProfileSerializer)
     def post(self, request):
@@ -90,6 +93,7 @@ class RegisterProfileView(APIView):
 class RegisterSendOTPView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [AuthRateThrottle]
 
     @extend_schema(tags=["Auth"], summary="Step 3 — Send phone OTP", request=RegisterSendOTPSerializer)
     def post(self, request):
@@ -122,6 +126,7 @@ class RegisterSendOTPView(APIView):
 class RegisterVerifyOTPView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [AuthRateThrottle]
 
     @extend_schema(tags=["Auth"], summary="Step 4 — Verify OTP and complete registration", request=RegisterVerifyOTPSerializer)
     def post(self, request):
@@ -165,6 +170,7 @@ class RegisterVerifyOTPView(APIView):
 class LoginView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [AuthRateThrottle]
 
     @extend_schema(tags=["Auth"], summary="Login with email and password", request=LoginSerializer)
     def post(self, request):
@@ -239,6 +245,7 @@ class LogoutView(APIView):
 class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [AuthRateThrottle]
 
     @extend_schema(tags=["Auth"], summary="Request password reset email", request=PasswordResetRequestSerializer)
     def post(self, request):

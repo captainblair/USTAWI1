@@ -1,15 +1,15 @@
 from django.db.models import Count
 from django.utils import timezone
 
-from apps.applications.models import RentalApplication
-from apps.leases.models import Lease, LeaseStatus
-from apps.payments.services.analytics import get_landlord_monthly_summary
-from apps.properties.models import Property, PropertyStatus
 from apps.analytics.services.timeseries import (
     application_status_chart,
     occupancy_donut,
     revenue_timeseries,
 )
+from apps.applications.models import RentalApplication
+from apps.leases.models import Lease, LeaseStatus
+from apps.payments.services.analytics import get_landlord_monthly_summary
+from apps.properties.models import Property, PropertyStatus
 
 
 def get_landlord_dashboard(user, request=None) -> dict:

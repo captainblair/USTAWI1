@@ -161,6 +161,9 @@ class Property(TimeStampedModel):
                 self.slug = f"{base}-{counter}"
                 counter += 1
         super().save(*args, **kwargs)
+        from apps.properties.services.cache import bump_property_cache_version
+
+        bump_property_cache_version()
 
 
 class PropertyImage(TimeStampedModel):

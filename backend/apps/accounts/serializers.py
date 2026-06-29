@@ -203,3 +203,14 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         except DjangoValidationError as exc:
             raise serializers.ValidationError({"password": list(exc.messages)}) from exc
         return attrs
+
+
+class AccountDeletionSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True)
+    reason = serializers.CharField(required=False, allow_blank=True, default="", max_length=500)
+
+    def validate_password(self, value):
+        user = self.context["request"].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Incorrect password.")
+        return value

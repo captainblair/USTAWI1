@@ -3,9 +3,9 @@ import secrets
 from django.utils import timezone
 
 from apps.support.models import (
+    MAX_ATTACHMENTS_PER_CASE,
     CaseAttachment,
     CaseMessage,
-    MAX_ATTACHMENTS_PER_CASE,
     SupportCase,
     SupportCaseStatus,
 )
