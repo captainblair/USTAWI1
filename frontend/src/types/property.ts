@@ -61,7 +61,9 @@ export type FilterMetadata = {
   neighborhoods: Array<{ name: string; slug: string; city: string }>;
   property_types: Array<{ value: string; label: string }>;
   price_range: { min: number; max: number };
+  safety_score_range?: { min: number; max: number };
   amenities: Amenity[];
+  suggestions_when_empty?: string[];
 };
 
 export type PropertySearchParams = {

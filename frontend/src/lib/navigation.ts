@@ -9,7 +9,9 @@ export type NavLink = {
 /** Homepage navbar — wireframe-inspired, Nenasasa-style */
 export const HOME_NAV_LINKS: NavLink[] = [
   { href: "/#how-it-works", label: "How it works", matchHash: "how-it-works" },
+  { href: "/#why-ustawi", label: "Why Ustawi", matchHash: "why-ustawi" },
   { href: "/#testimonials", label: "Testimonials", matchHash: "testimonials" },
+  { href: "/#faq", label: "FAQ", matchHash: "faq" },
   { href: "/#contact", label: "Contact", matchHash: "contact" },
 ];
 
@@ -17,6 +19,8 @@ export const HOME_NAV_LINKS: NavLink[] = [
 export const APP_NAV_LINKS: NavLink[] = [
   { href: "/properties", label: "Search", matchPath: "/properties" },
   { href: "/#how-it-works", label: "How it works", matchHash: "how-it-works" },
+  { href: "/#why-ustawi", label: "Why Ustawi", matchHash: "why-ustawi" },
   { href: "/#testimonials", label: "Testimonials", matchHash: "testimonials" },
+  { href: "/#faq", label: "FAQ", matchHash: "faq" },
   { href: "/#contact", label: "Contact", matchHash: "contact" },
 ];

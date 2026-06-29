@@ -5,9 +5,17 @@ import { HERO_IMAGE } from "@/lib/assets/sample-properties";
 import { ScrollReveal } from "@/components/home/scroll-reveal";
 import { WireframeHeroSearch } from "@/components/home/wireframe-hero-search";
 
-export function WireframeHero() {
+export function WireframeHero({
+  stats,
+}: {
+  stats?: { propertyCount?: number; avgSafety?: string; neighborhoodCount?: number };
+}) {
+  const propertyCount = stats?.propertyCount;
+  const avgSafety = stats?.avgSafety ?? "8.5";
+  const neighborhoodCount = stats?.neighborhoodCount;
+
   return (
-    <section className="relative min-h-[480px] overflow-hidden sm:min-h-[560px] lg:min-h-[620px]">
+    <section data-scroll-tone="red" className="relative min-h-[480px] overflow-hidden sm:min-h-[560px] lg:min-h-[620px]">
       <Image
         src={HERO_IMAGE}
         alt=""
@@ -62,7 +70,11 @@ export function WireframeHero() {
         <ScrollReveal variant="fade-up" delay={0.28} className="mt-8 w-full">
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-normal text-white/75 sm:gap-10">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-white">500+</span>
+              <span className="font-semibold text-white">
+                {propertyCount != null && propertyCount > 0
+                  ? `${propertyCount}+`
+                  : "500+"}
+              </span>
               <span>Verified homes</span>
             </div>
             <div className="hidden h-4 w-px bg-white/20 sm:block" />
@@ -72,9 +84,18 @@ export function WireframeHero() {
             </div>
             <div className="hidden h-4 w-px bg-white/20 sm:block" />
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-white">8.5+</span>
+              <span className="font-semibold text-white">{avgSafety}+</span>
               <span>Avg. safety score</span>
             </div>
+            {neighborhoodCount != null && neighborhoodCount > 0 && (
+              <>
+                <div className="hidden h-4 w-px bg-white/20 sm:block" />
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-white">{neighborhoodCount}</span>
+                  <span>Neighborhoods</span>
+                </div>
+              </>
+            )}
           </div>
         </ScrollReveal>
       </div>

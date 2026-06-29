@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export function LandlordCta() {
   return (
-    <section id="for-landlords" className="bg-ustawi-sand py-20 sm:py-24">
+    <section data-scroll-tone="navy" id="for-landlords" className="bg-ustawi-sand py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-3xl bg-ustawi-navy shadow-2xl shadow-ustawi-navy/20">
           <div className="hero-grid relative grid gap-8 p-10 sm:p-14 lg:grid-cols-2 lg:items-center lg:gap-12">

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { ScrollToTop } from "@/components/layout/scroll-to-top";
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -13,6 +14,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
       {!isHome && <Header />}
       {children}
       {!isHome && <Footer />}
+      <ScrollToTop />
     </>
   );
 }

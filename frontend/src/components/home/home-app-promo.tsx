@@ -31,7 +31,7 @@ function PhoneMockup() {
 
 export function HomeAppPromo() {
   return (
-    <section className="w-full bg-[#0a1128] py-8 sm:py-10">
+    <section data-scroll-tone="navy" className="w-full bg-[#0a1128] py-8 sm:py-10">
       <ScrollReveal variant="fade-up">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-6 sm:flex-row sm:items-center sm:justify-between sm:gap-10 sm:px-8 lg:px-12">
           <div className="flex shrink-0 justify-center sm:justify-start">
