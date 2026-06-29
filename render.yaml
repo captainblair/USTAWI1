@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: ustawi-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/health/
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ustawi-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ustawi-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: ustawi-redis
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+
+databases:
+  - name: ustawi-db
+    plan: free
+    postgresMajorVersion: "16"
+
+# Note: Add Redis via Render dashboard and link as ustawi-redis
