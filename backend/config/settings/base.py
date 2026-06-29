@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "apps.applications",
     "apps.verification",
     "apps.leases",
+    "apps.payments",
 ]
 
 if USE_POSTGIS:
@@ -164,6 +165,8 @@ SPECTACULAR_SETTINGS = {
         {"name": "Community Reports", "description": "Property community reports"},
         {"name": "Leases", "description": "Tenant lease contracts and signatures"},
         {"name": "Landlord Leases", "description": "Landlord lease management"},
+        {"name": "Payments", "description": "Tenant rent payments and receipts"},
+        {"name": "Landlord Payments", "description": "Landlord payment collection and billing"},
     ],
 }
 
@@ -185,6 +188,17 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+
+# M-Pesa Daraja — leave blank for dev-mode STK simulation
+MPESA_CONSUMER_KEY = env("MPESA_CONSUMER_KEY", default="")
+MPESA_CONSUMER_SECRET = env("MPESA_CONSUMER_SECRET", default="")
+MPESA_SHORTCODE = env("MPESA_SHORTCODE", default="")
+MPESA_PASSKEY = env("MPESA_PASSKEY", default="")
+MPESA_CALLBACK_URL = env(
+    "MPESA_CALLBACK_URL",
+    default="http://localhost:8001/api/v1/payments/webhooks/mpesa/",
+)
+MPESA_ENVIRONMENT = env("MPESA_ENVIRONMENT", default="sandbox")
 
 # Africa's Talking
 AFRICAS_TALKING_USERNAME = env("AFRICAS_TALKING_USERNAME", default="")

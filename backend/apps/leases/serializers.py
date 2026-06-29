@@ -77,6 +77,7 @@ class LeaseListSerializer(serializers.ModelSerializer):
     effective_status = serializers.SerializerMethodField()
     renewal_reminder = serializers.SerializerMethodField()
     signature_status = serializers.SerializerMethodField()
+    rent_due = serializers.SerializerMethodField()
 
     class Meta:
         model = Lease
@@ -96,6 +97,7 @@ class LeaseListSerializer(serializers.ModelSerializer):
             "duration_months",
             "signature_status",
             "renewal_reminder",
+            "rent_due",
             "created_at",
         ]
 
@@ -119,6 +121,11 @@ class LeaseListSerializer(serializers.ModelSerializer):
             "tenant_signed_at": obj.tenant_signed_at,
             "landlord_signed_at": obj.landlord_signed_at,
         }
+
+    def get_rent_due(self, obj):
+        from apps.payments.services.invoice import get_rent_due_summary
+
+        return get_rent_due_summary(obj)
 
 
 class LeaseDetailSerializer(LeaseListSerializer):

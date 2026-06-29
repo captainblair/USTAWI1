@@ -16,6 +16,9 @@ from apps.applications.urls.applications import tenant_urlpatterns as applicatio
 from apps.applications.urls.applications import landlord_urlpatterns as application_landlord_urlpatterns
 from apps.leases.urls.leases import landlord_urlpatterns as lease_landlord_urlpatterns
 from apps.leases.urls.leases import tenant_urlpatterns as lease_tenant_urlpatterns
+from apps.payments.urls.payments import landlord_urlpatterns as payment_landlord_urlpatterns
+from apps.payments.urls.payments import tenant_urlpatterns as payment_tenant_urlpatterns
+from apps.payments.urls.payments import webhook_urlpatterns as payment_webhook_urlpatterns
 from apps.properties.urls.properties import landlord_urlpatterns, saved_urlpatterns
 from core.views import HealthCheckView
 
@@ -36,6 +39,9 @@ urlpatterns = [
     path("api/v1/community-reports/", include(verification_community_urlpatterns)),
     path("api/v1/leases/", include(lease_tenant_urlpatterns)),
     path("api/v1/landlord/leases/", include(lease_landlord_urlpatterns)),
+    path("api/v1/payments/", include(payment_tenant_urlpatterns)),
+    path("api/v1/payments/webhooks/", include(payment_webhook_urlpatterns)),
+    path("api/v1/landlord/payments/", include(payment_landlord_urlpatterns)),
 ]
 
 if settings.DEBUG:
