@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from apps.applications.urls.applications import landlord_urlpatterns as application_landlord_urlpatterns
+from apps.applications.urls.applications import tenant_urlpatterns as application_tenant_urlpatterns
 from apps.properties.urls.properties import landlord_urlpatterns, saved_urlpatterns
 from core.views import HealthCheckView
 
@@ -16,6 +18,8 @@ urlpatterns = [
     path("api/v1/properties/", include("apps.properties.urls.properties")),
     path("api/v1/landlord/properties/", include(landlord_urlpatterns)),
     path("api/v1/saved-properties/", include(saved_urlpatterns)),
+    path("api/v1/applications/", include(application_tenant_urlpatterns)),
+    path("api/v1/landlord/applications/", include(application_landlord_urlpatterns)),
 ]
 
 if settings.DEBUG:

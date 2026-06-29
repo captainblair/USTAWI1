@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "core",
     "apps.accounts",
     "apps.properties",
+    "apps.applications",
 ]
 
 if USE_POSTGIS:
@@ -154,6 +155,8 @@ SPECTACULAR_SETTINGS = {
         {"name": "Properties", "description": "Public property search and listings"},
         {"name": "Landlord Properties", "description": "Landlord property management"},
         {"name": "Saved Properties", "description": "Tenant saved homes"},
+        {"name": "Applications", "description": "Tenant rental applications"},
+        {"name": "Landlord Applications", "description": "Landlord application inbox"},
     ],
 }
 
