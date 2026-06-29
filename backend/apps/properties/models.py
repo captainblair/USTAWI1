@@ -26,6 +26,12 @@ class PropertyType(models.TextChoices):
     MAISONETTE = "MAISONETTE", "Maisonette"
 
 
+class ImageVerificationStatus(models.TextChoices):
+    PENDING = "PENDING", "Pending"
+    APPROVED = "APPROVED", "Approved"
+    REJECTED = "REJECTED", "Rejected"
+
+
 class ImageType(models.TextChoices):
     GALLERY = "GALLERY", "Gallery"
     FLOOR_PLAN = "FLOOR_PLAN", "Floor Plan"
@@ -169,6 +175,12 @@ class PropertyImage(TimeStampedModel):
     caption = models.CharField(max_length=255, blank=True, default="")
     sort_order = models.PositiveSmallIntegerField(default=0)
     is_primary = models.BooleanField(default=False)
+    verification_status = models.CharField(
+        max_length=20,
+        choices=ImageVerificationStatus.choices,
+        default=ImageVerificationStatus.PENDING,
+    )
+    verification_notes = models.CharField(max_length=500, blank=True, default="")
 
     class Meta:
         ordering = ["sort_order", "created_at"]

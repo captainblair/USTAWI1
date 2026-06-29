@@ -3,8 +3,17 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from apps.applications.urls.applications import landlord_urlpatterns as application_landlord_urlpatterns
+from apps.verification.urls.verification import (
+    admin_urlpatterns as verification_admin_urlpatterns,
+)
+from apps.verification.urls.verification import (
+    community_urlpatterns as verification_community_urlpatterns,
+)
+from apps.verification.urls.verification import (
+    inspector_urlpatterns as verification_inspector_urlpatterns,
+)
 from apps.applications.urls.applications import tenant_urlpatterns as application_tenant_urlpatterns
+from apps.applications.urls.applications import landlord_urlpatterns as application_landlord_urlpatterns
 from apps.properties.urls.properties import landlord_urlpatterns, saved_urlpatterns
 from core.views import HealthCheckView
 
@@ -20,6 +29,9 @@ urlpatterns = [
     path("api/v1/saved-properties/", include(saved_urlpatterns)),
     path("api/v1/applications/", include(application_tenant_urlpatterns)),
     path("api/v1/landlord/applications/", include(application_landlord_urlpatterns)),
+    path("api/v1/inspector/verification/", include(verification_inspector_urlpatterns)),
+    path("api/v1/admin/verification/", include(verification_admin_urlpatterns)),
+    path("api/v1/community-reports/", include(verification_community_urlpatterns)),
 ]
 
 if settings.DEBUG:

@@ -180,6 +180,10 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(help_text="JWT refresh token from login response")
+
+
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 

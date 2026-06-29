@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.properties",
     "apps.applications",
+    "apps.verification",
 ]
 
 if USE_POSTGIS:
@@ -157,6 +158,9 @@ SPECTACULAR_SETTINGS = {
         {"name": "Saved Properties", "description": "Tenant saved homes"},
         {"name": "Applications", "description": "Tenant rental applications"},
         {"name": "Landlord Applications", "description": "Landlord application inbox"},
+        {"name": "Verification", "description": "Inspector verification queue and scoring"},
+        {"name": "Admin Verification", "description": "Admin verification pipeline stats"},
+        {"name": "Community Reports", "description": "Property community reports"},
     ],
 }
 

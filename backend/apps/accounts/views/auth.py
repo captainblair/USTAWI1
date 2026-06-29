@@ -12,6 +12,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from apps.accounts.models import PasswordResetToken, RegistrationSession
 from apps.accounts.serializers import (
     LoginSerializer,
+    LogoutSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
     RegisterProfileSerializer,
@@ -37,7 +38,7 @@ class RegisterRoleView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
-    @extend_schema(tags=["Auth"], summary="Step 1 — Select registration role")
+    @extend_schema(tags=["Auth"], summary="Step 1 — Select registration role", request=RegisterRoleSerializer)
     def post(self, request):
         serializer = RegisterRoleSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -63,7 +64,7 @@ class RegisterProfileView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
-    @extend_schema(tags=["Auth"], summary="Step 2 — Submit profile and credentials")
+    @extend_schema(tags=["Auth"], summary="Step 2 — Submit profile and credentials", request=RegisterProfileSerializer)
     def post(self, request):
         serializer = RegisterProfileSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -90,7 +91,7 @@ class RegisterSendOTPView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
-    @extend_schema(tags=["Auth"], summary="Step 3 — Send phone OTP")
+    @extend_schema(tags=["Auth"], summary="Step 3 — Send phone OTP", request=RegisterSendOTPSerializer)
     def post(self, request):
         serializer = RegisterSendOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -122,7 +123,7 @@ class RegisterVerifyOTPView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
-    @extend_schema(tags=["Auth"], summary="Step 4 — Verify OTP and complete registration")
+    @extend_schema(tags=["Auth"], summary="Step 4 — Verify OTP and complete registration", request=RegisterVerifyOTPSerializer)
     def post(self, request):
         serializer = RegisterVerifyOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -165,7 +166,7 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
-    @extend_schema(tags=["Auth"], summary="Login with email and password")
+    @extend_schema(tags=["Auth"], summary="Login with email and password", request=LoginSerializer)
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -211,7 +212,7 @@ class LoginView(APIView):
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(tags=["Auth"], summary="Logout and blacklist refresh token")
+    @extend_schema(tags=["Auth"], summary="Logout and blacklist refresh token", request=LogoutSerializer)
     def post(self, request):
         refresh_token = request.data.get("refresh")
         if not refresh_token:
@@ -239,7 +240,7 @@ class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
-    @extend_schema(tags=["Auth"], summary="Request password reset email")
+    @extend_schema(tags=["Auth"], summary="Request password reset email", request=PasswordResetRequestSerializer)
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -277,7 +278,7 @@ class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
-    @extend_schema(tags=["Auth"], summary="Confirm password reset with token")
+    @extend_schema(tags=["Auth"], summary="Confirm password reset with token", request=PasswordResetConfirmSerializer)
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

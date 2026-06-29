@@ -87,6 +87,7 @@ class UserProfile(TimeStampedModel):
 
     id_document_verified = models.BooleanField(default=False)
     income_verified = models.BooleanField(default=False)
+    is_verified_landlord = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "User Profile"

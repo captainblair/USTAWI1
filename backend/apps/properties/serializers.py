@@ -38,9 +38,10 @@ class PropertyImageSerializer(serializers.ModelSerializer):
             "caption",
             "sort_order",
             "is_primary",
+            "verification_status",
             "created_at",
         ]
-        read_only_fields = ["id", "created_at"]
+        read_only_fields = ["id", "created_at", "verification_status"]
 
 
 class PropertyDocumentSerializer(serializers.ModelSerializer):
@@ -52,10 +53,11 @@ class PropertyDocumentSerializer(serializers.ModelSerializer):
 
 class LandlordBriefSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="profile.full_name", read_only=True)
+    is_verified_landlord = serializers.BooleanField(source="profile.is_verified_landlord", read_only=True)
 
     class Meta:
         model = User
-        fields = ["id", "full_name", "is_phone_verified"]
+        fields = ["id", "full_name", "is_phone_verified", "is_verified_landlord"]
         read_only_fields = fields
 
 
@@ -110,6 +112,8 @@ class PropertyDetailSerializer(PropertyListSerializer):
     documents = serializers.SerializerMethodField()
     owner = LandlordBriefSerializer(read_only=True)
     is_saved = serializers.SerializerMethodField()
+    safety_score_breakdown = serializers.SerializerMethodField()
+    community_reports = serializers.SerializerMethodField()
 
     class Meta(PropertyListSerializer.Meta):
         fields = PropertyListSerializer.Meta.fields + [
@@ -124,6 +128,8 @@ class PropertyDetailSerializer(PropertyListSerializer):
             "owner",
             "views_count",
             "is_saved",
+            "safety_score_breakdown",
+            "community_reports",
             "created_at",
             "updated_at",
         ]
@@ -137,6 +143,23 @@ class PropertyDetailSerializer(PropertyListSerializer):
         if not request or not request.user.is_authenticated:
             return False
         return SavedProperty.objects.filter(user=request.user, property=obj).exists()
+
+    def get_safety_score_breakdown(self, obj):
+        record = getattr(obj, "safety_score_record", None)
+        if not record:
+            return {"overall_score": float(obj.safety_score), "factors": []}
+        from apps.verification.serializers import SafetyScoreSerializer
+
+        return SafetyScoreSerializer(record).data
+
+    def get_community_reports(self, obj):
+        from apps.verification.models import CommunityReport, CommunityReportStatus
+        from apps.verification.serializers import CommunityReportSerializer
+
+        reports = obj.community_reports.filter(
+            is_public=True, status=CommunityReportStatus.VERIFIED
+        ).order_by("-created_at")[:10]
+        return CommunityReportSerializer(reports, many=True, context=self.context).data
 
 
 class PropertyCreateUpdateSerializer(serializers.ModelSerializer):

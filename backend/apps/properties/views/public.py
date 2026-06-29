@@ -80,7 +80,11 @@ class PropertyDetailView(APIView):
 
     @extend_schema(tags=["Properties"], summary="Get property detail by ID or slug")
     def get(self, request, identifier):
-        qs = get_public_queryset()
+        qs = (
+            get_public_queryset()
+            .select_related("owner", "owner__profile", "neighborhood")
+            .prefetch_related("images", "amenities", "safety_score_record__factors")
+        )
         try:
             property_obj = qs.get(pk=identifier)
         except (Property.DoesNotExist, ValueError):

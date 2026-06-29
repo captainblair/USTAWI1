@@ -126,6 +126,9 @@ class LandlordPropertyPublishView(APIView):
             )
         prop.status = PropertyStatus.PENDING_REVIEW
         prop.save(update_fields=["status", "updated_at"])
+        from apps.verification.services.workflow import create_verification_case
+
+        create_verification_case(prop, actor=request.user)
         return Response(
             {
                 "success": True,
@@ -167,6 +170,9 @@ class LandlordPropertyActivateView(APIView):
             )
         prop.status = PropertyStatus.PENDING_REVIEW
         prop.save(update_fields=["status", "updated_at"])
+        from apps.verification.services.workflow import create_verification_case
+
+        create_verification_case(prop, actor=request.user)
         return Response(
             {
                 "success": True,
