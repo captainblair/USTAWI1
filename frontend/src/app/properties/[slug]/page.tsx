@@ -10,9 +10,14 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { SafetyBadge } from "@/components/properties/safety-badge";
+import { SavePropertyButton } from "@/components/properties/save-property-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getServerAccessToken } from "@/lib/auth/server";
 import { fetchPropertyDetail } from "@/lib/api/properties";
+import { propertyImageSrc } from "@/lib/media-url";
+import { PropertyListingJsonLd } from "@/lib/seo/json-ld";
+import { createPageMetadata, createPropertyMetadata } from "@/lib/seo/metadata";
 import { formatPrice, formatPropertyType } from "@/lib/utils";
 
 type PageProps = {
@@ -23,18 +28,19 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   try {
     const property = await fetchPropertyDetail(slug);
-    return { title: `${property.title} — Ustawi`, description: property.description?.slice(0, 160) };
+    return createPropertyMetadata(property, slug);
   } catch {
-    return { title: "Property — Ustawi" };
+    return createPageMetadata({ title: "Property", path: `/properties/${slug}` });
   }
 }
 
 export default async function PropertyDetailPage({ params }: PageProps) {
   const { slug } = await params;
+  const token = await getServerAccessToken();
 
   let property;
   try {
-    property = await fetchPropertyDetail(slug);
+    property = await fetchPropertyDetail(slug, token);
   } catch {
     notFound();
   }
@@ -51,6 +57,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
   return (
     <div className="bg-ustawi-cream pb-16">
+      <PropertyListingJsonLd property={property} slug={slug} />
       <div className="border-b border-ustawi-border bg-white">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <Link
@@ -74,7 +81,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                   index === 0 ? "sm:col-span-2 sm:row-span-2 aspect-[4/3] sm:aspect-auto sm:min-h-[360px]" : "aspect-[4/3]"
                 }`}
               >
-                <Image src={img.image} alt={img.caption || property.title} fill className="object-cover" sizes="50vw" />
+                <Image src={propertyImageSrc(img.image)} alt={img.caption || property.title} fill className="object-cover" sizes="50vw" />
               </div>
             ))
           ) : (
@@ -145,8 +152,11 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                   Apply for this home
                 </Button>
               </Link>
+              <div className="mt-4 flex justify-center">
+                <SavePropertyButton propertyId={property.id} initialSaved={property.is_saved} />
+              </div>
               <p className="mt-3 text-center text-xs text-ustawi-muted">
-                Log in or register to submit an application
+                Log in or register to save or apply for this home
               </p>
 
               <div className="mt-8 border-t border-ustawi-border pt-6">

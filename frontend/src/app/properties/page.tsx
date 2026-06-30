@@ -2,8 +2,14 @@ import { Suspense } from "react";
 import { PropertyFilters } from "@/components/properties/property-filters";
 import { PropertyGrid } from "@/components/properties/property-grid";
 import { PropertyMap } from "@/components/properties/property-map-loader";
+import {
+  PropertySearchEmptyState,
+  PropertySearchToolbar,
+} from "@/components/properties/property-search-empty-state";
 import { fetchFilterMetadata, fetchProperties } from "@/lib/api/properties";
-import type { PropertySearchParams } from "@/types/property";
+import { hasActiveSearch } from "@/lib/search-params";
+import { createPageMetadata } from "@/lib/seo/metadata";
+import type { FilterMetadata, PropertySearchParams } from "@/types/property";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -19,23 +25,33 @@ function toSearchParams(raw: Record<string, string | string[] | undefined>): Pro
   return params;
 }
 
-export const metadata = {
-  title: "Search Homes — Ustawi",
-  description: "Search verified rental properties in Nairobi by map area, radius, price, and safety score.",
-};
+export const metadata = createPageMetadata({
+  title: "Search Homes",
+  description:
+    "Search verified rental properties in Nairobi by map area, radius, price, safety score, and neighborhood.",
+  path: "/properties",
+});
 
 export default async function PropertiesPage({ searchParams }: PageProps) {
   const resolved = await searchParams;
   const filters = toSearchParams(resolved);
 
   const [metadata, listings] = await Promise.all([
-    fetchFilterMetadata().catch(() => ({
-      cities: ["Nairobi"],
-      neighborhoods: [],
-      property_types: [],
-      amenities: [],
-      price_range: { min: 0, max: 0 },
-    })),
+    fetchFilterMetadata().catch(
+      (): FilterMetadata => ({
+        cities: ["Nairobi"],
+        neighborhoods: [],
+        property_types: [],
+        amenities: [],
+        price_range: { min: 0, max: 0 },
+        suggestions_when_empty: [
+          "Adjust price range",
+          "Lower safety score filter",
+          "Clear some amenities",
+          "Explore nearby areas",
+        ],
+      }),
+    ),
     fetchProperties(filters).catch(() => ({
       success: true as const,
       count: 0,
@@ -45,7 +61,32 @@ export default async function PropertiesPage({ searchParams }: PageProps) {
     })),
   ]);
 
+  const showEmptyState = listings.count === 0 && hasActiveSearch(filters);
   const geoActive = Boolean(filters.bbox || (filters.lat && filters.lng && filters.radius));
+
+  if (showEmptyState) {
+    return (
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#eef0f8] via-ustawi-cream to-[#fdeae8]/40">
+        <div
+          className="pointer-events-none absolute -left-32 top-40 h-72 w-72 rounded-full bg-ustawi-navy/5 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -right-24 top-[480px] h-64 w-64 rounded-full bg-ustawi-red/10 blur-3xl"
+          aria-hidden
+        />
+        <Suspense fallback={<div className="h-24 animate-pulse bg-ustawi-navy/20" />}>
+          <PropertySearchToolbar metadata={metadata} />
+        </Suspense>
+        <div className="relative mx-auto px-4 py-10 sm:px-6 sm:py-14">
+          <PropertySearchEmptyState
+            metadata={metadata}
+            suggestions={metadata.suggestions_when_empty}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-ustawi-cream py-10 sm:py-14">

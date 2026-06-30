@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Bed, Check, MapPin, Shield } from "lucide-react";
 import { SAMPLE_PROPERTIES } from "@/lib/assets/sample-properties";
+import { propertyImageSrc } from "@/lib/media-url";
 import { formatPrice } from "@/lib/utils";
 import type { PropertyListItem } from "@/types/property";
 import { SafetyBadge } from "@/components/properties/safety-badge";
@@ -33,7 +34,7 @@ function mapProperty(p: PropertyListItem, fallbackImage: string, index: number):
     title: p.title,
     subtitle: p.neighborhood ? `${p.neighborhood.name}, ${p.city}` : p.city,
     price: parseFloat(p.price_monthly),
-    image: p.primary_image ?? fallbackImage,
+    image: propertyImageSrc(p.primary_image, fallbackImage),
     bedrooms: p.bedrooms,
     href: `/properties/${p.slug}`,
     safetyScore: parseFloat(p.safety_score),

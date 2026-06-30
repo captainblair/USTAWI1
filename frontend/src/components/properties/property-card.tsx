@@ -2,34 +2,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { Bath, BedDouble, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { SavePropertyButton } from "@/components/properties/save-property-button";
 import { SafetyBadge } from "@/components/properties/safety-badge";
+import { propertyImageSrc } from "@/lib/media-url";
 import { formatPrice, formatPropertyType } from "@/lib/utils";
 import type { PropertyListItem } from "@/types/property";
 
 function PropertyImage({ property }: { property: PropertyListItem }) {
-  if (property.primary_image) {
-    return (
-      <Image
-        src={property.primary_image}
-        alt={property.title}
-        fill
-        className="property-card-image object-cover"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-      />
-    );
-  }
+  const src = propertyImageSrc(property.primary_image);
 
   return (
-    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-ustawi-navy-light to-ustawi-navy">
-      <div className="text-center text-white/80">
-        <BedDouble className="mx-auto h-10 w-10 opacity-60" />
-        <p className="mt-2 text-xs font-medium uppercase tracking-wider opacity-60">Photo coming soon</p>
-      </div>
-    </div>
+    <Image
+      src={src}
+      alt={property.title}
+      fill
+      className="property-card-image object-cover"
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+    />
   );
 }
 
-export function PropertyCard({ property }: { property: PropertyListItem }) {
+export function PropertyCard({
+  property,
+  initialSaved = false,
+}: {
+  property: PropertyListItem;
+  /** When true, heart shows filled until saved-ids query loads. */
+  initialSaved?: boolean;
+}) {
   const location = property.neighborhood
     ? `${property.neighborhood.name}, ${property.city}`
     : property.city;
@@ -44,6 +44,9 @@ export function PropertyCard({ property }: { property: PropertyListItem }) {
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           {property.is_verified && <Badge variant="verified">Verified</Badge>}
           {property.is_featured && <Badge variant="featured">Featured</Badge>}
+        </div>
+        <div className="absolute right-3 top-3">
+          <SavePropertyButton propertyId={property.id} initialSaved={initialSaved} size="sm" />
         </div>
         <div className="absolute bottom-3 right-3">
           <SafetyBadge score={property.safety_score} />

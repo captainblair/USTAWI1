@@ -25,9 +25,10 @@ export async function fetchProperties(params: PropertySearchParams = {}) {
   return response;
 }
 
-export async function fetchPropertyDetail(identifier: string) {
+export async function fetchPropertyDetail(identifier: string, token?: string) {
   const response = await apiFetch<ApiSuccess<PropertyDetail>>(`/properties/${identifier}/`, {
     cache: "no-store",
+    token,
   });
   return response.data;
 }

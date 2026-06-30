@@ -1,4 +1,6 @@
 import { HomePartners } from "@/components/home/home-partners";
+import { OrganizationJsonLd } from "@/lib/seo/json-ld";
+import { createPageMetadata } from "@/lib/seo/metadata";
 import { HomeFaq } from "@/components/home/home-faq";
 import { HomeAppPromo } from "@/components/home/home-app-promo";
 import { HomeContact, HomeTestimonials } from "@/components/home/home-sections";
@@ -15,6 +17,13 @@ import {
   fetchProperties,
 } from "@/lib/api/properties";
 import type { FilterMetadata, PropertyListItem } from "@/types/property";
+
+export const metadata = createPageMetadata({
+  title: "Find Safe Homes in Kenya",
+  description:
+    "Search verified rental properties in Nairobi with safety scores, neighborhood insights, and secure M-Pesa rent payments.",
+  path: "/",
+});
 
 async function loadHomePageData() {
   const [featuredResult, filtersResult, listingsResult] = await Promise.allSettled([
@@ -51,6 +60,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-ustawi-cream" data-scroll-tone="navy">
+      <OrganizationJsonLd />
       <div className="relative">
         <WireframeNav />
         <WireframeHero

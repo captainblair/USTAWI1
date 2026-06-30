@@ -66,6 +66,12 @@ export type FilterMetadata = {
   suggestions_when_empty?: string[];
 };
 
+export type SavedProperty = {
+  id: string;
+  property: PropertyListItem;
+  created_at: string;
+};
+
 export type PropertySearchParams = {
   q?: string;
   city?: string;

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { UstawiLogo } from "@/components/brand/ustawi-logo";
-import { Button } from "@/components/ui/button";
+import { WireframeNavAuth } from "@/components/layout/wireframe-nav-auth";
 import { HOME_NAV_LINKS } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -96,20 +96,7 @@ export function WireframeNav() {
         </nav>
 
         <div className="ml-auto flex items-center gap-7">
-          <Link
-            href="/login"
-            className={cn(
-              "text-[15px] font-medium transition",
-              scrolled ? "text-[#0a1128]/75 hover:text-[#0a1128]" : "text-white/85 hover:text-white",
-            )}
-          >
-            Login
-          </Link>
-          <Link href="/register">
-            <Button size="sm" className="min-w-[120px] px-6 shadow-ustawi-red">
-              Register
-            </Button>
-          </Link>
+          <WireframeNavAuth scrolled={scrolled} />
         </div>
       </div>
 
@@ -117,20 +104,7 @@ export function WireframeNav() {
         <UstawiLogo variant="compact" priority tone={logoTone} />
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className={cn(
-              "text-sm font-medium",
-              scrolled ? "text-[#0a1128]/75" : "text-white/85",
-            )}
-          >
-            Login
-          </Link>
-          <Link href="/register">
-            <Button size="sm" className="px-4 shadow-ustawi-red">
-              Register
-            </Button>
-          </Link>
+          <WireframeNavAuth scrolled={scrolled} />
           <button
             type="button"
             className={cn("rounded-lg p-2", scrolled ? "text-[#0a1128]" : "text-white")}

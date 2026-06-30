@@ -8,6 +8,11 @@ import { ScrollToTop } from "@/components/layout/scroll-to-top";
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const isAuthRoute = pathname === "/login" || pathname === "/register";
+
+  if (isAuthRoute) {
+    return <>{children}</>;
+  }
 
   return (
     <>

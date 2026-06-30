@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UstawiLogo } from "@/components/brand/ustawi-logo";
-import { Button } from "@/components/ui/button";
+import { UserMenu } from "@/components/layout/user-menu";
 import { APP_NAV_LINKS } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -37,18 +37,8 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-6">
-          <Link
-            href="/login"
-            className="hidden text-[15px] font-medium text-ustawi-navy/75 sm:block hover:text-ustawi-navy"
-          >
-            Login
-          </Link>
-          <Link href="/register">
-            <Button size="sm" className="min-w-[110px] px-5">
-              Register
-            </Button>
-          </Link>
+        <div className="ml-auto flex items-center gap-4">
+          <UserMenu />
         </div>
       </div>
     </header>

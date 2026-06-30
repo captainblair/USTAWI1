@@ -63,3 +63,10 @@ export const LOGO_PATH = "/images/logo/best.png";
 /** Full-bleed hero — Karen villa at dusk */
 export const HERO_IMAGE =
   `${houses}/5 bedroom/5-Bedroom-Villa-for-Sale-in-Karen-34-1024x683.jpg`;
+
+/** Auth split panels — Karen villa, bright daytime exterior */
+export const AUTH_HERO_IMAGE =
+  `${houses}/5 bedroom/5-Bedroom-Villa-for-Sale-in-Karen-2-1024x683.jpg`;
+
+/** @deprecated Use AUTH_HERO_IMAGE */
+export const AUTH_SUNNY_HERO = AUTH_HERO_IMAGE;

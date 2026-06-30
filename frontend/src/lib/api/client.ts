@@ -40,15 +40,30 @@ export async function apiFetch<T>(
   const payload = (await response.json()) as T | ApiError;
 
   if (!response.ok || (payload as ApiError).success === false) {
-    const errorPayload = payload as ApiError;
+    const errorPayload = payload as ApiError & Record<string, unknown>;
+    const details =
+      errorPayload.error?.details ??
+      (typeof errorPayload === "object" && !errorPayload.success
+        ? extractFieldErrors(errorPayload)
+        : undefined);
+
     throw new ApiRequestError(
       errorPayload.error?.message ?? "Request failed",
       response.status,
-      errorPayload.error?.details,
+      details,
     );
   }
 
   return payload as T;
+}
+
+function extractFieldErrors(payload: Record<string, unknown>): Record<string, string[]> | undefined {
+  const skip = new Set(["success", "error", "message", "detail"]);
+  const entries = Object.entries(payload).filter(
+    ([key, value]) => !skip.has(key) && Array.isArray(value),
+  );
+  if (entries.length === 0) return undefined;
+  return Object.fromEntries(entries.map(([k, v]) => [k, v as string[]]));
 }
 
 export { API_BASE };
