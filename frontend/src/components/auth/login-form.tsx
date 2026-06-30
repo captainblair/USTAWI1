@@ -82,7 +82,7 @@ export function LoginForm() {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="w-full min-w-0 space-y-4">
         <div>
           <AuthFieldLabel htmlFor="login-email">Email</AuthFieldLabel>
           <Input

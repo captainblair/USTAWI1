@@ -111,16 +111,16 @@ export function PremiumAuthSplitLayout({
   maxFormWidth = "lg",
 }: PremiumAuthSplitLayoutProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-white lg:flex-row">
+    <div className="flex min-h-screen w-full max-w-[100vw] flex-col overflow-x-hidden bg-white lg:flex-row">
       {/* Desktop brand panel — borrow.png / borrow1.png pattern */}
       <aside className="relative order-1 hidden min-h-screen lg:order-none lg:block lg:w-1/2">
         <AuthBrandPanel variant={brandVariant} heroImage={heroImage} className="min-h-screen" />
       </aside>
 
       {/* Form panel — clean white */}
-      <div className="relative order-2 flex w-full flex-col bg-white lg:w-1/2">
+      <div className="relative order-2 flex w-full min-w-0 flex-col overflow-x-hidden bg-white lg:w-1/2">
         {/* Mobile brand strip */}
-        <div className="relative h-44 shrink-0 lg:hidden">
+        <div className="relative h-44 w-full shrink-0 overflow-hidden lg:hidden">
           <Image src={heroImage} alt="" fill className="object-cover object-center" sizes="100vw" />
           <div className="absolute inset-0 bg-ustawi-navy/80" />
           <div className="relative z-10 flex h-full flex-col justify-between p-5">
@@ -145,9 +145,9 @@ export function PremiumAuthSplitLayout({
 
         <main
           className={cn(
-            "mx-auto flex w-full flex-1 flex-col justify-center px-6 py-8 sm:px-10 lg:px-14 lg:py-12",
-            maxFormWidth === "md" && "max-w-[420px]",
-            maxFormWidth === "lg" && "max-w-[460px]",
+            "mx-auto box-border flex w-full min-w-0 max-w-full flex-1 flex-col justify-center px-4 py-8 sm:px-6 lg:px-14 lg:py-12",
+            maxFormWidth === "md" && "lg:max-w-[420px]",
+            maxFormWidth === "lg" && "lg:max-w-[460px]",
           )}
         >
           {children}
@@ -164,17 +164,17 @@ export function AuthProgressSteps({ current }: { current: 1 | 2 }) {
   ] as const;
 
   return (
-    <nav aria-label="Registration progress" className="mb-7">
-      <ol className="flex items-center">
+    <nav aria-label="Registration progress" className="mb-7 w-full min-w-0">
+      <ol className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
         {steps.map((step, i) => {
           const done = current > step.num;
           const active = current === step.num;
           return (
-            <li key={step.num} className="flex flex-1 items-center last:flex-none">
-              <div className="flex items-center gap-2">
+            <li key={step.num} className="flex min-w-0 items-center sm:flex-1 sm:last:flex-none">
+              <div className="flex min-w-0 items-center gap-2">
                 <span
                   className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold",
+                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
                     active && "bg-ustawi-red text-white",
                     done && "bg-ustawi-navy text-white",
                     !active && !done && "bg-[#F4F6F8] text-ustawi-muted",
@@ -182,11 +182,18 @@ export function AuthProgressSteps({ current }: { current: 1 | 2 }) {
                 >
                   {done ? "✓" : step.num}
                 </span>
-                <span className={cn("text-[13px] font-medium", active ? "text-ustawi-navy" : "text-ustawi-muted")}>
+                <span
+                  className={cn(
+                    "truncate text-[13px] font-medium",
+                    active ? "text-ustawi-navy" : "text-ustawi-muted",
+                  )}
+                >
                   {step.label}
                 </span>
               </div>
-              {i < steps.length - 1 && <div className="mx-4 h-px flex-1 bg-[#E8EAF2]" aria-hidden />}
+              {i < steps.length - 1 && (
+                <div className="ml-3 hidden h-px flex-1 bg-[#E8EAF2] sm:mx-3 sm:block" aria-hidden />
+              )}
             </li>
           );
         })}
@@ -197,9 +204,9 @@ export function AuthProgressSteps({ current }: { current: 1 | 2 }) {
 
 export function AuthPageHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <header className="mb-6">
+    <header className="mb-6 min-w-0">
       <h1 className="text-2xl font-bold tracking-tight text-ustawi-navy">{title}</h1>
-      {subtitle && <p className="mt-1.5 text-sm text-ustawi-muted">{subtitle}</p>}
+      {subtitle && <p className="mt-1.5 break-words text-sm text-ustawi-muted">{subtitle}</p>}
     </header>
   );
 }
@@ -245,7 +252,7 @@ export function AuthGoogleButton() {
     <button
       type="button"
       disabled
-      className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-[#E8EAF2] bg-white text-sm font-medium text-ustawi-navy transition hover:bg-[#FAFBFC] disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex h-11 w-full min-w-0 max-w-full items-center justify-center gap-2 rounded-lg border border-[#E8EAF2] bg-white text-sm font-medium text-ustawi-navy transition hover:bg-[#FAFBFC] disabled:cursor-not-allowed disabled:opacity-60"
     >
       <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] shrink-0" aria-hidden>
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -309,7 +316,7 @@ export function AuthRoleCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center rounded-lg border px-2 py-3 text-center transition-colors",
+        "flex min-w-0 w-full flex-col items-center rounded-lg border px-1.5 py-3 text-center transition-colors sm:px-2",
         selected
           ? "border-ustawi-red bg-[#FFF5F4] ring-1 ring-ustawi-red/20"
           : "border-[#E8EAF2] bg-[#F4F6F8] hover:border-ustawi-navy/15",
@@ -323,8 +330,8 @@ export function AuthRoleCard({
       >
         <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
       </span>
-      <span className="mt-2 text-[13px] font-semibold text-ustawi-navy">{label}</span>
-      <span className="mt-0.5 text-[10px] leading-snug text-ustawi-muted">{description}</span>
+      <span className="mt-2 text-[12px] font-semibold leading-tight text-ustawi-navy sm:text-[13px]">{label}</span>
+      <span className="mt-0.5 text-[9px] leading-snug text-ustawi-muted sm:text-[10px]">{description}</span>
     </button>
   );
 }

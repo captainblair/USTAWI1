@@ -72,7 +72,7 @@ export function OtpInput({
   }
 
   return (
-    <div className="flex justify-center gap-2.5 sm:gap-3">
+    <div className="mx-auto grid w-full max-w-[280px] grid-cols-6 gap-1.5 sm:max-w-xs sm:gap-2">
       {Array.from({ length }).map((_, i) => (
         <input
           key={i}
@@ -89,8 +89,8 @@ export function OtpInput({
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={handlePaste}
           className={cn(
-            "h-14 w-11 rounded-2xl border-2 bg-[#faf8f5] text-center text-xl font-bold text-ustawi-navy shadow-[inset_0_1px_2px_rgba(31,43,108,0.04)] outline-none transition-all duration-200 sm:h-16 sm:w-14 sm:text-2xl",
-            "focus:border-ustawi-red focus:bg-white focus:ring-4 focus:ring-ustawi-red/15 focus:scale-[1.02]",
+            "aspect-square h-11 w-full min-w-0 rounded-xl border-2 bg-[#faf8f5] text-center text-lg font-bold text-ustawi-navy outline-none transition-colors duration-200 sm:h-14 sm:text-xl",
+            "focus:border-ustawi-red focus:bg-white focus:ring-2 focus:ring-ustawi-red/15",
             error && "border-red-300 bg-red-50/50 animate-shake",
             digits[i]?.trim() && !error && "border-ustawi-navy/30 bg-white",
             disabled && "opacity-50",

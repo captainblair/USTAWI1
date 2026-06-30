@@ -185,7 +185,7 @@ export function RegisterWizard() {
           </div>
         )}
 
-        <form onSubmit={handleVerifyOtp} className="space-y-6">
+        <form onSubmit={handleVerifyOtp} className="w-full min-w-0 space-y-6">
           <OtpInput
             value={otp}
             onChange={(v) => {
@@ -244,9 +244,9 @@ export function RegisterWizard() {
       <AuthGoogleButton />
       <AuthDivider label="Manual sign up" />
 
-      <section className="mb-5">
+      <section className="mb-5 w-full min-w-0">
         <p className="mb-2 text-sm font-semibold text-ustawi-navy">I am a…</p>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid w-full min-w-0 grid-cols-3 gap-1.5 sm:gap-2">
           {ROLES.map(({ value, label, description, icon }) => (
             <AuthRoleCard
               key={value}
@@ -260,7 +260,7 @@ export function RegisterWizard() {
         </div>
       </section>
 
-      <form onSubmit={handleCreateAccount} className="space-y-4">
+      <form onSubmit={handleCreateAccount} className="w-full min-w-0 space-y-4">
         <div>
           <AuthFieldLabel htmlFor="reg-name">Full Name</AuthFieldLabel>
           <Input
@@ -274,7 +274,7 @@ export function RegisterWizard() {
           <AuthFieldError message={fieldErrors.full_name} />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid min-w-0 gap-4 sm:grid-cols-2">
           <div>
             <AuthFieldLabel htmlFor="reg-phone">Phone Number</AuthFieldLabel>
             <Input
@@ -303,7 +303,7 @@ export function RegisterWizard() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid min-w-0 gap-4 sm:grid-cols-2">
           <div>
             <AuthFieldLabel htmlFor="reg-password">Password</AuthFieldLabel>
             <div className="relative">
