@@ -59,7 +59,8 @@ export function WireframeHero({
 
         <ScrollReveal variant="fade-up" delay={0.14}>
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
-            Verified listings, safety scores, and M-Pesa payments — secure living made simple.
+            Search by keyword or explore the map — verified listings, safety scores, and M-Pesa
+            payments.
           </p>
         </ScrollReveal>
 

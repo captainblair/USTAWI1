@@ -80,4 +80,10 @@ export type PropertySearchParams = {
   amenities?: string;
   ordering?: string;
   page?: string;
+  /** Centre latitude for radius search (km) */
+  lat?: string;
+  lng?: string;
+  radius?: string;
+  /** min_lng,min_lat,max_lng,max_lat */
+  bbox?: string;
 };

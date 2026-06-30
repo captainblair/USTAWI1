@@ -23,10 +23,30 @@ export function PropertyFilters({ metadata }: { metadata: FilterMetadata }) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const params = new URLSearchParams();
-    form.forEach((value, key) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    const filterKeys = [
+      "q",
+      "city",
+      "neighborhood",
+      "min_price",
+      "max_price",
+      "min_beds",
+      "max_beds",
+      "min_baths",
+      "property_type",
+      "min_safety_score",
+      "amenities",
+      "ordering",
+    ] as const;
+
+    filterKeys.forEach((key) => {
+      const value = form.get(key);
       if (value) params.set(key, String(value));
+      else params.delete(key);
     });
+
+    params.delete("page");
     startTransition(() => router.push(`/properties?${params.toString()}`));
   }
 

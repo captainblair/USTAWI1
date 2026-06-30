@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { PropertyFilters } from "@/components/properties/property-filters";
 import { PropertyGrid } from "@/components/properties/property-grid";
+import { PropertyMap } from "@/components/properties/property-map-loader";
 import { fetchFilterMetadata, fetchProperties } from "@/lib/api/properties";
 import type { PropertySearchParams } from "@/types/property";
 
@@ -20,7 +21,7 @@ function toSearchParams(raw: Record<string, string | string[] | undefined>): Pro
 
 export const metadata = {
   title: "Search Homes — Ustawi",
-  description: "Search verified rental properties in Nairobi by price, safety score, and amenities.",
+  description: "Search verified rental properties in Nairobi by map area, radius, price, and safety score.",
 };
 
 export default async function PropertiesPage({ searchParams }: PageProps) {
@@ -44,6 +45,8 @@ export default async function PropertiesPage({ searchParams }: PageProps) {
     })),
   ]);
 
+  const geoActive = Boolean(filters.bbox || (filters.lat && filters.lng && filters.radius));
+
   return (
     <div className="bg-ustawi-cream py-10 sm:py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -51,8 +54,26 @@ export default async function PropertiesPage({ searchParams }: PageProps) {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-ustawi-red">Search</p>
           <h1 className="mt-2 text-3xl font-bold text-ustawi-navy sm:text-4xl">Find your next home</h1>
           <p className="mt-2 text-ustawi-muted">
-            Filter by neighborhood, price, safety score, and more.
+            Search by map area or radius, then filter by price, safety score, and neighborhood.
           </p>
+        </div>
+
+        <div className="mb-8">
+          <Suspense
+            fallback={
+              <div className="h-[320px] animate-pulse rounded-2xl border border-ustawi-border bg-white sm:h-[380px]" />
+            }
+          >
+            <PropertyMap properties={listings.results} />
+          </Suspense>
+          {geoActive && (
+            <p className="mt-2 text-xs text-ustawi-muted">
+              Map search active
+              {filters.bbox ? " · bounding box" : filters.radius ? ` · ${filters.radius} km radius` : ""}
+              {" · "}
+              combined with your other filters
+            </p>
+          )}
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">

@@ -60,6 +60,9 @@ export function WireframeNav() {
   }, []);
 
   function isActive(link: (typeof HOME_NAV_LINKS)[number]) {
+    if (link.matchPath) {
+      return pathname === link.matchPath || pathname.startsWith(`${link.matchPath}/`);
+    }
     if (link.matchHash && pathname === "/") {
       return hash === link.matchHash;
     }
