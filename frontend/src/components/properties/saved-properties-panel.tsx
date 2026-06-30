@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { PropertyCard } from "@/components/properties/property-card";
-import { SavedPropertiesLoginPrompt } from "@/components/properties/save-property-button";
+import { SavedPropertiesGuestPrompt, SavedPropertiesRoleNotice } from "@/components/properties/save-property-button";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useSavedProperties } from "@/hooks/use-saved-properties";
 
 export function SavedPropertiesPanel() {
-  const { isAuthenticated, canSave, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, canSave, isLoading: authLoading } = useAuth();
   const { data, isLoading, isError, error } = useSavedProperties();
 
   if (authLoading) {
@@ -21,8 +21,12 @@ export function SavedPropertiesPanel() {
     );
   }
 
-  if (!isAuthenticated || !canSave) {
-    return <SavedPropertiesLoginPrompt />;
+  if (!isAuthenticated) {
+    return <SavedPropertiesGuestPrompt />;
+  }
+
+  if (!canSave) {
+    return <SavedPropertiesRoleNotice role={user?.role ?? "USER"} />;
   }
 
   if (isLoading) {

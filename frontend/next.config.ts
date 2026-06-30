@@ -35,6 +35,11 @@ const nextConfig: NextConfig = {
       apiMediaRemotePattern(),
       {
         protocol: "https",
+        hostname: "ui-avatars.com",
+        pathname: "/api/**",
+      },
+      {
+        protocol: "https",
         hostname: "images.unsplash.com",
         pathname: "/**",
       },

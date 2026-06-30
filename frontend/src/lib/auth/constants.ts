@@ -13,6 +13,8 @@ export type AuthUser = {
   phone?: string;
   role: UserRole;
   full_name?: string;
+  avatar?: string | null;
+  avatar_updated_at?: string;
 };
 
 export type AuthSession = {
@@ -23,5 +25,13 @@ export type AuthSession = {
 
 /** Tenants can save properties per backend `IsAuthenticatedTenantOrReadOnly`. */
 export function canSaveProperties(user: AuthUser | null | undefined): boolean {
+  return user?.role === "TENANT";
+}
+
+export function isAdmin(user: AuthUser | null | undefined): boolean {
+  return user?.role === "ADMIN";
+}
+
+export function isTenant(user: AuthUser | null | undefined): boolean {
   return user?.role === "TENANT";
 }

@@ -36,6 +36,8 @@ export default async function PropertiesPage({ searchParams }: PageProps) {
   const resolved = await searchParams;
   const filters = toSearchParams(resolved);
 
+  let apiReachable = true;
+
   const [metadata, listings] = await Promise.all([
     fetchFilterMetadata().catch(
       (): FilterMetadata => ({
@@ -52,13 +54,20 @@ export default async function PropertiesPage({ searchParams }: PageProps) {
         ],
       }),
     ),
-    fetchProperties(filters).catch(() => ({
-      success: true as const,
-      count: 0,
-      next: null,
-      previous: null,
-      results: [],
-    })),
+    (async () => {
+      try {
+        return await fetchProperties(filters);
+      } catch {
+        apiReachable = false;
+        return {
+          success: true as const,
+          count: 0,
+          next: null,
+          previous: null,
+          results: [],
+        };
+      }
+    })(),
   ]);
 
   const showEmptyState = listings.count === 0 && hasActiveSearch(filters);
@@ -98,6 +107,14 @@ export default async function PropertiesPage({ searchParams }: PageProps) {
             Search by map area or radius, then filter by price, safety score, and neighborhood.
           </p>
         </div>
+
+        {!apiReachable && (
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Cannot reach the Ustawi API. From the <code className="rounded bg-amber-100 px-1">backend</code> folder run{" "}
+            <code className="rounded bg-amber-100 px-1">python manage.py runserver 8001</code> (frontend expects port{" "}
+            <code className="rounded bg-amber-100 px-1">8001</code>, not 8000).
+          </div>
+        )}
 
         <div className="mb-8">
           <Suspense

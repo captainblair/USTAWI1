@@ -50,6 +50,7 @@ export function PropertyMap({ properties, className }: PropertyMapProps) {
     Math.min(20, Math.max(1, parseFloat(searchParams.get("radius") ?? "5") || 5)),
   );
   const [mapReady, setMapReady] = useState(false);
+  const [mapError, setMapError] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -104,22 +105,47 @@ export function PropertyMap({ properties, className }: PropertyMapProps) {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const map = L.map(containerRef.current, {
-      scrollWheelZoom: true,
-      zoomControl: true,
-    }).setView([NAIROBI_CENTER.lat, NAIROBI_CENTER.lng], DEFAULT_ZOOM);
+    let map: L.Map;
+    let resizeObserver: ResizeObserver | undefined;
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
+    try {
+      map = L.map(containerRef.current, {
+        scrollWheelZoom: true,
+        zoomControl: true,
+      }).setView([NAIROBI_CENTER.lat, NAIROBI_CENTER.lng], DEFAULT_ZOOM);
 
-    markersLayerRef.current = L.layerGroup().addTo(map);
-    overlayLayerRef.current = L.layerGroup().addTo(map);
-    mapRef.current = map;
-    setMapReady(true);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map);
+
+      markersLayerRef.current = L.layerGroup().addTo(map);
+      overlayLayerRef.current = L.layerGroup().addTo(map);
+      mapRef.current = map;
+
+      const refreshSize = () => {
+        if (mapRef.current) mapRef.current.invalidateSize({ animate: false });
+      };
+
+      requestAnimationFrame(refreshSize);
+      setTimeout(refreshSize, 100);
+      setTimeout(refreshSize, 400);
+
+      if (typeof ResizeObserver !== "undefined" && containerRef.current) {
+        resizeObserver = new ResizeObserver(refreshSize);
+        resizeObserver.observe(containerRef.current);
+      }
+
+      setMapReady(true);
+      setMapError(false);
+    } catch {
+      setMapError(true);
+      setMapReady(false);
+      return;
+    }
 
     return () => {
+      resizeObserver?.disconnect();
       map.remove();
       mapRef.current = null;
       markersLayerRef.current = null;
@@ -298,12 +324,22 @@ export function PropertyMap({ properties, className }: PropertyMapProps) {
         )}
       </div>
 
-      <div className="relative h-[320px] w-full sm:h-[380px] lg:h-[420px]">
-        <div ref={containerRef} className="absolute inset-0 z-0" />
+      <div className="relative h-[320px] w-full min-w-0 sm:h-[380px] lg:h-[420px]">
+        <div ref={containerRef} className="absolute inset-0 z-0 h-full w-full min-h-[280px] bg-[#e8edf4]" />
+        {!mapReady && !mapError && (
+          <div className="absolute inset-0 z-[1] flex items-center justify-center bg-[#e8edf4] text-sm text-ustawi-muted">
+            Loading map…
+          </div>
+        )}
+        {mapError && (
+          <div className="absolute inset-0 z-[1] flex items-center justify-center bg-[#e8edf4] px-6 text-center text-sm text-ustawi-muted">
+            Map could not load. Refresh the page or try a different browser.
+          </div>
+        )}
         {mapReady && mappableCount === 0 && (
           <div className="pointer-events-none absolute inset-x-4 top-4 z-[500] rounded-lg border border-ustawi-border bg-white/95 px-3 py-2 text-center text-xs text-ustawi-muted shadow-sm">
             {properties.length === 0
-              ? "No listings loaded — start the Django API (port 8001) and run seed_properties."
+              ? "No listings loaded — start the Ustawi API on port 8001 (python manage.py runserver 8001) and run seed_properties if needed."
               : "Listings loaded but none have map coordinates yet."}
           </div>
         )}

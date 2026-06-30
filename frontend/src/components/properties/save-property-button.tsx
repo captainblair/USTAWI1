@@ -63,7 +63,7 @@ export function SavePropertyButton({
 }
 
 /** Compact link shown on the saved-properties page when logged out. */
-export function SavedPropertiesLoginPrompt() {
+export function SavedPropertiesGuestPrompt() {
   return (
     <div className="rounded-2xl border border-ustawi-border bg-white p-10 text-center shadow-sm">
       <Heart className="mx-auto h-10 w-10 text-ustawi-red" />
@@ -88,4 +88,39 @@ export function SavedPropertiesLoginPrompt() {
       </div>
     </div>
   );
+}
+
+/** Shown when logged in but role cannot save properties (landlord, admin, agent, etc.). */
+export function SavedPropertiesRoleNotice({ role }: { role: string }) {
+  const roleLabel = role.charAt(0) + role.slice(1).toLowerCase();
+
+  return (
+    <div className="rounded-2xl border border-ustawi-border bg-white p-10 text-center shadow-sm">
+      <Heart className="mx-auto h-10 w-10 text-ustawi-muted/50" />
+      <h2 className="mt-4 text-xl font-bold text-ustawi-navy">Saved homes are for tenants</h2>
+      <p className="mx-auto mt-2 max-w-md text-sm text-ustawi-muted">
+        You&apos;re signed in as a <strong className="text-ustawi-navy">{roleLabel}</strong>. Bookmarking
+        listings is available on tenant accounts. Browse properties or manage your account below.
+      </p>
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <Link
+          href="/properties"
+          className="rounded-full bg-ustawi-red px-6 py-2.5 text-sm font-semibold text-white shadow-ustawi-red"
+        >
+          Browse properties
+        </Link>
+        <Link
+          href="/profile"
+          className="rounded-full border border-ustawi-border px-6 py-2.5 text-sm font-semibold text-ustawi-navy hover:bg-ustawi-cream"
+        >
+          Your profile
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/** @deprecated Use SavedPropertiesGuestPrompt or SavedPropertiesRoleNotice */
+export function SavedPropertiesLoginPrompt() {
+  return <SavedPropertiesGuestPrompt />;
 }

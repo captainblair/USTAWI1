@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, User } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { ProfileAvatar } from "@/components/profile/profile-avatar";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/lib/api/auth";
@@ -58,22 +59,50 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-3">
-      <div className="hidden items-center gap-2 sm:flex">
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ustawi-navy text-xs font-bold text-white">
-          {initials}
-        </span>
-        <div className="text-right leading-tight">
+      <Link href="/profile" className="hidden items-center gap-2 sm:flex">
+        <ProfileAvatar
+          src={user.avatar}
+          version={user.avatar_updated_at}
+          initials={initials}
+          size="sm"
+          className="ring-0 shadow-none"
+        />
+        <div className="text-left leading-tight">
           <p className="max-w-[140px] truncate text-sm font-semibold text-ustawi-navy">
             {user.full_name ?? user.email}
           </p>
           <p className="text-xs capitalize text-ustawi-muted">{user.role.toLowerCase()}</p>
         </div>
-      </div>
+      </Link>
+      {user.role === "TENANT" && (
+        <>
+          <Link
+            href="/applications"
+            className="hidden rounded-full border border-ustawi-border px-3 py-1.5 text-xs font-semibold text-ustawi-navy hover:bg-ustawi-cream sm:inline-flex"
+          >
+            Applications
+          </Link>
+          <Link
+            href="/saved"
+            className="hidden rounded-full border border-ustawi-border px-3 py-1.5 text-xs font-semibold text-ustawi-navy hover:bg-ustawi-cream sm:inline-flex"
+          >
+            Saved
+          </Link>
+        </>
+      )}
+      {user.role === "ADMIN" && (
+        <Link
+          href="/admin"
+          className="hidden rounded-full border border-ustawi-border px-3 py-1.5 text-xs font-semibold text-ustawi-navy hover:bg-ustawi-cream sm:inline-flex"
+        >
+          Admin
+        </Link>
+      )}
       <Link
-        href="/saved"
+        href="/profile"
         className="hidden rounded-full border border-ustawi-border px-3 py-1.5 text-xs font-semibold text-ustawi-navy hover:bg-ustawi-cream sm:inline-flex"
       >
-        Saved
+        Profile
       </Link>
       <button
         type="button"
@@ -83,9 +112,6 @@ export function UserMenu() {
       >
         <LogOut className="h-4 w-4" />
       </button>
-      <Link href="/login" className="sr-only">
-        <User />
-      </Link>
     </div>
   );
 }

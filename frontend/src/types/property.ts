@@ -39,12 +39,37 @@ export type PropertyListItem = {
 
 export type PropertyDetail = PropertyListItem & {
   description: string;
+  size_sqm?: number | null;
+  year_built?: number | null;
+  furnished?: boolean;
+  pet_friendly?: boolean;
   images: Array<{
     id: string;
     image: string;
+    image_type?: string;
     caption: string;
     is_primary: boolean;
   }>;
+  documents?: Array<{
+    id: string;
+    title: string;
+    document: string;
+    doc_type: string;
+    is_public: boolean;
+    created_at: string;
+  }>;
+  community_reports?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    status: string;
+    created_at: string;
+  }>;
+  safety_score_breakdown?: {
+    overall_score: number;
+    factors: Array<{ name: string; score: number; weight?: number }>;
+  };
   owner: {
     id: string;
     full_name: string;

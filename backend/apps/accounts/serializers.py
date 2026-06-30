@@ -21,6 +21,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     role = serializers.CharField(source="user.role", read_only=True)
     is_email_verified = serializers.BooleanField(source="user.is_email_verified", read_only=True)
     is_phone_verified = serializers.BooleanField(source="user.is_phone_verified", read_only=True)
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
@@ -49,6 +50,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+    def get_avatar(self, obj):
+        if not obj.avatar:
+            return None
+        url = obj.avatar.url
+        if url.startswith(("http://", "https://")):
+            return url
+        request = self.context.get("request")
+        if request:
+            return request.build_absolute_uri(url if url.startswith("/") else f"/{url}")
+        return url if url.startswith("/") else f"/{url}"
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):

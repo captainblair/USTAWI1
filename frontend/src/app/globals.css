@@ -68,6 +68,20 @@ body {
   box-shadow: 0 1px 0 rgba(31, 43, 108, 0.06), 0 4px 24px rgba(31, 43, 108, 0.05);
 }
 
+/* Leaflet map — ensure tiles fill the auth/properties map panels */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+  font-family: inherit;
+}
+
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 1;
+}
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-4px); }

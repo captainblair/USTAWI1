@@ -9,8 +9,10 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isAuthRoute = pathname === "/login" || pathname === "/register";
+  const isPropertyDetailRoute =
+    /^\/properties\/[^/]+$/.test(pathname) || /^\/properties\/[^/]+\/apply$/.test(pathname);
 
-  if (isAuthRoute) {
+  if (isAuthRoute || isPropertyDetailRoute) {
     return <>{children}</>;
   }
 

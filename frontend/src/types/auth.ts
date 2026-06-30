@@ -10,6 +10,8 @@ export type ApiUserProfile = {
   email?: string;
   phone?: string;
   role?: UserRole;
+  avatar?: string | null;
+  updated_at?: string;
 };
 
 export type ApiUser = {

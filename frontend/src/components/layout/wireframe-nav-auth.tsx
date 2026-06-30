@@ -56,8 +56,23 @@ export function WireframeNavAuth({ scrolled }: WireframeNavAuthProps) {
 
   return (
     <>
-      <Link href="/saved" className={linkClass}>
-        Saved
+      {user.role === "TENANT" && (
+        <>
+          <Link href="/applications" className={linkClass}>
+            Applications
+          </Link>
+          <Link href="/saved" className={linkClass}>
+            Saved
+          </Link>
+        </>
+      )}
+      {user.role === "ADMIN" && (
+        <Link href="/admin" className={linkClass}>
+          Admin
+        </Link>
+      )}
+      <Link href="/profile" className={linkClass}>
+        Profile
       </Link>
       <span className={cn("hidden text-sm font-semibold sm:inline", scrolled ? "text-[#0a1128]" : "text-white")}>
         {user.full_name?.split(" ")[0] ?? user.email.split("@")[0]}

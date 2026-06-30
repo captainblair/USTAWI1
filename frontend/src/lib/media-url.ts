@@ -66,3 +66,15 @@ export function propertyImageSrc(
     ? toOptimizableImageSrc(fallback)
     : "/images/houses/penthouse/Penthouse-for-Sale-in-Westlands-Nairobi-35-1024x683.jpg";
 }
+
+/** Profile avatar URL with cache-bust so uploads show immediately after save. */
+export function resolveAvatarUrl(
+  url: string | null | undefined,
+  version?: string | null,
+): string | null {
+  const resolved = resolvePropertyImageUrl(url);
+  if (!resolved) return null;
+  if (!version) return resolved;
+  const sep = resolved.includes("?") ? "&" : "?";
+  return `${resolved}${sep}v=${encodeURIComponent(version)}`;
+}

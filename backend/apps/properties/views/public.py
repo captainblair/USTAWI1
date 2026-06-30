@@ -1,3 +1,5 @@
+import uuid
+
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -99,8 +101,9 @@ class PropertyDetailView(APIView):
             .prefetch_related("images", "amenities", "safety_score_record__factors")
         )
         try:
-            property_obj = qs.get(pk=identifier)
-        except (Property.DoesNotExist, ValueError):
+            uuid.UUID(str(identifier))
+            property_obj = get_object_or_404(qs, pk=identifier)
+        except ValueError:
             property_obj = get_object_or_404(qs, slug=identifier)
 
         Property.objects.filter(pk=property_obj.pk).update(views_count=F("views_count") + 1)

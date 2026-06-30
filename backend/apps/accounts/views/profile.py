@@ -21,7 +21,7 @@ class ProfileView(APIView):
     @extend_schema(tags=["Profile"], summary="Get current user profile")
     def get(self, request):
         return Response(
-            {"success": True, "data": UserProfileSerializer(request.user.profile).data},
+            {"success": True, "data": UserProfileSerializer(request.user.profile, context={"request": request}).data},
             status=status.HTTP_200_OK,
         )
 
@@ -37,7 +37,7 @@ class ProfileView(APIView):
             {
                 "success": True,
                 "message": "Profile updated.",
-                "data": UserProfileSerializer(request.user.profile).data,
+                "data": UserProfileSerializer(request.user.profile, context={"request": request}).data,
             },
             status=status.HTTP_200_OK,
         )

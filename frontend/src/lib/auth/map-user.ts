@@ -8,6 +8,8 @@ export function mapUserFromApi(user: ApiUser): AuthUser {
     phone: user.phone ?? undefined,
     role: user.role as UserRole,
     full_name: user.profile?.full_name,
+    avatar: user.profile?.avatar ?? null,
+    avatar_updated_at: user.profile?.updated_at,
   };
 }
 
@@ -17,11 +19,16 @@ export function getPostAuthRedirect(role: UserRole, next?: string | null): strin
   }
   switch (role) {
     case "LANDLORD":
+    case "AGENT":
       return "/properties";
     case "TENANT":
       return "/saved";
+    case "ADMIN":
+      return "/admin";
+    case "INSPECTOR":
+      return "/profile";
     default:
-      return "/properties";
+      return "/profile";
   }
 }
 
