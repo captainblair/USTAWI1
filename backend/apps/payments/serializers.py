@@ -36,12 +36,15 @@ class InvoiceListSerializer(serializers.ModelSerializer):
 class PaymentHistorySerializer(serializers.ModelSerializer):
     invoice_number = serializers.CharField(source="invoice.invoice_number", read_only=True)
     property_title = serializers.CharField(source="invoice.lease.property.title", read_only=True)
+    lease_id = serializers.UUIDField(source="invoice.lease.id", read_only=True)
     receipt_number = serializers.SerializerMethodField()
+    receipt_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Payment
         fields = [
             "id",
+            "lease_id",
             "invoice_number",
             "property_title",
             "amount",
@@ -53,12 +56,18 @@ class PaymentHistorySerializer(serializers.ModelSerializer):
             "mpesa_transaction_date",
             "completed_at",
             "receipt_number",
+            "receipt_id",
             "created_at",
         ]
 
     def get_receipt_number(self, obj):
         if hasattr(obj, "receipt"):
             return obj.receipt.receipt_number
+        return None
+
+    def get_receipt_id(self, obj):
+        if hasattr(obj, "receipt"):
+            return str(obj.receipt.id)
         return None
 
 

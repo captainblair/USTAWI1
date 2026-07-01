@@ -15,6 +15,7 @@ export function getAccountNavLinks(role: string): NavLink[] {
       { href: "/dashboard", label: "Dashboard", matchPath: "/dashboard" },
       { href: "/applications", label: "Applications", matchPath: "/applications" },
       { href: "/leases", label: "Leases", matchPath: "/leases" },
+      { href: "/payments", label: "Payments", matchPath: "/payments" },
       { href: "/maintenance", label: "Maintenance", matchPath: "/maintenance" },
       { href: "/notifications", label: "Notifications", matchPath: "/notifications" },
       { href: "/saved", label: "Saved", matchPath: "/saved" },

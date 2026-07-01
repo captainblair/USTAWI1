@@ -10,7 +10,7 @@ import { LeaseSummarySidebar } from "@/components/leases/lease-summary-sidebar";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { fetchLeaseDetail, signLease } from "@/lib/api/leases";
-import { fetchPaymentHistory, initiateRentPayment } from "@/lib/api/payments";
+import { fetchPaymentHistory } from "@/lib/api/payments";
 import { isTenant } from "@/lib/auth/constants";
 import { resolveLeaseDocUrl } from "@/lib/leases/documents";
 import {
@@ -33,7 +33,6 @@ export function LeaseDetailPanel({ leaseId }: { leaseId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [signing, setSigning] = useState(false);
-  const [paying, setPaying] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -106,21 +105,7 @@ export function LeaseDetailPanel({ leaseId }: { leaseId: string }) {
 
   async function handlePayRent() {
     if (!accessToken || !lease) return;
-    setPaying(true);
-    setActionError(null);
-    setActionMessage(null);
-    try {
-      const result = await initiateRentPayment(accessToken, lease.id);
-      setActionMessage(
-        result.checkout_request_id
-          ? "M-Pesa STK push sent. Check your phone to complete payment."
-          : "Payment initiated successfully.",
-      );
-    } catch (err) {
-      setActionError(err instanceof ApiRequestError ? err.message : "Could not initiate payment.");
-    } finally {
-      setPaying(false);
-    }
+    router.push(`/payments?lease=${lease.id}`);
   }
 
   function handleDownload() {
@@ -204,10 +189,9 @@ export function LeaseDetailPanel({ leaseId }: { leaseId: string }) {
                   <Button
                     type="button"
                     className="h-11 w-full rounded-xl bg-[#EF3D32] text-base font-bold hover:bg-[#EF3D32]/90"
-                    disabled={paying}
                     onClick={handlePayRent}
                   >
-                    {paying ? "Sending STK push…" : "M-Pesa Pay"}
+                    M-Pesa Pay
                   </Button>
                   <p className="mt-2 text-center text-xs text-ustawi-muted">Secure payment via M-Pesa</p>
                 </div>

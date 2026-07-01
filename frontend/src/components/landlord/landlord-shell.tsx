@@ -11,6 +11,7 @@ import {
   Search,
   Settings,
   Users,
+  Wallet,
   Wrench,
   X,
 } from "lucide-react";
@@ -25,6 +26,7 @@ const NAV = [
   { href: "/landlord/properties", label: "Properties", icon: Building2 },
   { href: "/landlord/applications", label: "Applications", icon: FileText },
   { href: "/landlord/leases", label: "Leases", icon: Users },
+  { href: "/landlord/payments", label: "Payments", icon: Wallet },
   { href: "/landlord/maintenance", label: "Maintenance", icon: Wrench },
   { href: "#", label: "Messages", icon: MessageSquare, disabled: true },
   { href: "/profile", label: "Settings", icon: Settings },

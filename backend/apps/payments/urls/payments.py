@@ -12,6 +12,7 @@ from apps.payments.views.tenant import (
     TenantPaymentStatusView,
     TenantPayRentView,
     TenantReceiptDetailView,
+    TenantReceiptDownloadView,
     TenantRentDueView,
 )
 from apps.payments.views.webhooks import DevSimulateCallbackView, MpesaCallbackView
@@ -23,6 +24,7 @@ tenant_urlpatterns = [
     path("history/", TenantPaymentHistoryView.as_view(), name="tenant-payment-history"),
     path("payments/<uuid:pk>/", TenantPaymentStatusView.as_view(), name="tenant-payment-status"),
     path("receipts/<uuid:pk>/", TenantReceiptDetailView.as_view(), name="tenant-receipt-detail"),
+    path("receipts/<uuid:pk>/download/", TenantReceiptDownloadView.as_view(), name="tenant-receipt-download"),
 ]
 
 landlord_urlpatterns = [

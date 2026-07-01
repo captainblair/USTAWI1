@@ -18,6 +18,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
   const isInspectorRoute = pathname === "/inspector" || pathname.startsWith("/inspector/");
   const isTenantDashboardRoute = pathname === "/dashboard";
+  const isPaymentsRoute = pathname === "/payments" || pathname.startsWith("/payments/");
 
   if (
     isAuthRoute ||
@@ -28,7 +29,8 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     isLandlordRoute ||
     isAdminRoute ||
     isInspectorRoute ||
-    isTenantDashboardRoute
+    isTenantDashboardRoute ||
+    isPaymentsRoute
   ) {
     return <>{children}</>;
   }

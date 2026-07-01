@@ -81,10 +81,16 @@ def initiate_rent_payment(lease, tenant, phone: str) -> Payment:
     )
 
     if result.get("status") == "dev_mode":
-        from apps.payments.tasks import process_mpesa_callback_task
-
         dev_callback = _build_dev_success_callback(payment)
-        process_mpesa_callback_task.delay(str(payment.id), dev_callback)
+        from django.conf import settings
+
+        # In DEBUG, complete synchronously so demos work without Celery.
+        if settings.DEBUG:
+            process_mpesa_callback(str(payment.id), dev_callback)
+        else:
+            from apps.payments.tasks import process_mpesa_callback_task
+
+            process_mpesa_callback_task.delay(str(payment.id), dev_callback)
 
     return payment
 
@@ -195,22 +201,19 @@ def find_payment_for_callback(payload: dict) -> Payment | None:
 
 def _create_receipt(payment: Payment) -> PaymentReceipt:
     if hasattr(payment, "receipt"):
+        from apps.payments.services.receipt_pdf import ensure_receipt_pdf_file
+
+        ensure_receipt_pdf_file(payment.receipt)
         return payment.receipt
 
+    from apps.payments.services.receipt_pdf import generate_payment_receipt_pdf
+
     receipt_number = _generate_receipt_number()
-    content = (
-        f"Ustawi Payment Receipt\n"
-        f"Receipt: {receipt_number}\n"
-        f"Invoice: {payment.invoice.invoice_number}\n"
-        f"Amount: {payment.currency} {payment.amount}\n"
-        f"M-Pesa Ref: {payment.mpesa_receipt_number}\n"
-        f"Date: {payment.completed_at}\n"
-        f"Phone: {payment.phone_number}\n"
-    ).encode("utf-8")
+    pdf = generate_payment_receipt_pdf(payment, receipt_number=receipt_number)
 
     receipt = PaymentReceipt.objects.create(
         payment=payment,
         receipt_number=receipt_number,
-        receipt_file=ContentFile(content, name=f"{receipt_number}.txt"),
     )
+    receipt.receipt_file.save(f"{receipt_number}.pdf", pdf, save=True)
     return receipt

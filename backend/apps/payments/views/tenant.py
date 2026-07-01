@@ -1,4 +1,5 @@
 from drf_spectacular.utils import OpenApiParameter, extend_schema
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -91,10 +92,19 @@ class TenantPayRentView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        from apps.payments.services.daraja import MpesaDarajaClient
+
+        dev_mode = not MpesaDarajaClient().is_configured
+        payment.refresh_from_db()
+
         return Response(
             {
                 "success": True,
-                "message": "M-Pesa STK Push initiated. Check your phone to complete payment.",
+                "message": (
+                    "Demo payment initiated — no M-Pesa PIN required in dev mode."
+                    if dev_mode
+                    else "M-Pesa STK Push initiated. Check your phone to complete payment."
+                ),
                 "data": {
                     "payment_id": str(payment.id),
                     "status": payment.status,
@@ -102,6 +112,7 @@ class TenantPayRentView(APIView):
                     "currency": payment.currency,
                     "invoice_number": payment.invoice.invoice_number,
                     "checkout_request_id": payment.mpesa_checkout_request_id,
+                    "dev_mode": dev_mode,
                 },
             },
             status=status.HTTP_201_CREATED,
@@ -133,6 +144,26 @@ class TenantPaymentStatusView(APIView):
         payment = Payment.objects.select_related("invoice", "receipt").get(pk=pk, tenant=request.user)
         data = PaymentHistorySerializer(payment, context={"request": request}).data
         return Response({"success": True, "data": data})
+
+
+class TenantReceiptDownloadView(APIView):
+    permission_classes = [IsAuthenticated, IsTenantUser]
+
+    @extend_schema(tags=["Payments"], summary="Download payment receipt PDF")
+    def get(self, request, pk):
+        from apps.payments.services.receipt_pdf import ensure_receipt_pdf_file
+
+        receipt = PaymentReceipt.objects.select_related(
+            "payment",
+            "payment__invoice",
+            "payment__tenant",
+        ).get(pk=pk, payment__tenant=request.user)
+        ensure_receipt_pdf_file(receipt)
+
+        filename = f"{receipt.receipt_number}.pdf"
+        file_handle = receipt.receipt_file.open("rb")
+        response = FileResponse(file_handle, content_type="application/pdf", as_attachment=True, filename=filename)
+        return response
 
 
 class TenantReceiptDetailView(APIView):

@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Menu,
   Search,
+  Wallet,
   Wrench,
   X,
 } from "lucide-react";
@@ -22,6 +23,7 @@ const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/applications", label: "Applications", icon: ClipboardList },
   { href: "/leases", label: "Leases", icon: FileText },
+  { href: "/payments", label: "Payments", icon: Wallet },
   { href: "/maintenance", label: "Maintenance", icon: Wrench },
   { href: "/saved", label: "Saved", icon: Heart },
 ];

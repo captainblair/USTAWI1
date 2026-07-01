@@ -48,7 +48,7 @@ export function createPageMetadata({
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} — ${SITE_NAME}`;
 
   return {
-    title: fullTitle,
+    title: { absolute: fullTitle },
     description,
     metadataBase: new URL(siteUrl),
     alternates: { canonical },
