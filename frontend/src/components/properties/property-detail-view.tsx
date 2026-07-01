@@ -20,6 +20,7 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { PropertyGallery } from "@/components/properties/property-gallery";
 import { PropertyMiniMapLoader } from "@/components/properties/property-mini-map-loader";
 import { propertyImageSrc } from "@/lib/media-url";
+import { isPropertyOccupied } from "@/lib/properties/status";
 import { canSaveProperties } from "@/lib/auth/constants";
 import type { PropertyDetail } from "@/types/property";
 import { cn } from "@/lib/utils";
@@ -60,13 +61,37 @@ function amenityIcon(name: string) {
   return Circle;
 }
 
-function ApplyNowButton({ propertySlug, propertyId }: { propertySlug: string; propertyId: string }) {
+function ApplyNowButton({
+  propertySlug,
+  propertyId,
+  occupied,
+}: {
+  propertySlug: string;
+  propertyId: string;
+  occupied: boolean;
+}) {
   const { isAuthenticated, user, isLoading } = useAuth();
   const href = `/properties/${propertySlug}/apply?property=${propertyId}`;
   const loginHref = `/login?next=${encodeURIComponent(href)}`;
 
   const className =
     "flex h-[46px] w-full items-center justify-center rounded-[10px] bg-[#EF3D32] text-[13px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_4px_14px_rgba(239,61,50,0.35)] transition hover:bg-[#e03126] disabled:opacity-60";
+
+  const occupiedClassName =
+    "flex h-[46px] w-full cursor-not-allowed items-center justify-center rounded-[10px] border border-[#CBD5E1] bg-[#F1F5F9] text-[13px] font-bold uppercase tracking-[0.14em] text-[#64748B]";
+
+  if (occupied) {
+    return (
+      <div className="space-y-2">
+        <button type="button" className={occupiedClassName} disabled>
+          Occupied
+        </button>
+        <p className="text-center text-[13px] text-[#64748B]">
+          This property is currently occupied and not accepting new applications.
+        </p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -116,6 +141,7 @@ export function PropertyDetailView({ property }: { property: PropertyDetail }) {
   const floorPlan = property.images?.find((img) => img.image_type === "FLOOR_PLAN");
   const tourThumb = galleryImages[1]?.image ?? galleryImages[0]?.image ?? property.primary_image;
   const landlordName = property.owner?.full_name || property.landlord_name || "Landlord";
+  const occupied = isPropertyOccupied(property.status);
 
   const safetyValue = parseFloat(String(property.safety_score));
   const safetyPercent = Math.min(100, (safetyValue / 10) * 100);
@@ -143,6 +169,12 @@ export function PropertyDetailView({ property }: { property: PropertyDetail }) {
     <div className="pb-14">
       {/* Gallery on cream */}
       <div className="mx-auto max-w-[1180px] px-5 pt-6 sm:px-8 sm:pt-8">
+        {occupied && (
+          <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            <span className="font-semibold text-slate-900">Occupied</span> — this listing is still visible for
+            reference, but it is not available for new rental applications.
+          </div>
+        )}
         <PropertyGallery images={galleryImages} title={property.title} />
       </div>
 
@@ -193,7 +225,7 @@ export function PropertyDetailView({ property }: { property: PropertyDetail }) {
               </p>
 
               <div className="mt-5">
-                <ApplyNowButton propertyId={property.id} propertySlug={property.slug} />
+                <ApplyNowButton propertyId={property.id} propertySlug={property.slug} occupied={occupied} />
               </div>
 
               <section className="mt-10">

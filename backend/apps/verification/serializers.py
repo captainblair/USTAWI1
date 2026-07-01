@@ -194,11 +194,15 @@ class CaseActionSerializer(serializers.Serializer):
 
 class CommunityReportSerializer(serializers.ModelSerializer):
     reporter_name = serializers.SerializerMethodField()
+    property_title = serializers.CharField(source="property.title", read_only=True)
+    property_id = serializers.UUIDField(source="property.id", read_only=True)
 
     class Meta:
         model = CommunityReport
         fields = [
             "id",
+            "property_id",
+            "property_title",
             "title",
             "description",
             "category",

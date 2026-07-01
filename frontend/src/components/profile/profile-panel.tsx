@@ -344,6 +344,12 @@ export function ProfilePanel() {
               My leases
             </Link>
             <Link
+              href="/maintenance"
+              className="block rounded-2xl border border-ustawi-navy/15 bg-ustawi-navy px-4 py-3 text-center text-sm font-semibold text-white hover:bg-ustawi-navy/90"
+            >
+              Maintenance requests
+            </Link>
+            <Link
               href="/applications"
               className="block rounded-2xl border border-ustawi-navy/15 bg-ustawi-navy px-4 py-3 text-center text-sm font-semibold text-white hover:bg-ustawi-navy/90"
             >

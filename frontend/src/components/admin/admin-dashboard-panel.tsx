@@ -2,13 +2,30 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ExternalLink, ShieldCheck, Users } from "lucide-react";
+import {
+  Building2,
+  ChevronRight,
+  DollarSign,
+  Loader2,
+  ShieldCheck,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+  ChartCard,
+  SimpleBarChart,
+  SimpleDonutChart,
+  SimpleLineChart,
+} from "@/components/admin/admin-charts";
 import { useAuth } from "@/components/providers/auth-provider";
 import { fetchAdminDashboard } from "@/lib/api/analytics";
+import { fetchInspectorQueue } from "@/lib/api/inspector-verification";
 import { isAdmin } from "@/lib/auth/constants";
-import type { AdminDashboardKpis } from "@/types/analytics";
+import type { AdminDashboard } from "@/types/analytics";
+import type { VerificationCaseListItem } from "@/types/verification";
 import { ApiRequestError } from "@/types/api";
+import { formatVerificationDate, VERIFICATION_STATUS_META } from "@/lib/verification/status";
 
 function formatKes(amount: number, currency: string) {
   return new Intl.NumberFormat("en-KE", {
@@ -18,39 +35,26 @@ function formatKes(amount: number, currency: string) {
   }).format(amount);
 }
 
-function getDjangoAdminUrl() {
-  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001/api/v1";
-  return apiBase.replace(/\/api\/v1\/?$/, "/admin/");
-}
-
-function KpiCard({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
+function KpiCard({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string | number;
+  icon: typeof Users;
+}) {
   return (
-    <div className="rounded-2xl border border-ustawi-border bg-white p-5 shadow-sm">
-      <p className="text-sm text-ustawi-muted">{label}</p>
-      <p className="mt-2 text-2xl font-bold text-ustawi-navy">{value}</p>
-      {hint && <p className="mt-1 text-xs text-ustawi-muted">{hint}</p>}
-    </div>
-  );
-}
-
-function RoleBreakdown({ usersByRole }: { usersByRole: Record<string, number> }) {
-  const entries = Object.entries(usersByRole).sort((a, b) => b[1] - a[1]);
-  if (entries.length === 0) return null;
-
-  return (
-    <div className="rounded-2xl border border-ustawi-border bg-white p-6 shadow-sm">
-      <h3 className="flex items-center gap-2 text-sm font-bold text-ustawi-navy">
-        <Users className="h-4 w-4 text-ustawi-red" />
-        Users by role
-      </h3>
-      <ul className="mt-4 space-y-2">
-        {entries.map(([role, count]) => (
-          <li key={role} className="flex items-center justify-between text-sm">
-            <span className="capitalize text-ustawi-muted">{role.toLowerCase()}</span>
-            <span className="font-semibold text-ustawi-navy">{count}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="rounded-2xl bg-[#1F2B6C] p-5 text-white shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm text-white/70">{label}</p>
+          <p className="mt-2 text-2xl font-bold">{value}</p>
+        </div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+          <Icon className="h-5 w-5" strokeWidth={1.75} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -58,41 +62,43 @@ function RoleBreakdown({ usersByRole }: { usersByRole: Record<string, number> })
 export function AdminDashboardPanel() {
   const router = useRouter();
   const { user, accessToken, isAuthenticated, isLoading: authLoading } = useAuth();
-
-  const [kpis, setKpis] = useState<AdminDashboardKpis | null>(null);
+  const [data, setData] = useState<AdminDashboard | null>(null);
+  const [pendingCases, setPendingCases] = useState<VerificationCaseListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
-
     if (!isAuthenticated || !accessToken) {
       router.replace("/login?next=/admin");
       return;
     }
-
     if (!isAdmin(user)) {
       router.replace("/profile");
       return;
     }
 
     let cancelled = false;
-
     async function load() {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchAdminDashboard(accessToken!);
-        if (!cancelled) setKpis(data.kpis);
+        const [dashboard, queue] = await Promise.all([
+          fetchAdminDashboard(accessToken!),
+          fetchInspectorQueue(accessToken!, "pending"),
+        ]);
+        if (!cancelled) {
+          setData(dashboard);
+          setPendingCases(queue.results.slice(0, 5));
+        }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof ApiRequestError ? err.message : "Could not load admin dashboard.");
+          setError(err instanceof ApiRequestError ? err.message : "Could not load dashboard.");
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
-
     load();
     return () => {
       cancelled = true;
@@ -101,17 +107,13 @@ export function AdminDashboardPanel() {
 
   if (authLoading || loading) {
     return (
-      <div className="animate-pulse space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-28 rounded-2xl bg-ustawi-sand" />
-          ))}
-        </div>
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-ustawi-navy/40" />
       </div>
     );
   }
 
-  if (error || !kpis) {
+  if (error || !data) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-sm text-red-700">
         {error ?? "Dashboard unavailable."}
@@ -119,73 +121,84 @@ export function AdminDashboardPanel() {
     );
   }
 
-  const djangoAdminUrl = getDjangoAdminUrl();
+  const { kpis, charts } = data;
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-2xl border border-ustawi-navy/10 bg-ustawi-navy p-6 text-white sm:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">Platform admin</p>
-            <h2 className="mt-2 text-2xl font-bold">Welcome back, {user?.full_name ?? user?.email}</h2>
-            <p className="mt-2 max-w-xl text-sm text-white/80">
-              Overview of users, listings, revenue, and verification queue. Full data management is available in
-              Django admin until role-specific frontend portals ship.
-            </p>
-          </div>
-          <a
-            href={djangoAdminUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ustawi-navy transition hover:bg-ustawi-cream"
-          >
-            Open Django admin
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard label="Total users" value={kpis.total_users} hint={`+${kpis.new_users_this_month} this month`} />
-        <KpiCard label="Active listings" value={kpis.active_listings} />
-        <KpiCard label="Occupied properties" value={kpis.occupied_properties} hint={`${kpis.platform_occupancy_rate}% occupancy`} />
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <KpiCard label="Total users" value={kpis.total_users} icon={Users} />
         <KpiCard
-          label="Revenue (all time)"
-          value={formatKes(kpis.total_revenue, kpis.currency)}
-          hint={`${formatKes(kpis.revenue_this_month, kpis.currency)} this month`}
+          label="Monthly revenue"
+          value={formatKes(kpis.revenue_this_month, kpis.currency)}
+          icon={DollarSign}
         />
+        <KpiCard label="Active listings" value={kpis.active_listings} icon={Building2} />
+        <KpiCard label="Pending verifications" value={kpis.pending_verifications} icon={ShieldCheck} />
+        <KpiCard label="Occupancy rate" value={`${kpis.platform_occupancy_rate}%`} icon={TrendingUp} />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <KpiCard label="Active leases" value={kpis.active_leases} />
-        <KpiCard label="Pending verifications" value={kpis.pending_verifications} />
-        <RoleBreakdown usersByRole={kpis.users_by_role} />
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        <ChartCard title="User growth over time">
+          <SimpleLineChart chart={charts.user_growth} />
+        </ChartCard>
+        <ChartCard title="Monthly revenue trends">
+          <SimpleLineChart chart={charts.revenue_trend} />
+        </ChartCard>
+        <ChartCard title="Verification pipeline breakdown" className="lg:col-span-2 xl:col-span-1">
+          <SimpleDonutChart chart={charts.verification_pipeline} />
+        </ChartCard>
       </div>
 
-      <div className="rounded-2xl border border-ustawi-border bg-white p-6 shadow-sm">
-        <h3 className="flex items-center gap-2 text-sm font-bold text-ustawi-navy">
-          <ShieldCheck className="h-4 w-4 text-ustawi-red" />
-          Admin capabilities (backend ready)
-        </h3>
-        <ul className="mt-4 grid gap-2 text-sm text-ustawi-muted sm:grid-cols-2">
-          <li>• Platform analytics & user growth charts</li>
-          <li>• Verification pipeline management</li>
-          <li>• Support case management</li>
-          <li>• User, property, and payment oversight</li>
-        </ul>
-        <p className="mt-4 text-xs text-ustawi-muted">
-          These APIs are live on the backend. This page shows KPIs; detailed CRUD uses{" "}
-          <a href={djangoAdminUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-ustawi-navy underline">
-            Django admin
-          </a>{" "}
-          for now. A full admin UI is planned (wireframe page #19).
-        </p>
-        <Link
-          href="/profile"
-          className="mt-4 inline-block text-sm font-semibold text-ustawi-red hover:underline"
-        >
-          Go to profile settings →
-        </Link>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <ChartCard title="Listings by status">
+          <SimpleBarChart chart={charts.listings_by_status} />
+        </ChartCard>
+        <ChartCard title="Occupancy breakdown">
+          <SimpleDonutChart chart={charts.occupancy_breakdown} />
+        </ChartCard>
+      </div>
+
+      <div className="rounded-2xl border border-[#E8EAF2] bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-sm font-bold text-ustawi-navy">Pending verifications</h3>
+          <Link href="/inspector" className="text-sm font-semibold text-ustawi-red hover:underline">
+            Open inspector queue
+          </Link>
+        </div>
+
+        {pendingCases.length === 0 ? (
+          <p className="mt-4 text-sm text-ustawi-muted">No properties awaiting initial review.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-[#E8EAF2]">
+            {pendingCases.map((item) => {
+              const meta = VERIFICATION_STATUS_META[item.status];
+              return (
+                <li key={item.id}>
+                  <Link
+                    href={`/inspector/${item.id}`}
+                    className="flex items-center justify-between gap-3 py-3 transition hover:bg-[#FAFBFE]"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-semibold text-ustawi-navy">{item.property_title}</p>
+                      <p className="text-sm text-ustawi-muted">
+                        {item.owner_name} · {item.property_location}
+                      </p>
+                      <p className="mt-0.5 text-xs text-ustawi-muted">
+                        Submitted {formatVerificationDate(item.submitted_at)}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${meta.className}`}>
+                        {meta.label}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-ustawi-muted" />
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { BadgeCheck, Check, Home } from "lucide-react";
 import { LeaseStatusBadge } from "@/components/leases/lease-status-badge";
 import { formatLeaseDate, isActiveLeaseStatus, LEASE_STATUS_META } from "@/lib/leases/status";
+import { resolvePropertyImageUrl } from "@/lib/media-url";
 import { formatPrice } from "@/lib/utils";
 import type { LeaseDetail, LeaseStatus } from "@/types/lease";
 import { cn } from "@/lib/utils";
@@ -33,12 +35,25 @@ export function LeaseSummarySidebar({
   className,
 }: LeaseSummarySidebarProps) {
   const statusMeta = LEASE_STATUS_META[status];
+  const propertyImage = resolvePropertyImageUrl(lease.property_primary_image);
 
   return (
     <div className={cn("space-y-4 sm:space-y-5", className)}>
       <div className="overflow-hidden rounded-2xl border border-[#E8EAF2] bg-white shadow-sm">
-        <div className="flex h-24 items-center justify-center bg-gradient-to-br from-[#E8EAF2] to-[#DDE1EE] sm:h-36">
-          <Home className="h-10 w-10 text-[#1F2B6C]/35 sm:h-12 sm:w-12" strokeWidth={1.5} />
+        <div className="relative h-24 bg-gradient-to-br from-[#E8EAF2] to-[#DDE1EE] sm:h-36">
+          {propertyImage ? (
+            <Image
+              src={propertyImage}
+              alt={lease.property_title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 320px"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <Home className="h-10 w-10 text-[#1F2B6C]/35 sm:h-12 sm:w-12" strokeWidth={1.5} />
+            </div>
+          )}
         </div>
         <div className="p-4 sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-2">

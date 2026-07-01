@@ -1,4 +1,4 @@
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 from apps.properties.models import Property, PropertyStatus
 from apps.verification.models import CommunityReport, CommunityReportStatus
+from apps.verification.permissions import IsInspectorOrAdmin
 from apps.verification.serializers import CommunityReportCreateSerializer, CommunityReportSerializer
 from core.pagination import StandardResultsSetPagination
 
@@ -22,6 +23,30 @@ class PropertyCommunityReportListView(APIView):
             is_public=True,
             status=CommunityReportStatus.VERIFIED,
         ).select_related("reporter", "reporter__profile").order_by("-created_at")
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(qs, request)
+        serializer = CommunityReportSerializer(page, many=True, context={"request": request})
+        return paginator.get_paginated_response(serializer.data)
+
+
+class CommunityReportModerationListView(APIView):
+    permission_classes = [IsAuthenticated, IsInspectorOrAdmin]
+    pagination_class = StandardResultsSetPagination
+
+    @extend_schema(
+        tags=["Community Reports"],
+        summary="List community reports for inspector/admin review",
+        parameters=[OpenApiParameter("status", str, description="PENDING | VERIFIED | DISMISSED")],
+    )
+    def get(self, request):
+        qs = (
+            CommunityReport.objects.select_related("property", "reporter", "reporter__profile")
+            .order_by("-created_at")
+        )
+        status_filter = request.query_params.get("status")
+        if status_filter:
+            qs = qs.filter(status=status_filter)
 
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(qs, request)

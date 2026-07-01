@@ -73,6 +73,7 @@ class LeaseAddendumSerializer(serializers.ModelSerializer):
 class LeaseListSerializer(serializers.ModelSerializer):
     property_title = serializers.CharField(source="property.title", read_only=True)
     property_address = serializers.CharField(source="property.address", read_only=True)
+    property_primary_image = serializers.SerializerMethodField()
     counterparty_name = serializers.SerializerMethodField()
     effective_status = serializers.SerializerMethodField()
     renewal_reminder = serializers.SerializerMethodField()
@@ -85,6 +86,7 @@ class LeaseListSerializer(serializers.ModelSerializer):
             "id",
             "property_title",
             "property_address",
+            "property_primary_image",
             "counterparty_name",
             "status",
             "effective_status",
@@ -106,6 +108,20 @@ class LeaseListSerializer(serializers.ModelSerializer):
         if request and request.user.id == obj.tenant_id:
             return obj.landlord.profile.full_name or obj.landlord.email
         return obj.tenant.profile.full_name or obj.tenant.email
+
+    def get_property_primary_image(self, obj):
+        prop = obj.property
+        img = prop.images.filter(is_primary=True).first() or prop.images.first()
+        if not img:
+            return None
+        request = self.context.get("request")
+        url = img.image.url
+        if request:
+            try:
+                return request.build_absolute_uri(url)
+            except Exception:
+                return url
+        return url
 
     def get_effective_status(self, obj):
         refreshed = refresh_lease_status(obj)

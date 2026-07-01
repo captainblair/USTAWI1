@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { UstawiLogo } from "@/components/brand/ustawi-logo";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { WireframeNavAuth } from "@/components/layout/wireframe-nav-auth";
+import { useAuth } from "@/components/providers/auth-provider";
 import { HOME_NAV_LINKS } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +44,7 @@ function NavItem({
 
 export function WireframeNav() {
   const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hash, setHash] = useState("");
@@ -103,15 +106,19 @@ export function WireframeNav() {
       <div className="flex h-[72px] items-center justify-between px-4 lg:hidden">
         <UstawiLogo variant="compact" priority tone={logoTone} />
 
-        <div className="flex items-center gap-3">
-          <WireframeNavAuth scrolled={scrolled} />
+        <div className="flex items-center gap-1">
+          {isAuthenticated && <NotificationBell />}
           <button
             type="button"
-            className={cn("rounded-lg p-2", scrolled ? "text-[#0a1128]" : "text-white")}
+            className={cn(
+              "flex h-11 w-11 items-center justify-center rounded-lg",
+              scrolled ? "text-[#0a1128] hover:bg-ustawi-cream" : "text-white hover:bg-white/10",
+            )}
             onClick={() => setOpen(!open)}
             aria-label="Menu"
+            aria-expanded={open}
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {open ? <X className="h-6 w-6" strokeWidth={1.75} /> : <Menu className="h-6 w-6" strokeWidth={1.75} />}
           </button>
         </div>
       </div>
@@ -139,6 +146,7 @@ export function WireframeNav() {
               {link.label}
             </Link>
           ))}
+          <WireframeNavAuth scrolled={scrolled} layout="menu" onNavigate={() => setOpen(false)} />
         </div>
       )}
     </header>

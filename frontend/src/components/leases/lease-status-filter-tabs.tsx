@@ -19,7 +19,7 @@ export function LeaseStatusFilterTabs({ tabs, value, onChange, className }: Leas
   return (
     <div
       className={cn(
-        "-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-none snap-x snap-mandatory",
+        "flex max-w-full gap-2 overflow-x-auto pb-1 scrollbar-none snap-x snap-mandatory [-webkit-overflow-scrolling:touch]",
         className,
       )}
     >

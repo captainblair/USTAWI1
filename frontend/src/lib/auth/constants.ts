@@ -39,3 +39,11 @@ export function isTenant(user: AuthUser | null | undefined): boolean {
 export function isLandlord(user: AuthUser | null | undefined): boolean {
   return user?.role === "LANDLORD" || user?.role === "AGENT";
 }
+
+export function isInspector(user: AuthUser | null | undefined): boolean {
+  return user?.role === "INSPECTOR";
+}
+
+export function isInspectorOrAdmin(user: AuthUser | null | undefined): boolean {
+  return user?.role === "INSPECTOR" || user?.role === "ADMIN";
+}

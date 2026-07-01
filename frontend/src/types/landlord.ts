@@ -1,3 +1,5 @@
+import type { ChartData } from "@/types/analytics";
+
 export type LandlordDashboardKpis = {
   total_properties: number;
   active_listings: number;
@@ -18,18 +20,6 @@ export type LandlordTopPerformer = {
   safety_score: number;
   application_count: number;
   monthly_rent: number;
-};
-
-export type ChartDataset = {
-  label?: string;
-  data: number[];
-  currency?: string;
-};
-
-export type ChartData = {
-  type: string;
-  labels: string[];
-  datasets: ChartDataset[];
 };
 
 export type LandlordDashboard = {

@@ -91,6 +91,8 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             prop = Property.objects.get(pk=value)
         except Property.DoesNotExist as exc:
             raise serializers.ValidationError("Property not found.") from exc
+        if prop.status == PropertyStatus.OCCUPIED:
+            raise serializers.ValidationError("This property is currently occupied and not accepting applications.")
         if prop.status != PropertyStatus.ACTIVE:
             raise serializers.ValidationError("This property is not accepting applications.")
         return value

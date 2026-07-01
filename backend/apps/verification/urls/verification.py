@@ -1,7 +1,11 @@
 from django.urls import path
 
 from apps.verification.views.admin import AdminVerificationOverviewView, VerificationPipelineStatsView
-from apps.verification.views.community import CommunityReportCreateView, PropertyCommunityReportListView
+from apps.verification.views.community import (
+    CommunityReportCreateView,
+    CommunityReportModerationListView,
+    PropertyCommunityReportListView,
+)
 from apps.verification.views.inspector import (
     InspectorApproveView,
     InspectorCaseDetailView,
@@ -45,6 +49,7 @@ admin_urlpatterns = [
 
 community_urlpatterns = [
     path("", CommunityReportCreateView.as_view(), name="community-report-create"),
+    path("moderation/", CommunityReportModerationListView.as_view(), name="community-report-moderation"),
     path(
         "property/<uuid:property_id>/",
         PropertyCommunityReportListView.as_view(),

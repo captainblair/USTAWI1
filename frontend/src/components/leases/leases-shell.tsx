@@ -4,11 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, Search, X } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 const MENU_LINKS = [
   { href: "/properties", label: "Search homes" },
   { href: "/applications", label: "Applications" },
   { href: "/leases", label: "Leases" },
+  { href: "/maintenance", label: "Maintenance" },
+  { href: "/notifications", label: "Notifications" },
   { href: "/saved", label: "Saved" },
   { href: "/profile", label: "Profile" },
 ];
@@ -32,14 +35,17 @@ function LeasesHeader() {
           <Link href="/" className="shrink-0 text-xl font-bold tracking-[0.06em] text-white" aria-label="Ustawi home">
             USTAWI
           </Link>
-          <button
-            type="button"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white hover:bg-white/10"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Menu"
-          >
-            {menuOpen ? <X className="h-6 w-6" strokeWidth={1.75} /> : <Menu className="h-6 w-6" strokeWidth={1.75} />}
-          </button>
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <button
+              type="button"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white hover:bg-white/10"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Menu"
+            >
+              {menuOpen ? <X className="h-6 w-6" strokeWidth={1.75} /> : <Menu className="h-6 w-6" strokeWidth={1.75} />}
+            </button>
+          </div>
         </div>
         <form onSubmit={handleSearch} className="mt-3">
           <div className="relative">
@@ -70,6 +76,7 @@ function LeasesHeader() {
               />
             </div>
           </form>
+          <NotificationBell />
           <button
             type="button"
             className="flex h-10 w-10 shrink-0 items-center justify-center text-white hover:bg-white/10 lg:hidden"

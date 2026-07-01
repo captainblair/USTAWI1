@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { SavePropertyButton } from "@/components/properties/save-property-button";
 import { SafetyBadge } from "@/components/properties/safety-badge";
 import { propertyImageSrc } from "@/lib/media-url";
+import { isPropertyOccupied } from "@/lib/properties/status";
 import { formatPrice, formatPropertyType } from "@/lib/utils";
 import type { PropertyListItem } from "@/types/property";
 
@@ -33,6 +34,7 @@ export function PropertyCard({
   const location = property.neighborhood
     ? `${property.neighborhood.name}, ${property.city}`
     : property.city;
+  const occupied = isPropertyOccupied(property.status);
 
   return (
     <Link
@@ -41,7 +43,9 @@ export function PropertyCard({
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-ustawi-sand">
         <PropertyImage property={property} />
+        {occupied && <div className="absolute inset-0 bg-[#1F2B6C]/25" aria-hidden />}
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          {occupied && <Badge variant="occupied">Occupied</Badge>}
           {property.is_verified && <Badge variant="verified">Verified</Badge>}
           {property.is_featured && <Badge variant="featured">Featured</Badge>}
         </div>
@@ -86,7 +90,7 @@ export function PropertyCard({
             <p className="text-xl font-bold text-ustawi-navy">
               {formatPrice(property.price_monthly, property.currency)}
             </p>
-            <p className="text-xs text-ustawi-muted">per month</p>
+            <p className="text-xs text-ustawi-muted">{occupied ? "Currently occupied" : "per month"}</p>
           </div>
           <span className="text-sm font-semibold text-ustawi-red opacity-0 transition group-hover:opacity-100">
             View →

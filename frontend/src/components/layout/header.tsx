@@ -19,7 +19,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-ustawi-border bg-white/95 backdrop-blur-md">
-      <div className="mx-auto flex h-[80px] max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex h-[80px] max-w-7xl items-center px-4 sm:px-6 lg:px-8">
         <UstawiLogo variant="nav" />
 
         <nav className="ml-10 hidden flex-1 items-center gap-8 lg:flex">

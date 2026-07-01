@@ -30,6 +30,7 @@ class TenantLeaseListView(APIView):
         qs = (
             Lease.objects.filter(tenant=request.user)
             .select_related("property", "landlord", "landlord__profile", "tenant__profile")
+            .prefetch_related("property__images")
             .order_by("-created_at")
         )
         status_filter = request.query_params.get("status")
@@ -52,7 +53,7 @@ class TenantLeaseDetailView(APIView):
         return (
             Lease.objects.filter(tenant=request.user)
             .select_related("property", "landlord", "landlord__profile", "tenant__profile", "application")
-            .prefetch_related("documents", "addendums", "signatures", "signatures__signer__profile")
+            .prefetch_related("documents", "addendums", "signatures", "signatures__signer__profile", "property__images")
             .get(pk=pk)
         )
 

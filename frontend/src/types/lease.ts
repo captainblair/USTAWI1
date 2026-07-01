@@ -69,6 +69,7 @@ export type LeaseListItem = {
   id: string;
   property_title: string;
   property_address: string;
+  property_primary_image: string | null;
   counterparty_name: string;
   status: LeaseStatus;
   effective_status: LeaseStatus;

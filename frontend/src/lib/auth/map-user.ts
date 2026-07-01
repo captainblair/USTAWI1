@@ -22,11 +22,11 @@ export function getPostAuthRedirect(role: UserRole, next?: string | null): strin
     case "AGENT":
       return "/landlord";
     case "TENANT":
-      return "/saved";
+      return "/dashboard";
     case "ADMIN":
       return "/admin";
     case "INSPECTOR":
-      return "/profile";
+      return "/inspector";
     default:
       return "/profile";
   }

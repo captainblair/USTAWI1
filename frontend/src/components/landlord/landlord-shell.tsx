@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Bell,
   Building2,
   FileText,
   LayoutDashboard,
@@ -17,6 +16,7 @@ import {
 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { ProfileAvatar } from "@/components/profile/profile-avatar";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useAuth } from "@/components/providers/auth-provider";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,7 @@ const NAV = [
   { href: "/landlord/properties", label: "Properties", icon: Building2 },
   { href: "/landlord/applications", label: "Applications", icon: FileText },
   { href: "/landlord/leases", label: "Leases", icon: Users },
-  { href: "#", label: "Maintenance", icon: Wrench, disabled: true },
+  { href: "/landlord/maintenance", label: "Maintenance", icon: Wrench },
   { href: "#", label: "Messages", icon: MessageSquare, disabled: true },
   { href: "/profile", label: "Settings", icon: Settings },
 ];
@@ -65,7 +65,7 @@ export function LandlordShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F8FC] lg:flex">
+    <div className="min-h-screen overflow-x-hidden bg-[#F7F8FC] lg:flex">
       {/* Sidebar — wireframe dark nav */}
       <aside
         className={cn(
@@ -146,9 +146,7 @@ export function LandlordShell({
             </div>
           </form>
           <div className="ml-auto flex items-center gap-3">
-            <button type="button" className="rounded-full p-2 text-ustawi-muted hover:bg-ustawi-cream" aria-label="Notifications">
-              <Bell className="h-5 w-5" />
-            </button>
+            <NotificationBell variant="light" />
             <Link href="/profile">
               <ProfileAvatar
                 src={user?.avatar}
@@ -161,7 +159,7 @@ export function LandlordShell({
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
           {(title || action) && (
             <div className="mb-4 flex flex-wrap items-center justify-between gap-4 sm:mb-6">
               {title ? <h1 className="text-xl font-bold text-ustawi-navy sm:text-2xl">{title}</h1> : null}

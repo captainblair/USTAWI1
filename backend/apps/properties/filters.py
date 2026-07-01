@@ -3,6 +3,8 @@ from django.db.models import Max, Min, Q
 
 from apps.properties.models import Amenity, Neighborhood, Property, PropertyStatus, PropertyType
 
+PUBLIC_LISTING_STATUSES = (PropertyStatus.ACTIVE, PropertyStatus.OCCUPIED)
+
 
 class PropertyFilter(django_filters.FilterSet):
     q = django_filters.CharFilter(method="filter_keyword")
@@ -40,21 +42,21 @@ class PropertyFilter(django_filters.FilterSet):
 
 def get_public_queryset():
     return (
-        Property.objects.filter(status=PropertyStatus.ACTIVE)
+        Property.objects.filter(status__in=PUBLIC_LISTING_STATUSES)
         .select_related("owner", "owner__profile", "neighborhood")
         .prefetch_related("images", "amenities")
     )
 
 
 def build_filter_metadata():
-    active = Property.objects.filter(status=PropertyStatus.ACTIVE)
-    price = active.aggregate(min_price=Min("price_monthly"), max_price=Max("price_monthly"))
-    safety = active.aggregate(min_score=Min("safety_score"), max_score=Max("safety_score"))
+    listed = Property.objects.filter(status__in=PUBLIC_LISTING_STATUSES)
+    price = listed.aggregate(min_price=Min("price_monthly"), max_price=Max("price_monthly"))
+    safety = listed.aggregate(min_score=Min("safety_score"), max_score=Max("safety_score"))
 
     return {
-        "cities": list(active.values_list("city", flat=True).distinct().order_by("city")),
+        "cities": list(listed.values_list("city", flat=True).distinct().order_by("city")),
         "neighborhoods": list(
-            Neighborhood.objects.filter(properties__status=PropertyStatus.ACTIVE)
+            Neighborhood.objects.filter(properties__status__in=PUBLIC_LISTING_STATUSES)
             .distinct()
             .values("name", "slug", "city")
             .order_by("name")

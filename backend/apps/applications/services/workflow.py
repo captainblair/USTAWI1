@@ -19,6 +19,8 @@ def submit_application(application: RentalApplication, actor) -> RentalApplicati
     if not application.monthly_income or application.monthly_income <= 0:
         raise ApplicationWorkflowError("Monthly income is required before submitting.")
 
+    if application.property.status == PropertyStatus.OCCUPIED:
+        raise ApplicationWorkflowError("This property is currently occupied and not accepting applications.")
     if application.property.status != PropertyStatus.ACTIVE:
         raise ApplicationWorkflowError("This property is not accepting applications.")
 
