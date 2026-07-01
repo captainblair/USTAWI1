@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Bed, Check, MapPin, Shield } from "lucide-react";
-import { SAMPLE_PROPERTIES } from "@/lib/assets/sample-properties";
 import { propertyImageSrc } from "@/lib/media-url";
 import { formatPrice } from "@/lib/utils";
 import type { PropertyListItem } from "@/types/property";
+import { FeaturedPropertiesMarquee } from "@/components/home/featured-properties-marquee";
 import { SafetyBadge } from "@/components/properties/safety-badge";
 import { WireframeHeroSearch } from "@/components/home/wireframe-hero-search";
 import { ScrollReveal } from "@/components/home/scroll-reveal";
@@ -29,12 +29,12 @@ type CardData = {
   safetyScore?: number;
 };
 
-function mapProperty(p: PropertyListItem, fallbackImage: string, index: number): CardData {
+function mapProperty(p: PropertyListItem): CardData {
   return {
     title: p.title,
     subtitle: p.neighborhood ? `${p.neighborhood.name}, ${p.city}` : p.city,
     price: parseFloat(p.price_monthly),
-    image: propertyImageSrc(p.primary_image, fallbackImage),
+    image: propertyImageSrc(p.primary_image),
     bedrooms: p.bedrooms,
     href: `/properties/${p.slug}`,
     safetyScore: parseFloat(p.safety_score),
@@ -74,13 +74,12 @@ function PropertyCard({
             Featured
           </span>
         )}
-        {safetyScore != null && !Number.isNaN(safetyScore) && (
+        {safetyScore != null && !Number.isNaN(safetyScore) ? (
           <div className="absolute right-3 top-3">
             <SafetyBadge score={safetyScore} size="sm" />
           </div>
-        )}
-        {!safetyScore && (
-          <span className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-ustawi-red shadow-ustawi-red ring-2 ring-white/90">
+        ) : (
+          <span className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ustawi-red shadow-ustawi-red ring-2 ring-white/90">
             <Shield className="h-4 w-4 text-white" strokeWidth={2.5} />
           </span>
         )}
@@ -90,6 +89,10 @@ function PropertyCard({
             {bedrooms} bed
           </span>
         )}
+        <span className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-ustawi-red px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-ustawi-red ring-2 ring-white/90 transition group-hover:gap-2">
+          View
+          <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+        </span>
       </div>
       <div className="space-y-1 p-4">
         <div className="flex items-start gap-1.5">
@@ -136,14 +139,9 @@ function TrustBadgesFooter() {
 const MOBILE_FILTERS = ["All", "Nairobi", "Westlands", "Verified"];
 
 function MobilePanel({ listings }: { listings: CardData[] }) {
-  const items = listings.length > 0 ? listings : SAMPLE_PROPERTIES.map((p) => ({
-    title: p.title,
-    subtitle: p.subtitle,
-    price: p.price,
-    image: p.cover,
-    bedrooms: p.bedrooms,
-    href: "/properties",
-  }));
+  if (listings.length === 0) {
+    return null;
+  }
 
   return (
     <section data-scroll-tone="navy" className="relative z-10 -mt-10 px-4 pb-12 sm:hidden">
@@ -168,11 +166,12 @@ function MobilePanel({ listings }: { listings: CardData[] }) {
               ))}
             </div>
             <ul className="mt-5 space-y-3">
-              {items.slice(0, 3).map((item, i) => (
+              {listings.slice(0, 3).map((item, i) => (
                 <ScrollReveal key={item.title + i} variant="slide-right" delay={i * 0.08}>
                   <li>
                     <Link
                       href={item.href ?? "/properties"}
+                      aria-label={`View ${item.title}`}
                       className="flex items-center gap-3 rounded-2xl bg-[#f8f8fa] p-3 ring-1 ring-black/[0.04] transition active:bg-[#f0f0f4]"
                     >
                       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl ring-2 ring-white">
@@ -187,14 +186,20 @@ function MobilePanel({ listings }: { listings: CardData[] }) {
                           {formatPrice(item.price)}/mo
                         </p>
                       </div>
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ustawi-red shadow-ustawi-red">
-                        <Shield className="h-3.5 w-3.5 text-white" />
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ustawi-red shadow-ustawi-red ring-2 ring-white"
+                        aria-hidden
+                      >
+                        <ArrowRight className="h-4 w-4 text-white" strokeWidth={2.5} />
                       </span>
                     </Link>
                   </li>
                 </ScrollReveal>
               ))}
             </ul>
+            <p className="mt-3 text-center text-xs text-ustawi-muted">
+              Tap a listing or the red arrow to view details.
+            </p>
           </div>
         </div>
       </ScrollReveal>
@@ -232,36 +237,11 @@ export function WireframeMainPanel({
   featured: PropertyListItem[];
   listings?: PropertyListItem[];
 }) {
-  const sampleCards: CardData[] = SAMPLE_PROPERTIES.map((p) => ({
-    title: p.title,
-    subtitle: p.subtitle,
-    price: p.price,
-    image: p.cover,
-    bedrooms: p.bedrooms,
-    href: "/properties",
-  }));
+  const browseCards = listings.slice(0, 3).map(mapProperty);
+  const featuredCards = featured.slice(0, 3).map((p) => ({ ...mapProperty(p), featured: true }));
 
-  const apiBrowse =
-    listings.length >= 3
-      ? listings.slice(0, 3).map((p, i) => mapProperty(p, SAMPLE_PROPERTIES[i]?.cover ?? SAMPLE_PROPERTIES[0].cover, i))
-      : featured.length >= 3
-        ? featured.slice(0, 3).map((p, i) => mapProperty(p, SAMPLE_PROPERTIES[i]?.cover ?? SAMPLE_PROPERTIES[0].cover, i))
-        : null;
-
-  const browseCards = apiBrowse ?? sampleCards;
-
-  const featuredCards =
-    featured.length > 0
-      ? featured.slice(0, 3).map((p, i) => ({
-          ...mapProperty(p, SAMPLE_PROPERTIES[i]?.detail ?? SAMPLE_PROPERTIES[0].detail, i),
-          featured: true,
-        }))
-      : listings.length > 0
-        ? listings.slice(0, 3).map((p, i) => ({
-            ...mapProperty(p, SAMPLE_PROPERTIES[i]?.detail ?? SAMPLE_PROPERTIES[0].detail, i),
-            featured: true,
-          }))
-        : sampleCards.map((p) => ({ ...p, image: SAMPLE_PROPERTIES.find((s) => s.title === p.title)?.detail ?? p.image, featured: true }));
+  const hasBrowse = browseCards.length > 0;
+  const hasFeatured = featuredCards.length > 0;
 
   return (
     <>
@@ -294,7 +274,7 @@ export function WireframeMainPanel({
               <div className="p-8">
                 <ScrollReveal variant="fade-up">
                   <SectionTitle
-                    accent="Live listings from our verified catalogue"
+                    accent="Live listings from verified landlords"
                     action={
                       <Link href="/properties">
                         <Button variant="outline" size="sm" className="gap-1.5">
@@ -307,37 +287,71 @@ export function WireframeMainPanel({
                     How it works
                   </SectionTitle>
                 </ScrollReveal>
-                <div className="grid grid-cols-3 gap-5">
-                  {browseCards.map((p, i) => (
-                    <ScrollReveal key={p.title + p.price + i} variant="fade-up" delay={i * 0.12}>
-                      <PropertyCard {...p} />
-                    </ScrollReveal>
-                  ))}
-                </div>
+                {hasBrowse ? (
+                  <>
+                    <div className="grid grid-cols-3 gap-5">
+                      {browseCards.map((p, i) => (
+                        <ScrollReveal key={p.href ?? p.title + p.price + i} variant="fade-up" delay={i * 0.12}>
+                          <PropertyCard {...p} />
+                        </ScrollReveal>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-center text-xs text-ustawi-muted">
+                      Click a listing image or the red arrow to view full details.
+                    </p>
+                  </>
+                ) : (
+                  <p className="rounded-xl bg-ustawi-cream px-4 py-8 text-center text-sm text-ustawi-muted">
+                    New verified listings will appear here as landlords publish on Ustawi.
+                  </p>
+                )}
 
                 <div id="featured-properties" className="mt-10 scroll-mt-28">
                   <ScrollReveal variant="fade-up">
                     <SectionTitle
                       accent="Hand-picked homes with top safety scores"
                       action={
-                        <Link href="/properties?ordering=-is_featured">
-                          <Button variant="outline" size="sm" className="gap-1.5">
-                            See featured
-                            <ArrowRight className="h-3.5 w-3.5" />
-                          </Button>
-                        </Link>
+                        hasFeatured ? (
+                          <Link href="/properties?ordering=-is_featured">
+                            <Button variant="outline" size="sm" className="gap-1.5">
+                              See featured
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </Button>
+                          </Link>
+                        ) : undefined
                       }
                     >
                       Featured Properties
                     </SectionTitle>
                   </ScrollReveal>
-                  <div className="grid grid-cols-3 gap-5">
-                    {featuredCards.map((p, i) => (
-                      <ScrollReveal key={p.title + p.price + i} variant="fade-up" delay={i * 0.12}>
-                        <PropertyCard {...p} featured />
-                      </ScrollReveal>
-                    ))}
-                  </div>
+
+                  {hasFeatured ? (
+                    <>
+                      <FeaturedPropertiesMarquee featured={featured} />
+                      <div
+                        className={`grid gap-5 ${
+                          featuredCards.length >= 3
+                            ? "grid-cols-3"
+                            : featuredCards.length === 2
+                              ? "grid-cols-2"
+                              : "grid-cols-1 max-w-sm"
+                        }`}
+                      >
+                        {featuredCards.map((p, i) => (
+                          <ScrollReveal key={p.href ?? p.title + p.price + i} variant="fade-up" delay={i * 0.12}>
+                            <PropertyCard {...p} featured />
+                          </ScrollReveal>
+                        ))}
+                      </div>
+                      <p className="mt-3 text-center text-xs text-ustawi-muted">
+                        Click a listing image or the red arrow to view full details.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="rounded-xl bg-ustawi-cream px-4 py-8 text-center text-sm text-ustawi-muted">
+                      Featured homes will appear here once landlords publish and listings are approved.
+                    </p>
+                  )}
                 </div>
 
                 <ScrollReveal variant="fade-up" delay={0.15}>

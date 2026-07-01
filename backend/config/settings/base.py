@@ -232,6 +232,9 @@ AFRICAS_TALKING_SENDER_ID = env("AFRICAS_TALKING_SENDER_ID", default="USTAWI")
 OTP_LENGTH = env("OTP_LENGTH")
 OTP_EXPIRY_MINUTES = env("OTP_EXPIRY_MINUTES")
 
+# Homepage featured carousel — auto-selected from approved public listings
+FEATURED_PROPERTY_LIMIT = env.int("FEATURED_PROPERTY_LIMIT", default=6)
+
 EMAIL_BACKEND = env(
     "EMAIL_BACKEND",
     default="django.core.mail.backends.console.EmailBackend",

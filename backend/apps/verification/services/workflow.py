@@ -171,6 +171,10 @@ def approve_case(case: VerificationCase, actor, notes: str = "") -> Verification
     owner_profile.save(update_fields=["is_verified_landlord", "updated_at"])
 
     log_audit(case, actor, "CASE_APPROVED", notes or "Property approved and verified.")
+
+    from apps.properties.services.featured import sync_featured_properties
+
+    sync_featured_properties()
     return case
 
 

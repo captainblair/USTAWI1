@@ -12,7 +12,7 @@ function toQuery(params: PropertySearchParams) {
 
 export async function fetchFeaturedProperties() {
   const response = await apiFetch<ApiSuccess<PropertyListItem[]>>("/properties/featured/", {
-    next: { revalidate: 300 },
+    cache: "no-store",
   });
   return response.data;
 }

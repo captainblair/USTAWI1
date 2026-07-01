@@ -18,6 +18,8 @@ import {
 } from "@/lib/api/properties";
 import type { FilterMetadata, PropertyListItem } from "@/types/property";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = createPageMetadata({
   title: "Find Safe Homes in Kenya",
   description:

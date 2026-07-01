@@ -72,9 +72,7 @@ export function WireframeHero({
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-normal text-white/75 sm:gap-10">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-white">
-                {propertyCount != null && propertyCount > 0
-                  ? `${propertyCount}+`
-                  : "500+"}
+                {propertyCount != null && propertyCount > 0 ? propertyCount : "—"}
               </span>
               <span>Verified homes</span>
             </div>

@@ -121,7 +121,6 @@ class Command(BaseCommand):
                     "bathrooms": listing["bathrooms"],
                     "safety_score": listing["safety_score"],
                     "is_verified": options["activate"],
-                    "is_featured": True,
                     "published_at": timezone.now() if options["activate"] else None,
                     "pet_friendly": "pet-friendly" in listing["amenities"],
                 },

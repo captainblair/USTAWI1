@@ -91,3 +91,17 @@ body {
 .animate-shake {
   animation: shake 0.4s ease-in-out;
 }
+
+/* Legacy hero-carousel (alternate layout) */
+@keyframes hero-marquee {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-hero-marquee {
+  animation: hero-marquee linear infinite;
+}
