@@ -12,6 +12,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from apps.accounts.models import PasswordResetToken, RegistrationSession
 from apps.accounts.serializers import (
+    GoogleAuthSerializer,
     LoginSerializer,
     LogoutSerializer,
     PasswordResetConfirmSerializer,
@@ -29,6 +30,11 @@ from apps.accounts.services.registration import (
     get_tokens_for_user,
     log_login_activity,
     update_registration_profile,
+)
+from apps.accounts.services.google_auth import (
+    GoogleAccountNotFoundError,
+    GoogleAuthError,
+    authenticate_or_register_with_google,
 )
 from core.throttling import AuthRateThrottle
 
@@ -212,6 +218,57 @@ class LoginView(APIView):
                 },
             },
             status=status.HTTP_200_OK,
+        )
+
+
+class GoogleAuthView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [AuthRateThrottle]
+
+    @extend_schema(tags=["Auth"], summary="Sign in or sign up with Google ID token", request=GoogleAuthSerializer)
+    def post(self, request):
+        serializer = GoogleAuthSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        role = serializer.validated_data.get("role")
+
+        try:
+            user, created = authenticate_or_register_with_google(
+                serializer.validated_data["id_token"],
+                role=role,
+            )
+        except GoogleAccountNotFoundError as exc:
+            return Response(
+                {"success": False, "error": {"message": str(exc), "code": "account_not_found"}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except GoogleAuthError as exc:
+            return Response(
+                {"success": False, "error": {"message": str(exc)}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not user.is_active:
+            return Response(
+                {"success": False, "error": {"message": "Account is disabled."}},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        tokens = get_tokens_for_user(user)
+        log_login_activity(request, user, success=True)
+
+        return Response(
+            {
+                "success": True,
+                "message": "Registration complete." if created else "Login successful.",
+                "data": {
+                    "user": UserSerializer(user).data,
+                    "tokens": tokens,
+                    "is_new_user": created,
+                },
+            },
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
 
 

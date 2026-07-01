@@ -217,6 +217,19 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         return attrs
 
 
+class GoogleAuthSerializer(serializers.Serializer):
+    id_token = serializers.CharField()
+    role = serializers.ChoiceField(
+        choices=[
+            (UserRole.TENANT, "Tenant"),
+            (UserRole.LANDLORD, "Landlord"),
+            (UserRole.AGENT, "Agent"),
+        ],
+        required=False,
+        allow_null=True,
+    )
+
+
 class AccountDeletionSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     reason = serializers.CharField(required=False, allow_blank=True, default="", max_length=500)

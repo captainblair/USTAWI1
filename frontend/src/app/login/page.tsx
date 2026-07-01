@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import { createPageMetadata } from "@/lib/seo/metadata";
+import { getGoogleClientId } from "@/lib/env/google";
 
 export const metadata = createPageMetadata({
   title: "Log in",
@@ -10,9 +11,11 @@ export const metadata = createPageMetadata({
 });
 
 export default function LoginPage() {
+  const googleClientId = getGoogleClientId();
+
   return (
     <Suspense fallback={<div className="min-h-screen bg-ustawi-cream" />}>
-      <LoginForm />
+      <LoginForm googleClientId={googleClientId} />
     </Suspense>
   );
 }

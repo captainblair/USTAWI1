@@ -45,6 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True, db_index=True)
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True, db_index=True)
+    google_sub = models.CharField(max_length=255, unique=True, null=True, blank=True, db_index=True)
     role = models.CharField(max_length=20, choices=UserRole.choices, default=UserRole.TENANT)
 
     is_active = models.BooleanField(default=True)

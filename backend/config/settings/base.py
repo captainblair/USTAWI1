@@ -232,6 +232,10 @@ AFRICAS_TALKING_SENDER_ID = env("AFRICAS_TALKING_SENDER_ID", default="USTAWI")
 OTP_LENGTH = env("OTP_LENGTH")
 OTP_EXPIRY_MINUTES = env("OTP_EXPIRY_MINUTES")
 
+# Google OAuth (Sign in with Google)
+GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
+GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET", default="")
+
 # Homepage featured carousel — auto-selected from approved public listings
 FEATURED_PROPERTY_LIMIT = env.int("FEATURED_PROPERTY_LIMIT", default=6)
 

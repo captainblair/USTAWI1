@@ -75,3 +75,15 @@ export async function registerVerifyOtp(registrationToken: string, otp: string) 
   });
   return response.data;
 }
+
+export async function loginWithGoogle(idToken: string, role?: RegistrationRole) {
+  const body: { id_token: string; role?: RegistrationRole } = { id_token: idToken };
+  if (role) body.role = role;
+
+  const response = await apiFetch<ApiSuccess<AuthPayload & { is_new_user?: boolean }>>("/auth/google/", {
+    method: "POST",
+    body,
+    cache: "no-store",
+  });
+  return response.data;
+}

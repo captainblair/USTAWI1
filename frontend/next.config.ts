@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
+import { loadEnvConfig } from "@next/env";
+
+loadEnvConfig(process.cwd());
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001/api/v1";
+const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() ?? "";
 const isDev = process.env.NODE_ENV === "development";
 
 function apiMediaRemotePattern() {
@@ -24,6 +28,9 @@ function apiMediaRemotePattern() {
 }
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: googleClientId,
+  },
   images: {
     // Fallback if any absolute localhost media URLs slip through.
     dangerouslyAllowLocalIP: isDev,

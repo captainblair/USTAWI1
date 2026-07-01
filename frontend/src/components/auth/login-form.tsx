@@ -8,15 +8,16 @@ import {
   AuthDivider,
   AuthFieldLabel,
   AuthFooterLink,
-  AuthGoogleButton,
   AuthPageHeader,
   AuthPrimaryButton,
   PremiumAuthSplitLayout,
   authInputClass,
 } from "@/components/auth/premium-auth-split-layout";
+import { GoogleAuthProvider } from "@/components/auth/google-auth-provider";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Input } from "@/components/ui/input";
-import { loginWithEmail } from "@/lib/api/auth";
+import { loginWithEmail, loginWithGoogle } from "@/lib/api/auth";
 import { persistAuthPayload } from "@/lib/auth/persist";
 import { getPostAuthRedirect } from "@/lib/auth/map-user";
 import type { UserRole } from "@/lib/auth/constants";
@@ -39,7 +40,7 @@ const PORTAL_DEFAULT_ROLES: Record<LoginPortal, UserRole> = {
   ADMIN: "ADMIN",
 };
 
-export function LoginForm() {
+export function LoginForm({ googleClientId }: { googleClientId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSession } = useAuth();
@@ -54,6 +55,36 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [roleNotice, setRoleNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function handleGoogleSuccess(credential: string) {
+    setError(null);
+    setRoleNotice(null);
+    setGoogleLoading(true);
+    try {
+      const payload = await loginWithGoogle(credential);
+      const session = persistAuthPayload(payload);
+      setSession(session);
+
+      const expectedRole = PORTAL_DEFAULT_ROLES[portal];
+      if (session.user.role !== expectedRole) {
+        setRoleNotice(
+          `Signed in as ${session.user.role.toLowerCase()}. Redirecting to your ${session.user.role.toLowerCase()} area.`,
+        );
+      }
+
+      router.push(getPostAuthRedirect(session.user.role, searchParams.get("next")));
+      router.refresh();
+    } catch (err) {
+      if (err instanceof ApiRequestError && err.status === 404) {
+        setError("No account for this Google email yet. Sign up and choose tenant, landlord, or agent first.");
+      } else {
+        setError(err instanceof ApiRequestError ? err.message : "Google sign-in failed.");
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -84,11 +115,17 @@ export function LoginForm() {
   }
 
   return (
-    <PremiumAuthSplitLayout brandVariant="login" maxFormWidth="md">
-      <AuthPageHeader title="Welcome back!" subtitle="Please enter your details." />
+    <GoogleAuthProvider clientId={googleClientId}>
+      <PremiumAuthSplitLayout brandVariant="login" maxFormWidth="md">
+        <AuthPageHeader title="Welcome back!" subtitle="Please enter your details." />
 
-      <AuthGoogleButton />
-      <AuthDivider label="Manual sign in" />
+        <GoogleSignInButton
+          clientId={googleClientId}
+          disabled={loading || googleLoading}
+          onSuccess={handleGoogleSuccess}
+          onError={(message) => setError(message)}
+        />
+        <AuthDivider label="Manual sign in" />
 
       <div className="mb-5 inline-flex flex-wrap rounded-lg border border-[#E8EAF2] bg-[#F4F6F8] p-0.5">
         {PORTALS.map(({ value, label }) => (
@@ -170,6 +207,7 @@ export function LoginForm() {
       </form>
 
       <AuthFooterLink prompt="Don't have an account?" linkText="Sign up" href="/register" />
-    </PremiumAuthSplitLayout>
+      </PremiumAuthSplitLayout>
+    </GoogleAuthProvider>
   );
 }

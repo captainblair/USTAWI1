@@ -9,7 +9,6 @@ import {
   AuthFieldError,
   AuthFieldLabel,
   AuthFooterLink,
-  AuthGoogleButton,
   AuthPageHeader,
   AuthPrimaryButton,
   AuthProgressSteps,
@@ -17,9 +16,12 @@ import {
   PremiumAuthSplitLayout,
   authInputClass,
 } from "@/components/auth/premium-auth-split-layout";
+import { GoogleAuthProvider } from "@/components/auth/google-auth-provider";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Input } from "@/components/ui/input";
 import {
+  loginWithGoogle,
   registerProfile,
   registerRole,
   registerSendOtp,
@@ -46,7 +48,7 @@ const ROLES: {
 
 type Phase = "register" | "verify";
 
-export function RegisterWizard() {
+export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
   const router = useRouter();
   const { setSession } = useAuth();
 
@@ -69,7 +71,28 @@ export function RegisterWizard() {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [otpError, setOtpError] = useState(false);
+
+  async function handleGoogleSuccess(credential: string) {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const payload = await loginWithGoogle(credential, role);
+      const session = persistAuthPayload(payload);
+      setSession(session);
+      router.push(getPostAuthRedirect(session.user.role));
+      router.refresh();
+    } catch (err) {
+      if (err instanceof ApiRequestError && err.status === 409) {
+        setError("An account with this email already exists. Try signing in with Google on the login page.");
+      } else {
+        setError(err instanceof ApiRequestError ? err.message : "Google sign-up failed.");
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (phase !== "verify" || resendSeconds <= 0) return;
@@ -233,16 +256,25 @@ export function RegisterWizard() {
   }
 
   return (
-    <PremiumAuthSplitLayout brandVariant="register">
-      <AuthProgressSteps current={1} />
+    <GoogleAuthProvider clientId={googleClientId}>
+      <PremiumAuthSplitLayout brandVariant="register">
+        <AuthProgressSteps current={1} />
 
-      <AuthPageHeader
-        title="Sign up for Ustawi"
-        subtitle="Create your account to get started."
-      />
+        <AuthPageHeader
+          title="Sign up for Ustawi"
+          subtitle="Create your account to get started."
+        />
 
-      <AuthGoogleButton />
-      <AuthDivider label="Manual sign up" />
+        <GoogleSignInButton
+          clientId={googleClientId}
+          disabled={loading || googleLoading}
+          onSuccess={handleGoogleSuccess}
+          onError={(message) => setError(message)}
+        />
+        <p className="mb-1 text-center text-xs text-ustawi-muted">
+          Choose tenant, landlord, or agent above before continuing with Google.
+        </p>
+        <AuthDivider label="Manual sign up" />
 
       <section className="mb-5 w-full min-w-0">
         <p className="mb-2 text-sm font-semibold text-ustawi-navy">I am a…</p>
@@ -355,6 +387,7 @@ export function RegisterWizard() {
       </form>
 
       <AuthFooterLink prompt="Already have an account?" linkText="Sign in" href="/login" />
-    </PremiumAuthSplitLayout>
+      </PremiumAuthSplitLayout>
+    </GoogleAuthProvider>
   );
 }
