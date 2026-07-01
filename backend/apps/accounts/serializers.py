@@ -111,6 +111,75 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class AdminUserListSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="profile.full_name", read_only=True, default="")
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "phone",
+            "role",
+            "full_name",
+            "is_active",
+            "is_email_verified",
+            "is_phone_verified",
+            "last_login",
+            "created_at",
+        ]
+        read_only_fields = fields
+
+
+class AdminUserDetailSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="profile.full_name", read_only=True, default="")
+    city = serializers.CharField(source="profile.city", read_only=True, default="")
+    country = serializers.CharField(source="profile.country", read_only=True, default="")
+    address = serializers.CharField(source="profile.address", read_only=True, default="")
+    id_document_verified = serializers.BooleanField(source="profile.id_document_verified", read_only=True)
+    income_verified = serializers.BooleanField(source="profile.income_verified", read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "phone",
+            "role",
+            "full_name",
+            "city",
+            "country",
+            "address",
+            "is_active",
+            "is_email_verified",
+            "is_phone_verified",
+            "id_document_verified",
+            "income_verified",
+            "last_login",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = fields
+
+
+class AdminUserRoleUpdateSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=UserRole.choices)
+
+    def validate_role(self, value):
+        actor = self.context["request"].user
+        target = self.context["target_user"]
+
+        if target.id == actor.id and value != UserRole.ADMIN:
+            raise serializers.ValidationError("You cannot remove your own admin access.")
+
+        if target.role == UserRole.ADMIN and value != UserRole.ADMIN:
+            other_admins = User.objects.filter(role=UserRole.ADMIN, is_active=True).exclude(pk=target.pk).count()
+            if other_admins == 0:
+                raise serializers.ValidationError("At least one active admin must remain on the platform.")
+
+        return value
+
+
 class RegisterRoleSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=UserRole.choices)
 

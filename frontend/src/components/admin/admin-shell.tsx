@@ -10,6 +10,7 @@ import {
   MessageSquareWarning,
   Search,
   ShieldCheck,
+  Users,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/verification", label: "Verifications", icon: ShieldCheck },
   { href: "/inspector", label: "Inspector queue", icon: Building2 },
   { href: "/admin/support", label: "Support", icon: HeadphonesIcon },

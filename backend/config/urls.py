@@ -52,6 +52,7 @@ urlpatterns = [
     path("api/v1/notifications/", include("apps.notifications.urls.notifications")),
     path("api/v1/support/", include(support_user_urlpatterns)),
     path("api/v1/admin/support/", include(support_admin_urlpatterns)),
+    path("api/v1/admin/", include("apps.accounts.urls.admin")),
     path("api/v1/analytics/", include(analytics_urlpatterns)),
 ]
 

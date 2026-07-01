@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   TrendingUp,
   Users,
+  type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -39,13 +40,15 @@ function KpiCard({
   label,
   value,
   icon: Icon,
+  href,
 }: {
   label: string;
   value: string | number;
-  icon: typeof Users;
+  icon: LucideIcon;
+  href?: string;
 }) {
-  return (
-    <div className="rounded-2xl bg-[#1F2B6C] p-5 text-white shadow-sm">
+  const content = (
+    <div className="rounded-2xl bg-[#1F2B6C] p-5 text-white shadow-sm transition hover:bg-[#243480]">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm text-white/70">{label}</p>
@@ -57,6 +60,16 @@ function KpiCard({
       </div>
     </div>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
 
 export function AdminDashboardPanel() {
@@ -126,7 +139,7 @@ export function AdminDashboardPanel() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <KpiCard label="Total users" value={kpis.total_users} icon={Users} />
+        <KpiCard label="Total users" value={kpis.total_users} icon={Users} href="/admin/users" />
         <KpiCard
           label="Monthly revenue"
           value={formatKes(kpis.revenue_this_month, kpis.currency)}
