@@ -59,8 +59,8 @@ export function WireframeHero({
 
         <ScrollReveal variant="fade-up" delay={0.14}>
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
-            Search by keyword or explore the map — verified listings, safety scores, and M-Pesa
-            payments.
+            Search by keyword or explore the map — verified listings, safety scores, M-Pesa
+            and PayPal payments.
           </p>
         </ScrollReveal>
 
@@ -79,6 +79,11 @@ export function WireframeHero({
             <div className="hidden h-4 w-px bg-white/20 sm:block" />
             <div className="flex items-center gap-2">
               <span className="font-semibold text-[#4ade80]">M-Pesa</span>
+              <span>Ready</span>
+            </div>
+            <div className="hidden h-4 w-px bg-white/20 sm:block" />
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-[#7dd3fc]">PayPal</span>
               <span>Ready</span>
             </div>
             <div className="hidden h-4 w-px bg-white/20 sm:block" />

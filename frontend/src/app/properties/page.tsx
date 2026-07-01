@@ -110,9 +110,8 @@ export default async function PropertiesPage({ searchParams }: PageProps) {
 
         {!apiReachable && (
           <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            Cannot reach the Ustawi API. From the <code className="rounded bg-amber-100 px-1">backend</code> folder run{" "}
-            <code className="rounded bg-amber-100 px-1">python manage.py runserver 8001</code> (frontend expects port{" "}
-            <code className="rounded bg-amber-100 px-1">8001</code>, not 8000).
+            We&apos;re having trouble loading listings right now. Please refresh the page or try again
+            in a few minutes.
           </div>
         )}
 

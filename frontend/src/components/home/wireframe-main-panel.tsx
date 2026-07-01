@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 const STEPS = [
   { num: "1", label: "Search", desc: "Browse verified listings" },
   { num: "2", label: "View & Compare", desc: "Safety scores & photos" },
-  { num: "3", label: "Settle Safely", desc: "Pay with M-Pesa" },
+  { num: "3", label: "Settle Safely", desc: "Pay with M-Pesa or PayPal" },
 ];
 
 type CardData = {
@@ -121,6 +121,15 @@ function TrustBadgesFooter() {
         <div>
           <p className="text-sm font-bold text-white">M-PESA Payments</p>
           <p className="text-xs text-white/60">Pay rent securely</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0070BA] text-sm font-bold italic text-white shadow-lg">
+          P
+        </span>
+        <div>
+          <p className="text-sm font-bold text-white">PayPal Payments</p>
+          <p className="text-xs text-white/60">For larger rent amounts</p>
         </div>
       </div>
       <div className="flex items-center gap-3">

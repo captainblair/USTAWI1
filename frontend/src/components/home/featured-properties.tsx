@@ -37,11 +37,10 @@ export function FeaturedProperties({ properties }: { properties: PropertyListIte
           </div>
         ) : (
           <div className="mt-12 rounded-2xl border border-dashed border-ustawi-border bg-white p-12 text-center">
-            <p className="text-lg font-semibold text-ustawi-navy">Listings coming soon</p>
+            <p className="text-lg font-semibold text-ustawi-navy">Featured listings coming soon</p>
             <p className="mt-2 text-ustawi-muted">
-              Start the backend and run{" "}
-              <code className="rounded bg-ustawi-sand px-2 py-0.5 text-sm">seed_properties</code> to
-              populate featured homes.
+              We&apos;re curating verified homes for this section. Explore all listings to find your next
+              place today.
             </p>
             <Link href="/properties" className="mt-6 inline-block">
               <Button>Browse search</Button>

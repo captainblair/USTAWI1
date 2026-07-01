@@ -44,8 +44,8 @@ export function HomeFooter() {
               <UstawiLogoMark variant="nav" />
             </Link>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/65">
-              Kenya&apos;s trusted rental platform — verified listings, safety scores, and M-Pesa
-              payments for tenants and landlords across Nairobi.
+              Kenya&apos;s trusted rental platform — verified listings, safety scores, M-Pesa
+              and PayPal payments for tenants and landlords across Nairobi.
             </p>
             <ul className="mt-6 space-y-3 text-sm text-white/70">
               <li className="flex items-start gap-2.5">
@@ -94,6 +94,8 @@ export function HomeFooter() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/45">
             <span>M-Pesa ready</span>
+            <span className="hidden h-3 w-px bg-white/20 sm:block" />
+            <span>PayPal ready</span>
             <span className="hidden h-3 w-px bg-white/20 sm:block" />
             <span>Kenya Data Protection aligned</span>
             <span className="hidden h-3 w-px bg-white/20 sm:block" />

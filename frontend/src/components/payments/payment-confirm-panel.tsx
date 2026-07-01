@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, Smartphone, XCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -14,11 +14,10 @@ import { formatPrice } from "@/lib/utils";
 
 const POLL_MS = 2000;
 const MAX_POLLS = 45;
+const IS_DEV = process.env.NODE_ENV === "development";
 
 export function PaymentConfirmPanel({ paymentId }: { paymentId: string }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const isDemo = searchParams.get("demo") === "1";
   const { user, accessToken, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [payment, setPayment] = useState<PaymentHistoryItem | null>(null);
@@ -67,7 +66,11 @@ export function PaymentConfirmPanel({ paymentId }: { paymentId: string }) {
           if (next < MAX_POLLS) {
             timer = setTimeout(() => check(), POLL_MS);
           } else {
-            setError("Payment is taking longer than expected. You can retry or use demo complete.");
+            setError(
+              IS_DEV
+                ? "Payment is taking longer than expected. You can retry or use demo complete."
+                : "Payment is taking longer than expected. Please try again or contact support if the issue continues.",
+            );
           }
           return next;
         });
@@ -126,9 +129,7 @@ export function PaymentConfirmPanel({ paymentId }: { paymentId: string }) {
             </div>
             <h2 className="mt-4 text-xl font-bold text-ustawi-navy">Check your phone</h2>
             <p className="mt-2 text-sm text-ustawi-muted">
-              {isDemo
-                ? "Demo mode: payment completes automatically — no M-Pesa PIN needed."
-                : "Enter your M-Pesa PIN on the STK push prompt to complete rent payment."}
+              Enter your M-Pesa PIN on the STK push prompt to complete rent payment.
             </p>
           </>
         ) : payment?.status === "FAILED" ? (
@@ -167,11 +168,13 @@ export function PaymentConfirmPanel({ paymentId }: { paymentId: string }) {
         {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
 
         {processing && (
-          <p className="mt-4 text-xs text-ustawi-muted">Checking status… ({pollCount}/{MAX_POLLS})</p>
+          <p className="mt-4 text-xs text-ustawi-muted">
+            {IS_DEV ? `Checking status… (${pollCount}/${MAX_POLLS})` : "Confirming your payment with M-Pesa…"}
+          </p>
         )}
 
         <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
-          {(processing || error) && (
+          {IS_DEV && (processing || error) && (
             <Button
               type="button"
               variant="outline"

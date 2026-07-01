@@ -28,6 +28,11 @@ const FAQ_ITEMS = [
       "Yes. Ustawi supports M-Pesa for rent payments and billing. Tenants receive digital receipts; landlords get clear payment tracking from their dashboard.",
   },
   {
+    question: "Can I pay with PayPal for larger amounts?",
+    answer:
+      "PayPal is coming soon on Ustawi. M-Pesa has a per-transaction limit (around KES 500,000), so PayPal will let tenants and landlords settle higher rent amounts securely when it launches.",
+  },
+  {
     question: "How do I apply for a property?",
     answer:
       "Create a free account, browse listings, and submit an application from any property detail page. Landlords review applications in their inbox and can approve, decline, or request more information.",

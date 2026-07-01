@@ -29,7 +29,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   try {
     property = await fetchPropertyDetail(slug, token);
   } catch {
-    loadError = "Could not load this listing. Check that the API is running on port 8001.";
+    loadError = "Could not load this listing. Please try again in a few minutes.";
   }
 
   if (!property) {

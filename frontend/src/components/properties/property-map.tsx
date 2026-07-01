@@ -339,7 +339,7 @@ export function PropertyMap({ properties, className }: PropertyMapProps) {
         {mapReady && mappableCount === 0 && (
           <div className="pointer-events-none absolute inset-x-4 top-4 z-[500] rounded-lg border border-ustawi-border bg-white/95 px-3 py-2 text-center text-xs text-ustawi-muted shadow-sm">
             {properties.length === 0
-              ? "No listings loaded — start the Ustawi API on port 8001 (python manage.py runserver 8001) and run seed_properties if needed."
+              ? "No listings to show on the map yet. Try adjusting your search or browse all properties."
               : "Listings loaded but none have map coordinates yet."}
           </div>
         )}

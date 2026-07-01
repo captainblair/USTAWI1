@@ -1,4 +1,5 @@
 import { ShieldCheck } from "lucide-react";
+import { PayPalBadge } from "@/components/home/paypal-badge";
 import { cn } from "@/lib/utils";
 
 export function MpesaBadge({ className }: { className?: string }) {
@@ -44,6 +45,7 @@ export function TrustBadgesRow({ className }: { className?: string }) {
     <div className={cn("flex flex-wrap items-center justify-center gap-4", className)}>
       <VerifiedBadge />
       <MpesaBadge />
+      <PayPalBadge />
     </div>
   );
 }

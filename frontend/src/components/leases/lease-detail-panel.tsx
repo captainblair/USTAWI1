@@ -8,6 +8,7 @@ import { LeaseDocumentsPanel } from "@/components/leases/lease-documents-panel";
 import { LeaseSignBanner } from "@/components/leases/lease-sign-banner";
 import { LeaseSummarySidebar } from "@/components/leases/lease-summary-sidebar";
 import { useAuth } from "@/components/providers/auth-provider";
+import { PayPalPayButton } from "@/components/payments/paypal-pay-button";
 import { Button } from "@/components/ui/button";
 import { fetchLeaseDetail, signLease } from "@/lib/api/leases";
 import { fetchPaymentHistory } from "@/lib/api/payments";
@@ -185,7 +186,7 @@ export function LeaseDetailPanel({ leaseId }: { leaseId: string }) {
             ]}
             payRentAction={
               isActiveLeaseStatus(status) && lease.rent_due.is_due ? (
-                <div className="mt-4 border-t border-[#E8EAF2] pt-4 sm:mt-5">
+                <div className="mt-4 space-y-3 border-t border-[#E8EAF2] pt-4 sm:mt-5">
                   <Button
                     type="button"
                     className="h-11 w-full rounded-xl bg-[#EF3D32] text-base font-bold hover:bg-[#EF3D32]/90"
@@ -193,7 +194,10 @@ export function LeaseDetailPanel({ leaseId }: { leaseId: string }) {
                   >
                     M-Pesa Pay
                   </Button>
-                  <p className="mt-2 text-center text-xs text-ustawi-muted">Secure payment via M-Pesa</p>
+                  <PayPalPayButton />
+                  <p className="text-center text-xs text-ustawi-muted">
+                    M-Pesa for everyday rent · PayPal for larger payments
+                  </p>
                 </div>
               ) : undefined
             }

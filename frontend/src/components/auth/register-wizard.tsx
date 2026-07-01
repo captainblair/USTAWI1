@@ -202,7 +202,7 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
           </p>
         </div>
 
-        {devOtpHint && (
+        {devOtpHint && process.env.NODE_ENV === "development" && (
           <div className="mb-6 rounded-xl border border-amber-200/80 bg-amber-50 px-4 py-3 text-center text-xs text-amber-900">
             Dev mode — your code is <strong className="font-mono text-sm">{devOtpHint}</strong>
           </div>

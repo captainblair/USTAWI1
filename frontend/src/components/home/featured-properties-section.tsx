@@ -42,9 +42,9 @@ export function FeaturedPropertiesSection({ properties }: { properties: Property
         ) : (
           <ScrollReveal variant="scale" className="mt-12">
             <div className="rounded-2xl border border-dashed border-ustawi-border bg-white p-12 text-center shadow-sm">
-              <p className="text-lg font-semibold text-ustawi-navy">Featured listings loading soon</p>
+              <p className="text-lg font-semibold text-ustawi-navy">Featured listings coming soon</p>
               <p className="mt-2 text-sm text-ustawi-muted">
-                Start the backend to see live property cards with price, location, and safety scores.
+                New verified homes are added regularly. Browse all available listings in the meantime.
               </p>
               <Link href="/properties" className="mt-6 inline-block">
                 <Button className="rounded-2xl">Browse search</Button>

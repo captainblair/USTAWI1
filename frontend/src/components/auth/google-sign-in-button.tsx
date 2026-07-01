@@ -46,7 +46,7 @@ export function GoogleSignInButton({
       >
         <GoogleMark />
         Google
-        <span className="font-normal text-ustawi-muted">(not configured)</span>
+        <span className="font-normal text-ustawi-muted">(unavailable)</span>
       </button>
     );
   }

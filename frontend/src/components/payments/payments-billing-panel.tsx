@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PayPalPayButton } from "@/components/payments/paypal-pay-button";
 import { DownloadReceiptButton } from "@/components/payments/download-receipt-button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Smartphone, Wallet } from "lucide-react";
@@ -214,9 +215,16 @@ export function PaymentsBillingPanel() {
               >
                 {paying ? "Sending STK push…" : "Send M-Pesa STK push"}
               </Button>
-              <p className="mt-2 text-xs text-ustawi-muted">
-                Leave M-Pesa credentials blank in backend `.env` for demo mode (no real PIN required).
-              </p>
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[#E8EAF2]" />
+                </div>
+                <p className="relative mx-auto w-fit bg-white px-3 text-xs font-medium uppercase tracking-wide text-ustawi-muted">
+                  or
+                </p>
+              </div>
+              <PayPalPayButton disabled={paying} />
+              <p className="mt-2 text-xs text-ustawi-muted">PayPal Payments Coming soon!</p>
             </div>
           )}
         </section>
