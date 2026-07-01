@@ -11,8 +11,10 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   const isAuthRoute = pathname === "/login" || pathname === "/register";
   const isPropertyDetailRoute =
     /^\/properties\/[^/]+$/.test(pathname) || /^\/properties\/[^/]+\/apply$/.test(pathname);
+  const isLeasesRoute = pathname === "/leases" || /^\/leases\/[^/]+$/.test(pathname);
+  const isLandlordRoute = pathname === "/landlord" || pathname.startsWith("/landlord/");
 
-  if (isAuthRoute || isPropertyDetailRoute) {
+  if (isAuthRoute || isPropertyDetailRoute || isLeasesRoute || isLandlordRoute) {
     return <>{children}</>;
   }
 

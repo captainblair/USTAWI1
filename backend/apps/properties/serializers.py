@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -14,6 +16,22 @@ from apps.properties.models import (
 )
 
 User = get_user_model()
+
+NAIROBI_CENTER = (Decimal("-1.286389"), Decimal("36.817223"))
+NEIGHBORHOOD_COORDS = {
+    "karen": (Decimal("-1.319700"), Decimal("36.707300")),
+    "westlands": (Decimal("-1.267600"), Decimal("36.807800")),
+    "kilimani": (Decimal("-1.292066"), Decimal("36.785016")),
+    "peponi": (Decimal("-1.240000"), Decimal("36.800000")),
+    "lavington": (Decimal("-1.279000"), Decimal("36.768000")),
+    "parklands": (Decimal("-1.263000"), Decimal("36.819000")),
+}
+
+
+def _coords_for_neighborhood(slug: str) -> tuple[Decimal, Decimal]:
+    if slug:
+        return NEIGHBORHOOD_COORDS.get(slug.strip().lower(), NAIROBI_CENTER)
+    return NAIROBI_CENTER
 
 
 class AmenitySerializer(serializers.ModelSerializer):
@@ -170,6 +188,8 @@ class PropertyCreateUpdateSerializer(serializers.ModelSerializer):
         allow_empty=True,
     )
     neighborhood_slug = serializers.SlugField(write_only=True, required=False, allow_blank=True)
+    latitude = serializers.DecimalField(max_digits=9, decimal_places=6, required=False)
+    longitude = serializers.DecimalField(max_digits=9, decimal_places=6, required=False)
 
     class Meta:
         model = Property
@@ -224,6 +244,10 @@ class PropertyCreateUpdateSerializer(serializers.ModelSerializer):
         neighborhood_slug = validated_data.pop("neighborhood_slug", "")
         validated_data["owner"] = self.context["request"].user
         validated_data["status"] = PropertyStatus.DRAFT
+        if validated_data.get("latitude") is None or validated_data.get("longitude") is None:
+            lat, lng = _coords_for_neighborhood(neighborhood_slug)
+            validated_data.setdefault("latitude", lat)
+            validated_data.setdefault("longitude", lng)
         instance = Property.objects.create(**validated_data)
         self._set_neighborhood(instance, neighborhood_slug)
         instance.save()

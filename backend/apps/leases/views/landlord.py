@@ -18,6 +18,7 @@ from apps.leases.serializers import (
     LeaseSignSerializer,
     LeaseTerminateSerializer,
 )
+from apps.leases.services.pdf import ensure_lease_agreement_document, ensure_signed_lease_pdf
 from apps.leases.services.workflow import (
     LeaseWorkflowError,
     create_lease_from_application,
@@ -77,6 +78,9 @@ class LandlordLeaseDetailView(APIView):
     @extend_schema(tags=["Landlord Leases"], summary="Get lease detail")
     def get(self, request, pk):
         lease = refresh_lease_status(self.get_object(request, pk))
+        ensure_lease_agreement_document(lease, actor=request.user)
+        ensure_signed_lease_pdf(lease)
+        lease.refresh_from_db()
         return Response(
             {
                 "success": True,

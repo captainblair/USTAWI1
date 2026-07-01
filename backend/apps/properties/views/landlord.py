@@ -1,3 +1,4 @@
+from django.conf import settings
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -125,9 +126,22 @@ class LandlordPropertyPublishView(APIView):
             )
         prop.status = PropertyStatus.PENDING_REVIEW
         prop.save(update_fields=["status", "updated_at"])
-        from apps.verification.services.workflow import create_verification_case
+        from apps.verification.services.workflow import approve_case, create_verification_case
 
-        create_verification_case(prop, actor=request.user)
+        case = create_verification_case(prop, actor=request.user)
+
+        # Local dev: auto-approve so landlords can test listing → apply → lease flow without inspector UI.
+        if settings.DEBUG and case:
+            approve_case(case, request.user, notes="Auto-approved in DEBUG mode.")
+            prop.refresh_from_db()
+            return Response(
+                {
+                    "success": True,
+                    "message": "Property published and activated (dev auto-approval).",
+                    "data": {"id": str(prop.id), "status": prop.status},
+                }
+            )
+
         return Response(
             {
                 "success": True,
@@ -210,6 +224,31 @@ class LandlordPropertyImageDeleteView(APIView):
     def delete(self, request, pk, image_id):
         prop = Property.objects.get(pk=pk, owner=request.user)
         image = PropertyImage.objects.get(pk=image_id, property=prop)
+        was_primary = image.is_primary
         image.image.delete(save=False)
         image.delete()
+        if was_primary:
+            next_image = PropertyImage.objects.filter(property=prop).order_by("sort_order", "created_at").first()
+            if next_image:
+                next_image.is_primary = True
+                next_image.save(update_fields=["is_primary"])
         return Response({"success": True, "message": "Image deleted."})
+
+
+class LandlordPropertyImageSetPrimaryView(APIView):
+    permission_classes = [IsLandlordAgentOrAdmin]
+
+    @extend_schema(tags=["Landlord Properties"], summary="Set property main (hero) photo")
+    def post(self, request, pk, image_id):
+        prop = Property.objects.get(pk=pk, owner=request.user)
+        image = PropertyImage.objects.get(pk=image_id, property=prop)
+        PropertyImage.objects.filter(property=prop).exclude(pk=image.pk).update(is_primary=False)
+        image.is_primary = True
+        image.save(update_fields=["is_primary"])
+        return Response(
+            {
+                "success": True,
+                "message": "Main photo updated.",
+                "data": {"id": str(image.id), "is_primary": True},
+            }
+        )

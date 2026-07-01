@@ -338,6 +338,12 @@ export function ProfilePanel() {
         {profile.role === "TENANT" && (
           <>
             <Link
+              href="/leases"
+              className="block rounded-2xl border border-ustawi-navy/15 bg-ustawi-navy px-4 py-3 text-center text-sm font-semibold text-white hover:bg-ustawi-navy/90"
+            >
+              My leases
+            </Link>
+            <Link
               href="/applications"
               className="block rounded-2xl border border-ustawi-navy/15 bg-ustawi-navy px-4 py-3 text-center text-sm font-semibold text-white hover:bg-ustawi-navy/90"
             >
@@ -352,22 +358,30 @@ export function ProfilePanel() {
           </>
         )}
 
-        {(profile.role === "LANDLORD" || profile.role === "ADMIN") && (
-          <div className="space-y-2">
-            {profile.role === "ADMIN" && (
-              <Link
-                href="/admin"
-                className="block rounded-2xl border border-ustawi-navy/15 bg-ustawi-navy px-4 py-3 text-center text-sm font-semibold text-white hover:bg-ustawi-navy/90"
-              >
-                Open admin dashboard
-              </Link>
-            )}
-            <p className="text-xs text-ustawi-muted">
-              Property management tools for {roleLabel.toLowerCase()} accounts are also available via the Django
-              admin panel at <code className="rounded bg-ustawi-sand px-1">/admin/</code> until the landlord
-              dashboard ships.
-            </p>
-          </div>
+        {(profile.role === "LANDLORD" || profile.role === "AGENT") && (
+          <>
+            <Link
+              href="/landlord"
+              className="block rounded-2xl border border-ustawi-navy/15 bg-ustawi-navy px-4 py-3 text-center text-sm font-semibold text-white hover:bg-ustawi-navy/90"
+            >
+              Landlord dashboard
+            </Link>
+            <Link
+              href="/landlord/properties/new"
+              className="block rounded-2xl border border-ustawi-border bg-ustawi-cream px-4 py-3 text-center text-sm font-semibold text-ustawi-navy hover:bg-white"
+            >
+              Add property
+            </Link>
+          </>
+        )}
+
+        {profile.role === "ADMIN" && (
+          <Link
+            href="/admin"
+            className="block rounded-2xl border border-ustawi-navy/15 bg-ustawi-navy px-4 py-3 text-center text-sm font-semibold text-white hover:bg-ustawi-navy/90"
+          >
+            Open admin dashboard
+          </Link>
         )}
       </aside>
     </div>

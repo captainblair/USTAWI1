@@ -20,7 +20,7 @@ export function getPostAuthRedirect(role: UserRole, next?: string | null): strin
   switch (role) {
     case "LANDLORD":
     case "AGENT":
-      return "/properties";
+      return "/landlord";
     case "TENANT":
       return "/saved";
     case "ADMIN":

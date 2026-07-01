@@ -35,3 +35,7 @@ export function isAdmin(user: AuthUser | null | undefined): boolean {
 export function isTenant(user: AuthUser | null | undefined): boolean {
   return user?.role === "TENANT";
 }
+
+export function isLandlord(user: AuthUser | null | undefined): boolean {
+  return user?.role === "LANDLORD" || user?.role === "AGENT";
+}

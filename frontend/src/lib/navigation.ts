@@ -20,6 +20,7 @@ export const HOME_NAV_LINKS: NavLink[] = [
 export const APP_NAV_LINKS: NavLink[] = [
   { href: "/properties", label: "Search", matchPath: "/properties" },
   { href: "/applications", label: "Applications", matchPath: "/applications" },
+  { href: "/leases", label: "Leases", matchPath: "/leases" },
   { href: "/saved", label: "Saved", matchPath: "/saved" },
   { href: "/profile", label: "Profile", matchPath: "/profile" },
   { href: "/#how-it-works", label: "How it works", matchHash: "how-it-works" },

@@ -1,7 +1,6 @@
 from datetime import date
 from decimal import Decimal
 
-from django.core.files.base import ContentFile
 from django.utils import timezone
 
 from apps.applications.models import ApplicationStatus, RentalApplication
@@ -13,6 +12,10 @@ from apps.leases.models import (
     LeaseStatus,
     SignatureMethod,
     SignerRole,
+)
+from apps.leases.services.pdf import (
+    ensure_lease_agreement_document,
+    regenerate_signed_lease_pdf,
 )
 from apps.properties.models import PropertyStatus
 
@@ -69,13 +72,7 @@ def create_lease_from_application(
         notes=notes,
     )
 
-    LeaseDocument.objects.create(
-        lease=lease,
-        doc_type=LeaseDocumentType.LEASE_AGREEMENT,
-        title=f"Lease Agreement — {prop.title}",
-        file=_placeholder_pdf(lease),
-        uploaded_by=actor,
-    )
+    ensure_lease_agreement_document(lease, actor=actor)
 
     from apps.notifications.models import NotificationCategory
     from apps.notifications.services.dispatch import send_notification
@@ -93,20 +90,6 @@ def create_lease_from_application(
         email_body=f"Your lease for {prop.title} is ready to sign on Ustawi.",
     )
     return lease
-
-
-def _placeholder_pdf(lease: Lease) -> ContentFile:
-    content = (
-        f"Ustawi Lease Agreement\n"
-        f"Property: {lease.property.title}\n"
-        f"Tenant: {lease.tenant.email}\n"
-        f"Landlord: {lease.landlord.email}\n"
-        f"Rent: {lease.currency} {lease.rent_amount}/month\n"
-        f"Term: {lease.start_date} to {lease.end_date}\n"
-        f"Due day: {lease.rent_due_day}\n"
-        f"Furnished: {'Yes' if lease.furnished else 'No'}\n"
-    ).encode("utf-8")
-    return ContentFile(content, name=f"lease-{lease.id}.pdf")
 
 
 def refresh_lease_status(lease: Lease) -> Lease:
@@ -194,24 +177,7 @@ def _activate_lease(lease: Lease) -> Lease:
     lease.activated_at = timezone.now()
     lease.save(update_fields=["status", "activated_at", "updated_at"])
 
-    agreement = lease.documents.filter(doc_type=LeaseDocumentType.LEASE_AGREEMENT).first()
-    if agreement and agreement.file:
-        lease.signed_pdf.save(
-            f"signed-{lease.id}.pdf",
-            agreement.file,
-            save=False,
-        )
-        lease.save(update_fields=["signed_pdf", "updated_at"])
-
-        LeaseDocument.objects.get_or_create(
-            lease=lease,
-            doc_type=LeaseDocumentType.SIGNED_COPY,
-            defaults={
-                "title": f"Signed Lease — {lease.property.title}",
-                "file": lease.signed_pdf,
-                "uploaded_by": lease.landlord,
-            },
-        )
+    regenerate_signed_lease_pdf(lease)
 
     prop = lease.property
     prop.status = PropertyStatus.OCCUPIED

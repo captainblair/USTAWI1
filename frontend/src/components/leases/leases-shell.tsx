@@ -5,8 +5,15 @@ import { useRouter } from "next/navigation";
 import { Menu, Search, X } from "lucide-react";
 import { FormEvent, useState } from "react";
 
-/** Wireframe property detail header — logo left, search + menu right; taller on mobile. */
-export function PropertyDetailHeader() {
+const MENU_LINKS = [
+  { href: "/properties", label: "Search homes" },
+  { href: "/applications", label: "Applications" },
+  { href: "/leases", label: "Leases" },
+  { href: "/saved", label: "Saved" },
+  { href: "/profile", label: "Profile" },
+];
+
+function LeasesHeader() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -20,14 +27,9 @@ export function PropertyDetailHeader() {
 
   return (
     <header className="bg-[#1F2B6C] text-white">
-      {/* Mobile — taller bar with search always visible */}
       <div className="px-4 py-4 sm:hidden">
         <div className="flex items-center justify-between gap-3">
-          <Link
-            href="/"
-            className="shrink-0 text-xl font-bold tracking-[0.06em] text-white"
-            aria-label="Ustawi home"
-          >
+          <Link href="/" className="shrink-0 text-xl font-bold tracking-[0.06em] text-white" aria-label="Ustawi home">
             USTAWI
           </Link>
           <button
@@ -52,16 +54,10 @@ export function PropertyDetailHeader() {
         </form>
       </div>
 
-      {/* Desktop */}
       <div className="mx-auto hidden h-[68px] max-w-[1180px] items-center justify-between gap-4 px-8 sm:flex">
-        <Link
-          href="/"
-          className="shrink-0 text-[22px] font-bold tracking-[0.06em] text-white"
-          aria-label="Ustawi home"
-        >
+        <Link href="/" className="shrink-0 text-[22px] font-bold tracking-[0.06em] text-white" aria-label="Ustawi home">
           USTAWI
         </Link>
-
         <div className="flex flex-1 items-center justify-end gap-4">
           <form onSubmit={handleSearch} className="w-full max-w-[320px]">
             <div className="relative">
@@ -74,7 +70,6 @@ export function PropertyDetailHeader() {
               />
             </div>
           </form>
-
           <button
             type="button"
             className="flex h-10 w-10 shrink-0 items-center justify-center text-white hover:bg-white/10 lg:hidden"
@@ -88,14 +83,7 @@ export function PropertyDetailHeader() {
 
       {menuOpen && (
         <nav className="border-t border-white/15 bg-[#1F2B6C] px-4 py-4 sm:px-8 lg:hidden">
-          {[
-            { href: "/properties", label: "Search homes" },
-            { href: "/applications", label: "Applications" },
-            { href: "/leases", label: "Leases" },
-            { href: "/saved", label: "Saved" },
-            { href: "/profile", label: "Profile" },
-            { href: "/login", label: "Log in" },
-          ].map((link) => (
+          {MENU_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -111,10 +99,10 @@ export function PropertyDetailHeader() {
   );
 }
 
-export function PropertyDetailShell({ children }: { children: React.ReactNode }) {
+export function LeasesShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#F7F8FC]">
-      <PropertyDetailHeader />
+      <LeasesHeader />
       <main>{children}</main>
     </div>
   );

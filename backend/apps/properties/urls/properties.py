@@ -5,6 +5,7 @@ from apps.properties.views.landlord import (
     LandlordPropertyArchiveView,
     LandlordPropertyDetailView,
     LandlordPropertyImageDeleteView,
+    LandlordPropertyImageSetPrimaryView,
     LandlordPropertyImageView,
     LandlordPropertyListCreateView,
     LandlordPropertyPublishView,
@@ -37,6 +38,11 @@ landlord_urlpatterns = [
         "<uuid:pk>/images/<uuid:image_id>/",
         LandlordPropertyImageDeleteView.as_view(),
         name="landlord-image-delete",
+    ),
+    path(
+        "<uuid:pk>/images/<uuid:image_id>/set-primary/",
+        LandlordPropertyImageSetPrimaryView.as_view(),
+        name="landlord-image-set-primary",
     ),
 ]
 

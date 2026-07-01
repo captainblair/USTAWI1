@@ -74,6 +74,22 @@ export function UserMenu() {
           <p className="text-xs capitalize text-ustawi-muted">{user.role.toLowerCase()}</p>
         </div>
       </Link>
+      {(user.role === "LANDLORD" || user.role === "AGENT") && (
+        <>
+          <Link
+            href="/landlord"
+            className="hidden rounded-full border border-ustawi-border px-3 py-1.5 text-xs font-semibold text-ustawi-navy hover:bg-ustawi-cream sm:inline-flex"
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/landlord/properties"
+            className="hidden rounded-full border border-ustawi-border px-3 py-1.5 text-xs font-semibold text-ustawi-navy hover:bg-ustawi-cream sm:inline-flex"
+          >
+            Properties
+          </Link>
+        </>
+      )}
       {user.role === "TENANT" && (
         <>
           <Link
@@ -81,6 +97,12 @@ export function UserMenu() {
             className="hidden rounded-full border border-ustawi-border px-3 py-1.5 text-xs font-semibold text-ustawi-navy hover:bg-ustawi-cream sm:inline-flex"
           >
             Applications
+          </Link>
+          <Link
+            href="/leases"
+            className="hidden rounded-full border border-ustawi-border px-3 py-1.5 text-xs font-semibold text-ustawi-navy hover:bg-ustawi-cream sm:inline-flex"
+          >
+            Leases
           </Link>
           <Link
             href="/saved"
