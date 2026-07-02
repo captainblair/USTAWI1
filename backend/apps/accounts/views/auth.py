@@ -82,15 +82,29 @@ class RegisterProfileView(APIView):
         session = RegistrationSession.objects.get(id=token)
         update_registration_profile(session, serializer.validated_data)
 
+        otp_service = OTPService()
+        try:
+            dev_otp = otp_service.send_registration_otp(session)
+        except ValueError as exc:
+            return Response(
+                {"success": False, "error": {"message": str(exc)}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        data = {
+            "registration_token": str(session.id),
+            "step": session.step,
+            "phone": session.phone,
+            "otp_expires_in_minutes": settings.OTP_EXPIRY_MINUTES,
+        }
+        if dev_otp:
+            data["dev_otp"] = dev_otp
+
         return Response(
             {
                 "success": True,
-                "message": "Profile saved. Request OTP to verify your phone.",
-                "data": {
-                    "registration_token": str(session.id),
-                    "step": session.step,
-                    "phone": session.phone,
-                },
+                "message": "Profile saved. Enter the verification code sent to your phone.",
+                "data": data,
             },
             status=status.HTTP_200_OK,
         )

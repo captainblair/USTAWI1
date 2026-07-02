@@ -35,6 +35,8 @@ export type RegisterProfileResponse = {
   registration_token: string;
   step: string;
   phone: string;
+  otp_expires_in_minutes?: number;
+  dev_otp?: string;
 };
 
 export type RegisterSendOtpResponse = {

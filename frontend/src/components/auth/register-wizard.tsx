@@ -71,6 +71,7 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [otpError, setOtpError] = useState(false);
 
@@ -100,6 +101,22 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
     return () => clearInterval(t);
   }, [phase, resendSeconds]);
 
+  // Prefetch registration session while the user fills the form (saves a round-trip on submit).
+  useEffect(() => {
+    if (phase !== "register") return;
+    let cancelled = false;
+    registerRole(role)
+      .then((data) => {
+        if (!cancelled) setRegistrationToken(data.registration_token);
+      })
+      .catch(() => {
+        if (!cancelled) setRegistrationToken(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [role, phase]);
+
   const handleResendOtp = useCallback(async () => {
     if (!registrationToken || resendSeconds > 0) return;
     setError(null);
@@ -120,15 +137,18 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
     setError(null);
     setFieldErrors({});
     setLoading(true);
+    setLoadingMessage("Creating your account…");
 
     try {
       let token = registrationToken;
       if (!token) {
+        setLoadingMessage("Setting up registration…");
         const roleData = await registerRole(role);
         token = roleData.registration_token;
         setRegistrationToken(token);
       }
 
+      setLoadingMessage("Saving details and sending verification code…");
       const profile = await registerProfile({
         registration_token: token,
         full_name: fullName.trim(),
@@ -139,8 +159,7 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
       });
       setPhone(profile.phone);
 
-      const otpData = await registerSendOtp(profile.registration_token);
-      if (otpData.dev_otp) setDevOtpHint(otpData.dev_otp);
+      if (profile.dev_otp) setDevOtpHint(profile.dev_otp);
       setResendSeconds(RESEND_COOLDOWN);
       setPhase("verify");
     } catch (err) {
@@ -156,6 +175,7 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
       }
     } finally {
       setLoading(false);
+      setLoadingMessage(null);
     }
   }
 
@@ -383,7 +403,7 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
         )}
 
         <AuthPrimaryButton disabled={loading}>
-          {loading ? "Creating account…" : "Sign up"}
+          {loading ? loadingMessage ?? "Creating account…" : "Sign up"}
         </AuthPrimaryButton>
       </form>
 

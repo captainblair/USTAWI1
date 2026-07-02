@@ -33,11 +33,22 @@ class AfricasTalkingSMSService:
     def is_configured(self) -> bool:
         return bool(self.username and self.api_key)
 
+    @property
+    def use_live_sms(self) -> bool:
+        if not self.is_configured:
+            return False
+        if not getattr(settings, "AFRICAS_TALKING_SMS_ENABLED", True):
+            return False
+        # Sandbox credentials never deliver real SMS — skip the HTTP round-trip.
+        if self.username.strip().lower() == "sandbox":
+            return False
+        return True
+
     def send_sms(self, phone: str, message: str) -> dict:
         phone = normalize_kenyan_phone(phone)
 
-        if not self.is_configured:
-            logger.info("Africa's Talking not configured. SMS to %s: %s", phone, message)
+        if not self.use_live_sms:
+            logger.info("SMS dev_mode for %s (live SMS disabled or sandbox)", phone)
             return {"status": "dev_mode", "phone": phone, "message": message}
 
         headers = {
@@ -52,10 +63,11 @@ class AfricasTalkingSMSService:
             "from": self.sender_id,
         }
 
+        timeout = getattr(settings, "AFRICAS_TALKING_SMS_TIMEOUT", 6)
         try:
-            response = requests.post(self.API_URL, headers=headers, data=data, timeout=30)
+            response = requests.post(self.API_URL, headers=headers, data=data, timeout=timeout)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as exc:
-            logger.exception("Africa's Talking SMS failed for %s; falling back to dev_mode", phone)
+            logger.warning("Africa's Talking SMS failed for %s: %s", phone, exc)
             return {"status": "dev_mode", "phone": phone, "message": message, "error": str(exc)}
