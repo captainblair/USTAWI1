@@ -81,6 +81,8 @@ export function resolveAvatarUrl(
     resolved = `${getApiMediaOrigin()}${trimmed}`;
   } else if (trimmed.startsWith("media/")) {
     resolved = `${getApiMediaOrigin()}/${trimmed}`;
+  } else if (trimmed.startsWith("https://res.cloudinary.com/")) {
+    resolved = trimmed;
   }
 
   if (!version) return resolved;

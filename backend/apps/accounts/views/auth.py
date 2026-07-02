@@ -191,7 +191,7 @@ class RegisterVerifyOTPView(APIView):
                 "success": True,
                 "message": "Registration complete.",
                 "data": {
-                    "user": UserSerializer(user).data,
+                    "user": UserSerializer(user, context={"request": request}).data,
                     "tokens": tokens,
                 },
             },
@@ -239,7 +239,7 @@ class LoginView(APIView):
                 "success": True,
                 "message": "Login successful.",
                 "data": {
-                    "user": UserSerializer(user).data,
+                    "user": UserSerializer(user, context={"request": request}).data,
                     "tokens": tokens,
                 },
             },
@@ -289,7 +289,7 @@ class GoogleAuthView(APIView):
                 "success": True,
                 "message": "Registration complete." if created else "Login successful.",
                 "data": {
-                    "user": UserSerializer(user).data,
+                    "user": UserSerializer(user, context={"request": request}).data,
                     "tokens": tokens,
                     "is_new_user": created,
                 },
@@ -408,7 +408,7 @@ class MeView(APIView):
     @extend_schema(tags=["Auth"], summary="Get current authenticated user")
     def get(self, request):
         return Response(
-            {"success": True, "data": UserSerializer(request.user).data},
+            {"success": True, "data": UserSerializer(request.user, context={"request": request}).data},
             status=status.HTTP_200_OK,
         )
 

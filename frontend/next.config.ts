@@ -42,6 +42,11 @@ const nextConfig: NextConfig = {
       apiMediaRemotePattern(),
       {
         protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "ui-avatars.com",
         pathname: "/api/**",
       },

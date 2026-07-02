@@ -254,10 +254,26 @@ FRONTEND_PASSWORD_RESET_URL = env(
     default="http://localhost:3000/reset-password",
 )
 
-# Media storage — local by default; S3/Cloudinary can be wired in Phase 11
+# Media storage — local disk in dev; Cloudinary in production (Render disk is ephemeral).
+CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
+
+if CLOUDINARY_URL:
+    INSTALLED_APPS = [
+        "cloudinary_storage",
+        "cloudinary",
+        *INSTALLED_APPS,
+    ]
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+
 AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default="")
 AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="")
-CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
 
 SENTRY_DSN = env("SENTRY_DSN", default="")
 SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT", default="development")

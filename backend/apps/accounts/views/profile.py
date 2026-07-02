@@ -32,6 +32,7 @@ class ProfileView(APIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        request.user.profile.refresh_from_db()
 
         return Response(
             {

@@ -9,7 +9,9 @@ import { ProfileAvatar } from "@/components/profile/profile-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchProfile, updateProfile, uploadProfileAvatar } from "@/lib/api/profile";
+import { fetchCurrentUser } from "@/lib/api/auth";
 import { setClientSession, getClientSession } from "@/lib/auth/session";
+import { mapUserFromApi } from "@/lib/auth/map-user";
 import type { UserProfile } from "@/types/profile";
 import { ApiRequestError } from "@/types/api";const inputClass =
   "h-11 rounded-lg border-[#E8EAF2] bg-white text-sm text-ustawi-navy placeholder:text-ustawi-muted/60 focus:border-ustawi-navy/30 focus:ring-2 focus:ring-ustawi-navy/10";
@@ -26,8 +28,11 @@ export function ProfilePanel() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formSuccess, setFormSuccess] = useState<string | null>(null);
+  const [photoSuccess, setPhotoSuccess] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -47,7 +52,7 @@ export function ProfilePanel() {
 
     async function load() {
       setLoading(true);
-      setError(null);
+      setLoadError(null);
       try {
         const data = await fetchProfile(accessToken!);
         if (cancelled) return;
@@ -58,7 +63,7 @@ export function ProfilePanel() {
         setAddress(data.address ?? "");
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof ApiRequestError ? err.message : "Could not load profile.");
+          setLoadError(err instanceof ApiRequestError ? err.message : "Could not load profile.");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -76,18 +81,18 @@ export function ProfilePanel() {
     if (!file || !accessToken) return;
 
     if (!file.type.startsWith("image/")) {
-      setError("Please choose a JPG or PNG image.");
+      setPhotoError("Please choose a JPG or PNG image.");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError("Image must be 5 MB or smaller.");
+      setPhotoError("Image must be 5 MB or smaller.");
       return;
     }
 
     setUploadingAvatar(true);
-    setError(null);
-    setSuccess(null);
+    setPhotoError(null);
+    setPhotoSuccess(null);
 
     const localPreview = URL.createObjectURL(file);
     setAvatarPreview((prev) => {
@@ -97,18 +102,19 @@ export function ProfilePanel() {
 
     try {
       const updated = await uploadProfileAvatar(accessToken, file);
+      if (!updated.avatar) {
+        throw new ApiRequestError("Photo was not saved on the server. Please try again.", 500);
+      }
+
       setProfile(updated);
-      setSuccess("Profile photo updated.");
+      setPhotoSuccess("Profile photo saved. It also updates in the top navigation bar.");
 
       const session = getClientSession();
-      if (session && user) {
+      if (session) {
+        const apiUser = await fetchCurrentUser(accessToken);
         const nextSession = {
           ...session,
-          user: {
-            ...user,
-            avatar: updated.avatar,
-            avatar_updated_at: updated.updated_at,
-          },
+          user: mapUserFromApi(apiUser),
         };
         setClientSession(nextSession);
         setSession(nextSession);
@@ -118,7 +124,8 @@ export function ProfilePanel() {
         if (prev) URL.revokeObjectURL(prev);
         return null;
       });
-      setError(err instanceof ApiRequestError ? err.message : "Could not upload photo.");    } finally {
+      setPhotoError(err instanceof ApiRequestError ? err.message : "Could not upload photo.");
+    } finally {
       setUploadingAvatar(false);
       if (avatarInputRef.current) avatarInputRef.current.value = "";
     }
@@ -129,8 +136,8 @@ export function ProfilePanel() {
     if (!accessToken) return;
 
     setSaving(true);
-    setError(null);
-    setSuccess(null);
+    setFormError(null);
+    setFormSuccess(null);
 
     try {
       const updated = await updateProfile(accessToken, {
@@ -151,9 +158,9 @@ export function ProfilePanel() {
         setSession(nextSession);
       }
 
-      setSuccess("Profile updated.");
+      setFormSuccess("Details saved.");
     } catch (err) {
-      setError(err instanceof ApiRequestError ? err.message : "Could not save profile.");
+      setFormError(err instanceof ApiRequestError ? err.message : "Could not save profile.");
     } finally {
       setSaving(false);
     }
@@ -172,7 +179,7 @@ export function ProfilePanel() {
   if (!profile) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-sm text-red-700">
-        {error ?? "Profile unavailable."}
+        {loadError ?? "Profile unavailable."}
       </div>
     );
   }
@@ -196,46 +203,70 @@ export function ProfilePanel() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-2xl border border-ustawi-border bg-white p-6 shadow-sm sm:p-8"
-      >
-        <h2 className="text-lg font-bold text-ustawi-navy">Personal details</h2>
-        <p className="mt-1 text-sm text-ustawi-muted">Update how your name and location appear on Ustawi.</p>
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-ustawi-border bg-white p-6 shadow-sm sm:p-8">
+          <h2 className="text-lg font-bold text-ustawi-navy">Profile photo</h2>
+          <p className="mt-1 text-sm text-ustawi-muted">
+            Uploads immediately when you choose a file — no need to click Save changes.
+          </p>
 
-        <div className="mt-6 flex flex-wrap items-center gap-6 border-b border-ustawi-border pb-6">
-          <ProfileAvatar
-            src={profile.avatar}
-            previewSrc={avatarPreview}
-            version={avatarVersion}
-            initials={initials}
-            size="xl"
-            onServerLoad={clearAvatarPreview}
-          />
-          <div>
-            <p className="text-sm font-semibold text-ustawi-navy">Profile photo</p>
-            <p className="mt-0.5 text-xs text-ustawi-muted">JPG, PNG, or WebP · max 5 MB · shown at full quality</p>            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="sr-only"
-              onChange={handleAvatarChange}
+          <div className="mt-6 flex flex-wrap items-center gap-6">
+            <ProfileAvatar
+              src={profile.avatar}
+              previewSrc={avatarPreview}
+              version={avatarVersion}
+              initials={initials}
+              size="xl"
+              onServerLoad={clearAvatarPreview}
+              onServerError={() => {
+                setPhotoSuccess(null);
+                setPhotoError(
+                  "Photo was saved but the image file is missing on the server. Re-upload after storage is configured.",
+                );
+              }}
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              disabled={uploadingAvatar}
-              onClick={() => avatarInputRef.current?.click()}
-            >
-              <Camera className="h-4 w-4" />
-              {uploadingAvatar ? "Uploading…" : "Upload photo"}
-            </Button>
+            <div>
+              <p className="text-sm font-semibold text-ustawi-navy">Your photo</p>
+              <p className="mt-0.5 text-xs text-ustawi-muted">JPG, PNG, or WebP · max 5 MB</p>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                onChange={handleAvatarChange}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                disabled={uploadingAvatar}
+                onClick={() => avatarInputRef.current?.click()}
+              >
+                <Camera className="h-4 w-4" />
+                {uploadingAvatar ? "Uploading…" : "Choose photo"}
+              </Button>
+            </div>
           </div>
+
+          {photoSuccess && (
+            <p className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              {photoSuccess}
+            </p>
+          )}
+          {photoError && (
+            <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{photoError}</p>
+          )}
         </div>
 
-        <div className="mt-6 space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-2xl border border-ustawi-border bg-white p-6 shadow-sm sm:p-8"
+        >
+          <h2 className="text-lg font-bold text-ustawi-navy">Personal details</h2>
+          <p className="mt-1 text-sm text-ustawi-muted">Update how your name and location appear on Ustawi.</p>
+
+          <div className="mt-6 space-y-4">
           <div>            <label htmlFor="profile-name" className="mb-1.5 block text-sm font-semibold text-ustawi-navy">
               Full name
             </label>
@@ -287,19 +318,20 @@ export function ProfilePanel() {
           </div>
         </div>
 
-        {error && (
-          <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+        {formError && (
+          <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{formError}</p>
         )}
-        {success && (
+        {formSuccess && (
           <p className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {success}
+            {formSuccess}
           </p>
         )}
 
         <Button type="submit" disabled={saving} className="mt-6">
           {saving ? "Saving…" : "Save changes"}
         </Button>
-      </form>
+        </form>
+      </div>
 
       <aside className="space-y-4">
         <div className="rounded-2xl border border-ustawi-border bg-white p-6 shadow-sm">

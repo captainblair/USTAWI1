@@ -12,6 +12,7 @@ type ProfileAvatarProps = {
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   onServerLoad?: () => void;
+  onServerError?: () => void;
 };
 
 const SIZES = {
@@ -30,6 +31,7 @@ export function ProfileAvatar({
   size = "lg",
   className,
   onServerLoad,
+  onServerError,
 }: ProfileAvatarProps) {
   const px = SIZES[size];
   const [imageError, setImageError] = useState(false);
@@ -63,6 +65,7 @@ export function ProfileAvatar({
           onError={() => {
             if (previewSrc) return;
             setImageError(true);
+            onServerError?.();
           }}
         />
       ) : (
