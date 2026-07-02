@@ -1,6 +1,10 @@
+import logging
+
 from django.utils import timezone
 
 from apps.notifications.models import ActivityEvent, Notification, NotificationCategory
+
+logger = logging.getLogger(__name__)
 
 
 def send_notification(
@@ -42,15 +46,22 @@ def send_notification(
         metadata=metadata or {},
     )
 
+    from apps.notifications.services.channels import deliver_channels
     from apps.notifications.tasks import deliver_notification_channels_task
 
-    deliver_notification_channels_task.delay(
+    delivery_args = (
         str(user.id),
         category,
         email_subject or title,
         email_body or message,
         sms_body or "",
     )
+    try:
+        deliver_notification_channels_task.delay(*delivery_args)
+    except Exception:
+        # Render often has no Celery worker; never fail the API request because email/SMS queued late.
+        logger.exception("Celery enqueue failed; delivering notification channels in-process")
+        deliver_channels(user, category, email_subject or title, email_body or message, sms_body or "")
 
     return notification
 

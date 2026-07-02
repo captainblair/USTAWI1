@@ -4,7 +4,8 @@ from apps.notifications.services.dispatch import send_notification
 
 def notify_application_submitted(application):
     landlord = application.property.owner
-    tenant_name = application.tenant.profile.full_name or application.tenant.email
+    profile = getattr(application.tenant, "profile", None)
+    tenant_name = (getattr(profile, "full_name", None) or "").strip() or application.tenant.email
     send_notification(
         landlord,
         NotificationCategory.APPLICATIONS,

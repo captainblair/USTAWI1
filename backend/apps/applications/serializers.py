@@ -45,7 +45,8 @@ class ApplicationEventSerializer(serializers.ModelSerializer):
     def get_actor_name(self, obj):
         if not obj.actor:
             return "System"
-        return obj.actor.profile.full_name or obj.actor.email
+        profile = getattr(obj.actor, "profile", None)
+        return (getattr(profile, "full_name", None) or "").strip() or obj.actor.email
 
 
 class ApplicationListSerializer(serializers.ModelSerializer):
@@ -252,7 +253,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
             {
                 "id": obj.id,
                 "status": obj.status,
-                "tenant_name": obj.tenant.profile.full_name,
+                "tenant_name": obj.tenant.profile.full_name or obj.tenant.email,
                 "tenant_email": obj.tenant.email,
                 "property_title": prop.title,
                 "property_location": f"{location}, {prop.city}",

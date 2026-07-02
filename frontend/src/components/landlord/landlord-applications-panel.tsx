@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -150,6 +151,11 @@ export function LandlordApplicationsPanel() {
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
+                <Link href={`/landlord/applications/${app.id}`}>
+                  <Button type="button" variant="outline" size="sm">
+                    View application
+                  </Button>
+                </Link>
                 {["SUBMITTED", "UNDER_REVIEW"].includes(app.status) && (
                   <>
                     {app.status === "SUBMITTED" && (

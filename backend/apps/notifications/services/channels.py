@@ -43,7 +43,10 @@ def deliver_email(user, subject: str, body: str):
 def deliver_sms(user, body: str):
     if not user.phone or not body:
         return
-    AfricasTalkingSMSService().send_sms(user.phone, body)
+    try:
+        AfricasTalkingSMSService().send_sms(user.phone, body)
+    except ValueError:
+        pass
 
 
 def deliver_channels(user, category: str, email_subject: str, email_body: str, sms_body: str):

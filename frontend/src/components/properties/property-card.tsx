@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Bath, BedDouble, MapPin } from "lucide-react";
+import { ArrowRight, Bath, BedDouble, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SavePropertyButton } from "@/components/properties/save-property-button";
 import { SafetyBadge } from "@/components/properties/safety-badge";
@@ -55,6 +55,10 @@ export function PropertyCard({
         <div className="absolute bottom-3 right-3">
           <SafetyBadge score={property.safety_score} isVerified={property.is_verified} />
         </div>
+        <span className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-ustawi-red px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-ustawi-red ring-2 ring-white/90 transition group-hover:gap-2 md:hidden">
+          View
+          <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col p-5">
@@ -92,7 +96,7 @@ export function PropertyCard({
             </p>
             <p className="text-xs text-ustawi-muted">{occupied ? "Currently occupied" : "per month"}</p>
           </div>
-          <span className="text-sm font-semibold text-ustawi-red opacity-0 transition group-hover:opacity-100">
+          <span className="hidden text-sm font-semibold text-ustawi-red opacity-0 transition group-hover:opacity-100 md:inline">
             View →
           </span>
         </div>
