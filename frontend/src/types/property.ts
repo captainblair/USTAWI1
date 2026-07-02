@@ -73,6 +73,7 @@ export type PropertyDetail = PropertyListItem & {
   owner: {
     id: string;
     full_name: string;
+    avatar: string | null;
     is_phone_verified: boolean;
     is_verified_landlord: boolean;
   };

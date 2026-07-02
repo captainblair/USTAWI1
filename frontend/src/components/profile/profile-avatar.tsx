@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { resolveAvatarUrl } from "@/lib/media-url";
 
@@ -10,6 +11,7 @@ type ProfileAvatarProps = {
   initials?: string;
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
+  onServerLoad?: () => void;
 };
 
 const SIZES = {
@@ -27,9 +29,16 @@ export function ProfileAvatar({
   initials = "U",
   size = "lg",
   className,
+  onServerLoad,
 }: ProfileAvatarProps) {
   const px = SIZES[size];
-  const resolved = previewSrc ?? resolveAvatarUrl(src, version);
+  const [imageError, setImageError] = useState(false);
+  const serverSrc = resolveAvatarUrl(src, version);
+  const displaySrc = previewSrc ?? (serverSrc && !imageError ? serverSrc : null);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [src, version, previewSrc]);
 
   return (
     <div
@@ -39,15 +48,22 @@ export function ProfileAvatar({
       )}
       style={{ width: px, height: px }}
     >
-      {resolved ? (
+      {displaySrc ? (
         // eslint-disable-next-line @next/next/no-img-element -- preserve upload quality; avoid fill/optimizer issues
         <img
-          src={resolved}
+          src={displaySrc}
           alt=""
           width={px}
           height={px}
           className="h-full w-full object-cover"
           decoding="async"
+          onLoad={() => {
+            if (!previewSrc && serverSrc) onServerLoad?.();
+          }}
+          onError={() => {
+            if (previewSrc) return;
+            setImageError(true);
+          }}
         />
       ) : (
         <span

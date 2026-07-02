@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useAuth } from "@/components/providers/auth-provider";
 import { PropertyGallery } from "@/components/properties/property-gallery";
 import { PropertyMiniMapLoader } from "@/components/properties/property-mini-map-loader";
+import { ProfileAvatar } from "@/components/profile/profile-avatar";
 import { propertyImageSrc } from "@/lib/media-url";
 import { isPropertyOccupied } from "@/lib/properties/status";
 import { canSaveProperties } from "@/lib/auth/constants";
@@ -141,6 +142,13 @@ export function PropertyDetailView({ property }: { property: PropertyDetail }) {
   const floorPlan = property.images?.find((img) => img.image_type === "FLOOR_PLAN");
   const tourThumb = galleryImages[1]?.image ?? galleryImages[0]?.image ?? property.primary_image;
   const landlordName = property.owner?.full_name || property.landlord_name || "Landlord";
+  const landlordInitials =
+    landlordName
+      .split(" ")
+      .map((p) => p[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "L";
   const occupied = isPropertyOccupied(property.status);
 
   const safetyValue = parseFloat(String(property.safety_score));
@@ -283,17 +291,14 @@ export function PropertyDetailView({ property }: { property: PropertyDetail }) {
             {/* RIGHT */}
             <div className="space-y-5">
               <div className="rounded-[14px] border border-[#E8EAF2] bg-white p-5 shadow-[0_2px_16px_rgba(31,43,108,0.06)]">
-                <div className="flex gap-3">
-                  <div className="relative h-[52px] w-[52px] shrink-0 overflow-hidden rounded-full bg-[#E8EAF2]">
-                    <Image
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(landlordName)}&background=1F2B6C&color=fff&size=128`}
-                      alt={landlordName}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-                  <div className="min-w-0 pt-0.5">
+                <div className="flex gap-4">
+                  <ProfileAvatar
+                    src={property.owner?.avatar}
+                    initials={landlordInitials}
+                    size="lg"
+                    className="ring-[#E8EAF2]"
+                  />
+                  <div className="min-w-0 pt-1">
                     <p className="text-[15px] font-bold text-[#1F2B6C]">Verified Landlord</p>
                     <p className="truncate text-[13px] text-[#6B7280]">{landlordName}</p>
                     <p className="mt-1.5 flex items-center gap-1.5 text-[12px] font-medium text-[#059669]">

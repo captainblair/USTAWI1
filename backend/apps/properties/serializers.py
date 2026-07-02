@@ -72,11 +72,24 @@ class PropertyDocumentSerializer(serializers.ModelSerializer):
 class LandlordBriefSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="profile.full_name", read_only=True)
     is_verified_landlord = serializers.BooleanField(source="profile.is_verified_landlord", read_only=True)
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "full_name", "is_phone_verified", "is_verified_landlord"]
+        fields = ["id", "full_name", "avatar", "is_phone_verified", "is_verified_landlord"]
         read_only_fields = fields
+
+    def get_avatar(self, obj):
+        profile = getattr(obj, "profile", None)
+        if not profile or not profile.avatar:
+            return None
+        url = profile.avatar.url
+        if url.startswith(("http://", "https://")):
+            return url
+        request = self.context.get("request")
+        if request:
+            return request.build_absolute_uri(url if url.startswith("/") else f"/{url}")
+        return url if url.startswith("/") else f"/{url}"
 
 
 class PropertyListSerializer(serializers.ModelSerializer):

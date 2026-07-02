@@ -98,10 +98,6 @@ export function ProfilePanel() {
     try {
       const updated = await uploadProfileAvatar(accessToken, file);
       setProfile(updated);
-      setAvatarPreview((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return null;
-      });
       setSuccess("Profile photo updated.");
 
       const session = getClientSession();
@@ -190,6 +186,14 @@ export function ProfilePanel() {
       .slice(0, 2)
       .toUpperCase() ?? profile.email[0]?.toUpperCase() ?? "U";
   const avatarVersion = profile.updated_at ?? String(Date.now());
+
+  function clearAvatarPreview() {
+    setAvatarPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+  }
+
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
       <form
@@ -206,6 +210,7 @@ export function ProfilePanel() {
             version={avatarVersion}
             initials={initials}
             size="xl"
+            onServerLoad={clearAvatarPreview}
           />
           <div>
             <p className="text-sm font-semibold text-ustawi-navy">Profile photo</p>
@@ -305,6 +310,7 @@ export function ProfilePanel() {
               version={avatarVersion}
               initials={initials}
               size="md"
+              onServerLoad={clearAvatarPreview}
             />
             <div>              <p className="font-semibold text-ustawi-navy">{profile.full_name || profile.email}</p>
               <p className="text-sm capitalize text-ustawi-muted">{roleLabel}</p>
