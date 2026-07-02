@@ -104,7 +104,18 @@ export function LandlordPropertyPhotos({
     }
   }
 
-  async function handleDelete(imageId: string) {
+  async function handleDelete(imageId: string, options?: { isPrimary?: boolean; isOnlyPhoto?: boolean }) {
+    const isPrimary = options?.isPrimary ?? false;
+    const isOnlyPhoto = options?.isOnlyPhoto ?? false;
+
+    const message = isOnlyPhoto
+      ? "Remove this photo? You will need to upload a new one before publishing."
+      : isPrimary
+        ? "Remove the main photo? The next gallery photo will become the new main image."
+        : "Remove this gallery photo?";
+
+    if (!window.confirm(message)) return;
+
     setBusy(imageId);
     setError(null);
     try {
@@ -123,7 +134,8 @@ export function LandlordPropertyPhotos({
         <h3 className="text-sm font-bold text-ustawi-navy">Photos — how tenants will see them</h3>
         <p className="mt-1 text-sm text-ustawi-muted">
           Upload one <strong>main hero photo</strong> (large image on the listing), then add{" "}
-          <strong>gallery photos</strong> (circular thumbnails under the hero — same as seeded listings).
+          <strong>gallery photos</strong> (circular thumbnails under the hero). You can delete or replace any photo
+          if you change your mind.
         </p>
       </div>
 
@@ -157,9 +169,25 @@ export function LandlordPropertyPhotos({
               </div>
             )}
             {primary && (
-              <span className="absolute left-2 top-2 rounded-full bg-ustawi-navy px-2 py-0.5 text-[10px] font-bold uppercase text-white">
-                Main
-              </span>
+              <>
+                <span className="absolute left-2 top-2 rounded-full bg-ustawi-navy px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+                  Main
+                </span>
+                <button
+                  type="button"
+                  title="Delete main photo"
+                  disabled={busy === primary.id}
+                  onClick={() =>
+                    handleDelete(primary.id, {
+                      isPrimary: true,
+                      isOnlyPhoto: galleryImages.length === 1,
+                    })
+                  }
+                  className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white transition hover:bg-red-600"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </>
             )}
           </div>
           <input
@@ -172,17 +200,36 @@ export function LandlordPropertyPhotos({
               if (file) void uploadMain(file);
             }}
           />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-3"
-            disabled={busy === "main"}
-            onClick={() => mainInputRef.current?.click()}
-          >
-            <Upload className="h-4 w-4" />
-            {busy === "main" ? "Uploading…" : primary ? "Replace main photo" : "Upload main photo"}
-          </Button>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy === "main"}
+              onClick={() => mainInputRef.current?.click()}
+            >
+              <Upload className="h-4 w-4" />
+              {busy === "main" ? "Uploading…" : primary ? "Replace main photo" : "Upload main photo"}
+            </Button>
+            {primary && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={busy === primary.id}
+                className="border-red-200 text-red-600 hover:bg-red-50"
+                onClick={() =>
+                  handleDelete(primary.id, {
+                    isPrimary: true,
+                    isOnlyPhoto: galleryImages.length === 1,
+                  })
+                }
+              >
+                <Trash2 className="h-4 w-4" />
+                {busy === primary.id ? "Deleting…" : "Delete main photo"}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Gallery uploads */}
@@ -224,6 +271,15 @@ export function LandlordPropertyPhotos({
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={propertyImageSrc(img.image)} alt="" className="h-full w-full object-cover" />
                   </div>
+                  <button
+                    type="button"
+                    title="Delete gallery photo"
+                    disabled={busy === img.id}
+                    onClick={() => handleDelete(img.id)}
+                    className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                   <div className="mt-1 flex gap-1">
                     <button
                       type="button"
@@ -236,7 +292,7 @@ export function LandlordPropertyPhotos({
                     </button>
                     <button
                       type="button"
-                      title="Delete"
+                      title="Delete gallery photo"
                       disabled={busy === img.id}
                       onClick={() => handleDelete(img.id)}
                       className="flex h-7 w-7 items-center justify-center rounded border border-red-200 text-red-600 hover:bg-red-50"
@@ -263,16 +319,20 @@ export function LandlordPropertyPhotos({
               )}
             >
               {img.is_primary ? "Main" : "Gallery"}
-              {!img.is_primary && (
-                <button
-                  type="button"
-                  className="ml-0.5 opacity-70 hover:opacity-100"
-                  onClick={() => handleDelete(img.id)}
-                  aria-label="Delete"
-                >
-                  ×
-                </button>
-              )}
+              <button
+                type="button"
+                className="ml-0.5 opacity-70 hover:opacity-100"
+                disabled={busy === img.id}
+                onClick={() =>
+                  handleDelete(img.id, {
+                    isPrimary: img.is_primary,
+                    isOnlyPhoto: galleryImages.length === 1,
+                  })
+                }
+                aria-label={`Delete ${img.is_primary ? "main" : "gallery"} photo`}
+              >
+                ×
+              </button>
             </span>
           ))}
         </div>
