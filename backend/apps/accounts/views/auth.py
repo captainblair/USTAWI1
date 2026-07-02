@@ -96,14 +96,17 @@ class RegisterProfileView(APIView):
             "step": session.step,
             "phone": session.phone,
             "otp_expires_in_minutes": settings.OTP_EXPIRY_MINUTES,
+            **OTPService.otp_response_fields(dev_otp),
         }
-        if dev_otp:
-            data["dev_otp"] = dev_otp
 
         return Response(
             {
                 "success": True,
-                "message": "Profile saved. Enter the verification code sent to your phone.",
+                "message": (
+                    "Profile saved. Enter the verification code shown on screen."
+                    if dev_otp
+                    else "Profile saved. Enter the verification code sent to your phone."
+                ),
                 "data": data,
             },
             status=status.HTTP_200_OK,
@@ -135,14 +138,17 @@ class RegisterSendOTPView(APIView):
             "step": session.step,
             "phone": session.phone,
             "otp_expires_in_minutes": settings.OTP_EXPIRY_MINUTES,
+            **OTPService.otp_response_fields(dev_otp),
         }
-        if dev_otp:
-            data["dev_otp"] = dev_otp
 
         return Response(
             {
                 "success": True,
-                "message": "OTP sent to your phone.",
+                "message": (
+                    "New verification code is shown on screen."
+                    if dev_otp
+                    else "OTP sent to your phone."
+                ),
                 "data": data,
             },
             status=status.HTTP_200_OK,

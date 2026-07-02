@@ -35,6 +35,9 @@ SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=CORS_ALLOWED_ORIGINS)  # noqa: F405
 
+# Until Africa's Talking live SMS is enabled, show OTP on the verify screen.
+REGISTRATION_OTP_IN_APP = env.bool("REGISTRATION_OTP_IN_APP", default=True)  # noqa: F405
+
 LOGGING["formatters"]["json"] = {  # noqa: F405
     "()": "core.logging.JsonFormatter",
 }

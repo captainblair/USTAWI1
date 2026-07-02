@@ -228,9 +228,11 @@ MPESA_ENVIRONMENT = env("MPESA_ENVIRONMENT", default="sandbox")
 AFRICAS_TALKING_USERNAME = env("AFRICAS_TALKING_USERNAME", default="")
 AFRICAS_TALKING_API_KEY = env("AFRICAS_TALKING_API_KEY", default="")
 AFRICAS_TALKING_SENDER_ID = env("AFRICAS_TALKING_SENDER_ID", default="USTAWI")
-# Set false on Render until live SMS is approved — skips slow/hanging API calls (OTP shown in-app).
+# Set SMS_ENABLED=false on Render until live SMS is approved.
 AFRICAS_TALKING_SMS_ENABLED = env.bool("AFRICAS_TALKING_SMS_ENABLED", default=True)
 AFRICAS_TALKING_SMS_TIMEOUT = env.int("AFRICAS_TALKING_SMS_TIMEOUT", default=6)
+# Show OTP on the verify screen until real SMS delivery is confirmed.
+REGISTRATION_OTP_IN_APP = env.bool("REGISTRATION_OTP_IN_APP", default=True)
 
 OTP_LENGTH = env("OTP_LENGTH")
 OTP_EXPIRY_MINUTES = env("OTP_EXPIRY_MINUTES")

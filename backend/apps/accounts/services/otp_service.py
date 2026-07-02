@@ -41,7 +41,17 @@ class OTPService:
         if result.get("status") == "dev_mode":
             logger.warning("DEV MODE OTP for %s: %s", phone, code)
 
-        return code if result.get("status") == "dev_mode" else ""
+        show_in_app = getattr(settings, "REGISTRATION_OTP_IN_APP", True)
+        if result.get("status") == "dev_mode" or show_in_app:
+            return code
+        return ""
+
+    @staticmethod
+    def otp_response_fields(dev_otp: str) -> dict:
+        """Extra API fields for registration OTP step."""
+        if dev_otp:
+            return {"otp_delivery": "in_app", "dev_otp": dev_otp}
+        return {"otp_delivery": "sms"}
 
     def verify_registration_otp(self, session: RegistrationSession, code: str) -> bool:
         if session.is_otp_expired:

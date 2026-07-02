@@ -58,6 +58,7 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [devOtpHint, setDevOtpHint] = useState<string | null>(null);
+  const [otpInApp, setOtpInApp] = useState(true);
   const [verifySuccess, setVerifySuccess] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(RESEND_COOLDOWN);
 
@@ -124,6 +125,7 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
     try {
       const otpData = await registerSendOtp(registrationToken);
       if (otpData.dev_otp) setDevOtpHint(otpData.dev_otp);
+      setOtpInApp(otpData.otp_delivery !== "sms");
       setResendSeconds(RESEND_COOLDOWN);
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : "Could not resend code.");
@@ -160,6 +162,7 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
       setPhone(profile.phone);
 
       if (profile.dev_otp) setDevOtpHint(profile.dev_otp);
+      setOtpInApp(profile.otp_delivery !== "sms");
       setResendSeconds(RESEND_COOLDOWN);
       setPhase("verify");
     } catch (err) {
@@ -217,16 +220,33 @@ export function RegisterWizard({ googleClientId }: { googleClientId: string }) {
             Verify your phone number
           </h1>
           <p className="mt-2 max-w-sm text-sm leading-relaxed text-ustawi-muted">
-            We sent a 6-digit code to{" "}
-            <span className="font-semibold text-ustawi-navy">{maskPhone(phone)}</span>
+            {otpInApp ? (
+              <>Your verification code is shown below. Enter it to activate your account.</>
+            ) : (
+              <>
+                We sent a 6-digit code to{" "}
+                <span className="font-semibold text-ustawi-navy">{maskPhone(phone)}</span>
+              </>
+            )}
           </p>
         </div>
 
-        {devOtpHint && (
-          <div className="mb-6 rounded-xl border border-amber-200/80 bg-amber-50 px-4 py-3 text-center text-xs text-amber-900">
-            SMS not available — use this verification code:{" "}
-            <strong className="font-mono text-sm">{devOtpHint}</strong>
+        {otpInApp && devOtpHint && (
+          <div className="mb-6 rounded-xl border border-amber-200/80 bg-amber-50 px-4 py-4 text-center text-sm text-amber-900">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-amber-800/80">
+              Your verification code
+            </p>
+            <strong className="font-mono text-3xl tracking-[0.25em] text-amber-950">{devOtpHint}</strong>
+            <p className="mt-3 text-xs leading-relaxed text-amber-800/90">
+              Text messaging is not enabled yet — copy this code into the boxes below.
+            </p>
           </div>
+        )}
+
+        {otpInApp && !devOtpHint && (
+          <p className="mb-4 rounded-xl border border-ustawi-border bg-ustawi-sand/50 px-4 py-3 text-center text-sm text-ustawi-muted">
+            Loading your code… tap <strong>Resend code</strong> if it does not appear.
+          </p>
         )}
 
         <form onSubmit={handleVerifyOtp} className="w-full min-w-0 space-y-6">

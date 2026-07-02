@@ -36,6 +36,7 @@ export type RegisterProfileResponse = {
   step: string;
   phone: string;
   otp_expires_in_minutes?: number;
+  otp_delivery?: "in_app" | "sms";
   dev_otp?: string;
 };
 
@@ -44,6 +45,7 @@ export type RegisterSendOtpResponse = {
   step: string;
   phone: string;
   otp_expires_in_minutes: number;
+  otp_delivery?: "in_app" | "sms";
   dev_otp?: string;
 };
 
