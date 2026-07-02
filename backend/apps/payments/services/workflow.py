@@ -31,8 +31,53 @@ def _generate_receipt_number() -> str:
     return f"RCP-{today}-{secrets.token_hex(3).upper()}"
 
 
+STALE_PAYMENT_MINUTES = 15
+
+
+def expire_stale_in_progress_payments(*, invoice=None) -> int:
+    """Fail abandoned PENDING/PROCESSING payments so tenants can retry."""
+    cutoff = timezone.now() - timezone.timedelta(minutes=STALE_PAYMENT_MINUTES)
+    qs = Payment.objects.filter(
+        status__in=(PaymentStatus.PENDING, PaymentStatus.PROCESSING),
+        created_at__lt=cutoff,
+    )
+    if invoice is not None:
+        qs = qs.filter(invoice=invoice)
+
+    count = 0
+    for payment in qs:
+        cancel_stuck_payment(payment, reason="Payment timed out. Please try again.")
+        count += 1
+    return count
+
+
+def cancel_stuck_payment(payment: Payment, *, reason: str = "Payment cancelled.") -> Payment:
+    """Mark an in-flight payment as failed and restore invoice to payable if needed."""
+    from apps.payments.models import PaymentReceipt
+
+    if payment.status not in (PaymentStatus.PENDING, PaymentStatus.PROCESSING):
+        raise PaymentWorkflowError(f"Payment {payment.id} is {payment.status} and cannot be cancelled.")
+
+    PaymentReceipt.objects.filter(payment=payment).delete()
+
+    payment.status = PaymentStatus.FAILED
+    payment.mpesa_result_desc = reason
+    payment.completed_at = timezone.now()
+    payment.save(update_fields=["status", "mpesa_result_desc", "completed_at", "updated_at"])
+
+    invoice = payment.invoice
+    if invoice.status == InvoiceStatus.PAID:
+        today = timezone.now().date()
+        invoice.status = InvoiceStatus.OVERDUE if today > invoice.due_date else InvoiceStatus.PENDING
+        invoice.paid_at = None
+        invoice.save(update_fields=["status", "paid_at", "updated_at"])
+
+    return payment
+
+
 def initiate_rent_payment(lease, tenant, phone: str) -> Payment:
     invoice = get_or_create_current_invoice(lease)
+    expire_stale_in_progress_payments(invoice=invoice)
 
     if invoice.status == InvoiceStatus.PAID:
         raise PaymentWorkflowError("Rent for this billing period is already paid.")
