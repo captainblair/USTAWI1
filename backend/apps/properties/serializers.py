@@ -201,6 +201,11 @@ class PropertyCreateUpdateSerializer(serializers.ModelSerializer):
         allow_empty=True,
     )
     neighborhood_slug = serializers.SlugField(write_only=True, required=False, allow_blank=True)
+
+    def validate_neighborhood_slug(self, value):
+        if not value:
+            return ""
+        return value.strip().lower()
     latitude = serializers.DecimalField(max_digits=9, decimal_places=6, required=False)
     longitude = serializers.DecimalField(max_digits=9, decimal_places=6, required=False)
 

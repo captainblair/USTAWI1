@@ -37,7 +37,16 @@ export async function apiFetch<T>(
     next,
   });
 
-  const payload = (await response.json()) as T | ApiError;
+  const raw = await response.text();
+  let payload: T | ApiError;
+  try {
+    payload = (raw ? JSON.parse(raw) : {}) as T | ApiError;
+  } catch {
+    throw new ApiRequestError(
+      raw.trim() || `Request failed (${response.status})`,
+      response.status,
+    );
+  }
 
   if (!response.ok || (payload as ApiError).success === false) {
     const errorPayload = payload as ApiError & Record<string, unknown>;
@@ -50,7 +59,7 @@ export async function apiFetch<T>(
     throw new ApiRequestError(
       errorPayload.error?.message ?? "Request failed",
       response.status,
-      details,
+      details as Record<string, string[]> | undefined,
     );
   }
 

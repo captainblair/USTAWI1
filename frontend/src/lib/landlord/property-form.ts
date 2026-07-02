@@ -14,12 +14,19 @@ const FIELD_LABELS: Record<string, string> = {
   currency: "Currency",
 };
 
-export function formatApiFieldErrors(details?: Record<string, string[]>): string | null {
+function normalizeFieldMessages(messages: unknown): string {
+  if (Array.isArray(messages)) return messages.map(String).join(", ");
+  if (messages == null) return "Invalid value";
+  if (typeof messages === "object") return JSON.stringify(messages);
+  return String(messages);
+}
+
+export function formatApiFieldErrors(details?: Record<string, unknown>): string | null {
   if (!details || Object.keys(details).length === 0) return null;
   return Object.entries(details)
     .map(([field, messages]) => {
       const label = FIELD_LABELS[field] ?? field.replace(/_/g, " ");
-      return `${label}: ${messages.join(", ")}`;
+      return `${label}: ${normalizeFieldMessages(messages)}`;
     })
     .join(" · ");
 }

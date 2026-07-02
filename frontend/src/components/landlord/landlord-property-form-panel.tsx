@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import { PropertyListingSteps } from "@/components/landlord/property-listing-ste
 import type { LandlordPropertyCreatePayload } from "@/types/landlord";
 import type { PropertyDetail } from "@/types/property";
 import { ApiRequestError } from "@/types/api";
+import { isLandlord } from "@/lib/auth/constants";
 import { cn } from "@/lib/utils";
 
 const PROPERTY_TYPES = [
@@ -45,7 +47,7 @@ function fieldClass(hasError: boolean) {
 
 export function LandlordPropertyFormPanel({ mode, property, onSaved }: Props) {
   const router = useRouter();
-  const { accessToken } = useAuth();
+  const { user, accessToken, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [title, setTitle] = useState(property?.title ?? "");
   const [description, setDescription] = useState(property?.description ?? "");
@@ -68,6 +70,17 @@ export function LandlordPropertyFormPanel({ mode, property, onSaved }: Props) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]> | undefined>();
 
   useEffect(() => {
+    if (authLoading || mode !== "create") return;
+    if (!isAuthenticated || !accessToken) {
+      router.replace("/login?next=/landlord/properties/new");
+      return;
+    }
+    if (!isLandlord(user)) {
+      router.replace("/profile");
+    }
+  }, [accessToken, authLoading, isAuthenticated, mode, router, user]);
+
+  useEffect(() => {
     if (mode === "create") {
       const coords = defaultCoordsForNeighborhood(neighborhoodSlug);
       setLatitude(String(coords.latitude));
@@ -77,11 +90,36 @@ export function LandlordPropertyFormPanel({ mode, property, onSaved }: Props) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!accessToken) return;
-
-    setSaving(true);
     setError(null);
     setFieldErrors(undefined);
+
+    if (authLoading) return;
+
+    if (!accessToken) {
+      setError("Your session expired. Please log in again.");
+      router.replace("/login?next=/landlord/properties/new");
+      return;
+    }
+
+    if (!isLandlord(user)) {
+      setError("Only landlords and agents can create property listings.");
+      return;
+    }
+
+    if (!title.trim() || !description.trim() || !address.trim() || !city.trim()) {
+      setError("Please fill in title, description, address, and city.");
+      return;
+    }
+
+    const rent = Number(priceMonthly);
+    if (!Number.isFinite(rent) || rent <= 0) {
+      setError("Enter a valid monthly rent greater than zero.");
+      return;
+    }
+
+    setSaving(true);
+
+    const normalizedSlug = neighborhoodSlug.trim().toLowerCase().replace(/\s+/g, "-");
 
     const payload: LandlordPropertyCreatePayload = {
       title: title.trim(),
@@ -89,8 +127,8 @@ export function LandlordPropertyFormPanel({ mode, property, onSaved }: Props) {
       property_type: propertyType,
       address: address.trim(),
       city: city.trim(),
-      neighborhood_slug: neighborhoodSlug.trim() || undefined,
-      price_monthly: Number(priceMonthly),
+      neighborhood_slug: normalizedSlug || undefined,
+      price_monthly: rent,
       currency: "KES",
       bedrooms: Number(bedrooms),
       bathrooms: Number(bathrooms),
@@ -102,7 +140,11 @@ export function LandlordPropertyFormPanel({ mode, property, onSaved }: Props) {
     try {
       if (mode === "create") {
         const created = await createLandlordProperty(accessToken, payload);
+        if (!created?.id) {
+          throw new ApiRequestError("Property was created but the server did not return an id.", 500);
+        }
         router.push(`/landlord/properties/${created.id}`);
+        router.refresh();
       } else if (property) {
         await updateLandlordProperty(accessToken, property.id, payload);
         onSaved?.();
@@ -110,14 +152,27 @@ export function LandlordPropertyFormPanel({ mode, property, onSaved }: Props) {
     } catch (err) {
       if (err instanceof ApiRequestError) {
         setFieldErrors(err.details);
-        const formatted = formatApiFieldErrors(err.details);
+        const formatted = formatApiFieldErrors(err.details as Record<string, unknown> | undefined);
         setError(formatted ?? err.message);
+        if (err.status === 401) {
+          router.replace("/login?next=/landlord/properties/new");
+        }
+      } else if (err instanceof Error) {
+        setError(err.message || "Could not save property.");
       } else {
         setError("Could not save property.");
       }
     } finally {
       setSaving(false);
     }
+  }
+
+  if (authLoading && mode === "create") {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-ustawi-navy/40" />
+      </div>
+    );
   }
 
   return (
@@ -206,11 +261,13 @@ export function LandlordPropertyFormPanel({ mode, property, onSaved }: Props) {
               <label className="mb-1.5 block text-sm font-semibold text-ustawi-navy">Neighborhood slug</label>
               <Input
                 value={neighborhoodSlug}
-                onChange={(e) => setNeighborhoodSlug(e.target.value)}
+                onChange={(e) => setNeighborhoodSlug(e.target.value.toLowerCase())}
                 className={fieldClass(apiFieldHasError(fieldErrors, "neighborhood_slug"))}
-                placeholder="karen"
+                placeholder="tilisi"
               />
-              <p className="mt-1 text-xs text-ustawi-muted">Used for search and map pin (e.g. karen, westlands).</p>
+              <p className="mt-1 text-xs text-ustawi-muted">
+                Lowercase slug for search and map pin (e.g. karen, westlands, tilisi).
+              </p>
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
