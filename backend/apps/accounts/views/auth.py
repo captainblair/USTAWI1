@@ -108,7 +108,13 @@ class RegisterSendOTPView(APIView):
 
         session = RegistrationSession.objects.get(id=serializer.validated_data["registration_token"])
         otp_service = OTPService()
-        dev_otp = otp_service.send_registration_otp(session)
+        try:
+            dev_otp = otp_service.send_registration_otp(session)
+        except ValueError as exc:
+            return Response(
+                {"success": False, "error": {"message": str(exc)}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         data = {
             "registration_token": str(session.id),

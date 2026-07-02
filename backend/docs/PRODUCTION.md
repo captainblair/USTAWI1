@@ -43,7 +43,7 @@ Set these on the **web** and **worker** services in Render:
    ```
 3. Set on Vercel:
    ```
-   NEXT_PUBLIC_API_URL=https://ustawi-api.onrender.com
+   NEXT_PUBLIC_API_URL=https://ustawi-api.onrender.com/api/v1
    ```
 
 CORS is configured with credentials support for JWT cookies if needed later.

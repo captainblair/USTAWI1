@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 class HealthCheckView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = []
 
     @extend_schema(
         tags=["Health"],

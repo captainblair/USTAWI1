@@ -52,6 +52,10 @@ class AfricasTalkingSMSService:
             "from": self.sender_id,
         }
 
-        response = requests.post(self.API_URL, headers=headers, data=data, timeout=30)
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = requests.post(self.API_URL, headers=headers, data=data, timeout=30)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as exc:
+            logger.exception("Africa's Talking SMS failed for %s; falling back to dev_mode", phone)
+            return {"status": "dev_mode", "phone": phone, "message": message, "error": str(exc)}

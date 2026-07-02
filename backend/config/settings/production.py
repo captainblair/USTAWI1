@@ -13,6 +13,16 @@ if _render_url:
     if render_host and render_host not in ALLOWED_HOSTS:  # noqa: F405
         ALLOWED_HOSTS = [*ALLOWED_HOSTS, render_host]  # noqa: F405
 
+# Free-tier Render often has no Redis — avoid 500s on every API call (DRF throttling uses cache).
+_redis_url = os.environ.get("REDIS_URL", "").strip()
+if not _redis_url or "localhost" in _redis_url or "127.0.0.1" in _redis_url:
+    CACHES = {  # noqa: F405
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "ustawi-production",
+        }
+    }
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
 SESSION_COOKIE_SECURE = True
