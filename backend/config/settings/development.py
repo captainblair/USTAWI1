@@ -12,14 +12,17 @@ if env.bool("USE_SQLITE", default=False):  # noqa: F405
         }
     }
 
-INSTALLED_APPS += ["debug_toolbar"]  # noqa: F405
+try:
+    import debug_toolbar  # noqa: F401
+except ImportError:
+    debug_toolbar = None
 
-if "test" in sys.argv:
+if debug_toolbar is not None:
+    INSTALLED_APPS += ["debug_toolbar"]  # noqa: F405
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
+
+if "test" in sys.argv and debug_toolbar is not None:
     INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "debug_toolbar"]  # noqa: F405
-
-MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
-
-if "test" in sys.argv:
     MIDDLEWARE = [mw for mw in MIDDLEWARE if mw != "debug_toolbar.middleware.DebugToolbarMiddleware"]  # noqa: F405
 
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
