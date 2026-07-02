@@ -53,7 +53,7 @@ export function PropertyCard({
           <SavePropertyButton propertyId={property.id} initialSaved={initialSaved} size="sm" />
         </div>
         <div className="absolute bottom-3 right-3">
-          <SafetyBadge score={property.safety_score} />
+          <SafetyBadge score={property.safety_score} isVerified={property.is_verified} />
         </div>
       </div>
 

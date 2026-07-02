@@ -152,7 +152,62 @@ def save_safety_score(case: VerificationCase, factors: dict, actor, notes: str =
     return safety
 
 
+def bootstrap_safety_score_if_missing(case: VerificationCase, actor) -> SafetyScore | None:
+    """Apply a safety score when admin approves but did not submit the scoring form."""
+    prop = case.property
+    if prop.safety_score and prop.safety_score > Decimal("0"):
+        return getattr(prop, "safety_score_record", None)
+
+    from apps.properties.models import ImageVerificationStatus, PropertyImage
+
+    images = PropertyImage.objects.filter(property=prop)
+    total = images.count()
+    approved = images.filter(verification_status=ImageVerificationStatus.APPROVED).count()
+    rejected = images.filter(verification_status=ImageVerificationStatus.REJECTED).count()
+
+    if total > 0 and approved == total:
+        factors = {
+            SafetyFactorType.NEIGHBORHOOD: Decimal("7.5"),
+            SafetyFactorType.BUILDING_CONDITION: Decimal("82"),
+            SafetyFactorType.ACCESS_CONTROL: Decimal("78"),
+            SafetyFactorType.LIGHTING: Decimal("7.5"),
+            SafetyFactorType.EMERGENCY_READINESS: Decimal("72"),
+        }
+        notes = "Safety score applied on approval — all listing photos approved."
+    elif approved > 0 and rejected == 0:
+        factors = {
+            SafetyFactorType.NEIGHBORHOOD: Decimal("7"),
+            SafetyFactorType.BUILDING_CONDITION: Decimal("75"),
+            SafetyFactorType.ACCESS_CONTROL: Decimal("70"),
+            SafetyFactorType.LIGHTING: Decimal("7"),
+            SafetyFactorType.EMERGENCY_READINESS: Decimal("65"),
+        }
+        notes = "Safety score applied on approval — photos reviewed."
+    elif approved > 0:
+        factors = {
+            SafetyFactorType.NEIGHBORHOOD: Decimal("6.5"),
+            SafetyFactorType.BUILDING_CONDITION: Decimal("68"),
+            SafetyFactorType.ACCESS_CONTROL: Decimal("65"),
+            SafetyFactorType.LIGHTING: Decimal("6.5"),
+            SafetyFactorType.EMERGENCY_READINESS: Decimal("60"),
+        }
+        notes = "Safety score applied on approval — mixed photo review."
+    else:
+        factors = {
+            SafetyFactorType.NEIGHBORHOOD: Decimal("7"),
+            SafetyFactorType.BUILDING_CONDITION: Decimal("75"),
+            SafetyFactorType.ACCESS_CONTROL: Decimal("70"),
+            SafetyFactorType.LIGHTING: Decimal("7"),
+            SafetyFactorType.EMERGENCY_READINESS: Decimal("65"),
+        }
+        notes = "Safety score applied on approval — listing verified by inspector."
+
+    return save_safety_score(case, factors, actor, notes=notes)
+
+
 def approve_case(case: VerificationCase, actor, notes: str = "") -> VerificationCase:
+    bootstrap_safety_score_if_missing(case, actor)
+
     case.status = VerificationCaseStatus.APPROVED
     case.stage = VerificationStage.FINAL_REVIEW
     case.completed_at = timezone.now()

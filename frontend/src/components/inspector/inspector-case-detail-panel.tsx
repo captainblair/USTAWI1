@@ -208,6 +208,10 @@ export function InspectorCaseDetailPanel({ caseId }: { caseId: string }) {
 
           <section className="rounded-2xl border border-[#E8EAF2] bg-white p-4 shadow-sm sm:p-5">
             <h3 className="font-bold text-ustawi-navy">Photos</h3>
+            <p className="mt-1 text-xs text-ustawi-muted">
+              Approving photos checks listing quality. The public safety score (0–10) is set separately below —
+              or applied automatically when you approve the listing.
+            </p>
             {detail.photos.length === 0 ? (
               <p className="mt-3 text-sm text-ustawi-muted">No photos.</p>
             ) : (
@@ -276,6 +280,10 @@ export function InspectorCaseDetailPanel({ caseId }: { caseId: string }) {
         <div className="space-y-4">
           <section className="rounded-2xl border border-[#E8EAF2] bg-white p-4 shadow-sm sm:p-5">
             <h3 className="font-bold text-ustawi-navy">Safety score</h3>
+            <p className="mt-1 text-xs text-ustawi-muted">
+              This is the score tenants see on the listing (not per photo). Save a custom score here, or it will
+              be calculated when you approve the property.
+            </p>
             {detail.safety_score_detail && (
               <p className="mt-2 text-2xl font-bold text-ustawi-navy">
                 {detail.safety_score_detail.overall_score}/10
