@@ -44,7 +44,7 @@ def notify_payment_completed(payment):
         f"Your rent payment of {payment.currency} {payment.amount} for {prop_title} was confirmed. "
         f"M-Pesa ref: {payment.mpesa_receipt_number}."
     )
-    receipt_path = ""
+    receipt_path = "/payments"
     if hasattr(payment, "receipt") and payment.receipt:
         receipt_path = f"/payments/receipts/{payment.receipt.id}"
     send_notification(
@@ -70,7 +70,7 @@ def notify_payment_completed(payment):
         landlord_msg,
         reference_type="payment",
         reference_id=payment.id,
-        action_path="/landlord/payments/collected",
+        action_path="/landlord/payments",
         event_type="payment_received",
         email_subject="Rent payment received",
         email_body=landlord_msg,
@@ -91,7 +91,7 @@ def notify_rent_due(invoice):
         msg,
         reference_type="invoice",
         reference_id=invoice.id,
-        action_path="/payments/pay-rent",
+        action_path=f"/payments?lease={lease.id}",
         event_type="rent_due",
         email_subject="Rent payment due",
         email_body=msg,

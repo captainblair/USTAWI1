@@ -70,6 +70,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/payments/pay-rent",
+        destination: "/payments",
+        permanent: false,
+      },
+      {
+        source: "/landlord/payments/collected",
+        destination: "/landlord/payments",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

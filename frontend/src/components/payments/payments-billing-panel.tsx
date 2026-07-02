@@ -69,7 +69,8 @@ export function PaymentsBillingPanel() {
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated || !accessToken) {
-      router.replace("/login?next=/payments");
+      const next = `/payments${preselectedLease ? `?lease=${preselectedLease}` : ""}`;
+      router.replace(`/login?next=${encodeURIComponent(next)}`);
       return;
     }
     if (!isTenant(user)) {
