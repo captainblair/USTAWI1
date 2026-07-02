@@ -1,6 +1,17 @@
+from urllib.parse import urlparse
+
+import os
+
 from .base import *  # noqa: F401,F403
 
 DEBUG = env.bool("DEBUG", default=False)  # noqa: F405
+
+# Render sets RENDER_EXTERNAL_URL (e.g. https://ustawi-api.onrender.com)
+_render_url = os.environ.get("RENDER_EXTERNAL_URL", "")
+if _render_url:
+    render_host = urlparse(_render_url).hostname
+    if render_host and render_host not in ALLOWED_HOSTS:  # noqa: F405
+        ALLOWED_HOSTS = [*ALLOWED_HOSTS, render_host]  # noqa: F405
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)

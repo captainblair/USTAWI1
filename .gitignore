@@ -14,8 +14,8 @@ venv/
 *.log
 local_settings.py
 db.sqlite3
-media/
 staticfiles/
+backend/media/
 
 # Environment
 .env
@@ -24,8 +24,8 @@ staticfiles/
 backend/.env
 backend/.env.local
 
-# Wireframes & sample assets (not for repo yet)
-images/
+# Wireframes & sample assets at repo root (not frontend/public/images)
+/images/
 
 # IDE
 .idea/
