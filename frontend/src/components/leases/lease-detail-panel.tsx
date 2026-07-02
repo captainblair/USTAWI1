@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { fetchLeaseDetail, signLease } from "@/lib/api/leases";
 import { fetchPaymentHistory } from "@/lib/api/payments";
 import { isTenant } from "@/lib/auth/constants";
-import { resolveLeaseDocUrl } from "@/lib/leases/documents";
 import {
   formatLeaseDate,
   isActiveLeaseStatus,
@@ -107,12 +106,6 @@ export function LeaseDetailPanel({ leaseId }: { leaseId: string }) {
   async function handlePayRent() {
     if (!accessToken || !lease) return;
     router.push(`/payments?lease=${lease.id}`);
-  }
-
-  function handleDownload() {
-    const url = resolveLeaseDocUrl(lease?.signed_pdf_url ?? lease?.documents[0]?.file_url ?? null);
-    if (!url) return;
-    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   async function handleShare() {
@@ -267,11 +260,11 @@ export function LeaseDetailPanel({ leaseId }: { leaseId: string }) {
 
           <LeaseDocumentsPanel
             lease={lease}
+            accessToken={accessToken!}
             status={status}
             monthsRemaining={monthsRemaining}
             counterpartyLabel="Landlord contact"
             counterpartyName={lease.landlord_name || lease.counterparty_name}
-            onDownload={handleDownload}
             onShare={handleShare}
           />
 

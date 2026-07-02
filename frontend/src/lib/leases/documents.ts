@@ -22,10 +22,11 @@ export function buildLeaseDocTabs(lease: LeaseDetail): LeaseDocTab[] {
   }
 
   lease.addendums.forEach((addendum, index) => {
+    if (!addendum.document?.id) return;
     tabs.push({
-      id: addendum.id,
+      id: addendum.document.id,
       label: addendum.title || `Addendum ${String.fromCharCode(65 + index)}`,
-      fileUrl: addendum.document?.file_url ?? null,
+      fileUrl: addendum.document.file_url ?? null,
       signed: Boolean(lease.signed_pdf_url),
     });
   });
@@ -54,7 +55,7 @@ export function buildLeaseDocTabs(lease: LeaseDetail): LeaseDocTab[] {
   return tabs;
 }
 
-/** Same-origin media path for fetch / download (via Next.js /media rewrite). */
+/** @deprecated Use authenticated lease download endpoints instead. */
 export function resolveLeaseDocUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   return resolvePropertyImageUrl(url);

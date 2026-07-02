@@ -21,6 +21,7 @@ import { PropertyGallery } from "@/components/properties/property-gallery";
 import { PropertyMiniMapLoader } from "@/components/properties/property-mini-map-loader";
 import { ProfileAvatar } from "@/components/profile/profile-avatar";
 import { propertyImageSrc } from "@/lib/media-url";
+import { landlordPresenceLabel } from "@/lib/presence/status";
 import { isPropertyOccupied } from "@/lib/properties/status";
 import { canSaveProperties } from "@/lib/auth/constants";
 import type { PropertyDetail } from "@/types/property";
@@ -142,6 +143,11 @@ export function PropertyDetailView({ property }: { property: PropertyDetail }) {
   const floorPlan = property.images?.find((img) => img.image_type === "FLOOR_PLAN");
   const tourThumb = galleryImages[1]?.image ?? galleryImages[0]?.image ?? property.primary_image;
   const landlordName = property.owner?.full_name || property.landlord_name || "Landlord";
+  const landlordPresence = landlordPresenceLabel({
+    is_online: property.owner?.is_online,
+    last_seen_at: property.owner?.last_seen_at,
+  });
+  const memberSince = property.owner?.member_since ?? new Date(property.published_at ?? Date.now()).getFullYear();
   const landlordInitials =
     landlordName
       .split(" ")
@@ -301,9 +307,19 @@ export function PropertyDetailView({ property }: { property: PropertyDetail }) {
                   <div className="min-w-0 pt-1">
                     <p className="text-[15px] font-bold text-[#1F2B6C]">Verified Landlord</p>
                     <p className="truncate text-[13px] text-[#6B7280]">{landlordName}</p>
-                    <p className="mt-1.5 flex items-center gap-1.5 text-[12px] font-medium text-[#059669]">
-                      <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
-                      Online
+                    <p
+                      className={cn(
+                        "mt-1.5 flex items-center gap-1.5 text-[12px] font-medium",
+                        landlordPresence.online ? "text-[#059669]" : "text-[#6B7280]",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "h-2 w-2 rounded-full",
+                          landlordPresence.online ? "bg-[#22C55E]" : "bg-[#9CA3AF]",
+                        )}
+                      />
+                      {landlordPresence.label}
                     </p>
                   </div>
                 </div>
@@ -314,7 +330,7 @@ export function PropertyDetailView({ property }: { property: PropertyDetail }) {
                   </div>
                   <div className="flex justify-between gap-2">
                     <dt className="text-[#6B7280]">On Ustawi since:</dt>
-                    <dd className="font-semibold text-[#1F2B6C]">2020</dd>
+                    <dd className="font-semibold text-[#1F2B6C]">{memberSince}</dd>
                   </div>
                 </dl>
               </div>

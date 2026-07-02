@@ -12,6 +12,7 @@ from apps.leases.serializers import (
     LeaseListSerializer,
     LeaseSignSerializer,
 )
+from apps.leases.services.document_delivery import serve_lease_pdf
 from apps.leases.services.pdf import ensure_lease_agreement_document, ensure_signed_lease_pdf
 from apps.leases.services.workflow import LeaseWorkflowError, refresh_lease_status, sign_lease
 from core.pagination import StandardResultsSetPagination
@@ -123,3 +124,26 @@ class TenantLeaseDocumentDownloadView(APIView):
                 "data": LeaseDocumentSerializer(doc, context={"request": request}).data,
             }
         )
+
+
+class TenantLeaseDocumentFileView(APIView):
+    permission_classes = [IsAuthenticated, IsTenantUser, IsLeaseTenant]
+
+    @extend_schema(tags=["Leases"], summary="Download lease document PDF")
+    def get(self, request, pk, doc_id):
+        lease = Lease.objects.get(pk=pk, tenant=request.user)
+        doc = LeaseDocument.objects.get(pk=doc_id, lease=lease)
+        filename = f"{doc.title or doc.doc_type or 'lease-document'}.pdf".replace('"', "")
+        return serve_lease_pdf(doc.file, filename, inline=True)
+
+
+class TenantLeaseSignedPdfDownloadView(APIView):
+    permission_classes = [IsAuthenticated, IsTenantUser, IsLeaseTenant]
+
+    @extend_schema(tags=["Leases"], summary="Download signed lease PDF")
+    def get(self, request, pk):
+        lease = Lease.objects.get(pk=pk, tenant=request.user)
+        ensure_signed_lease_pdf(lease)
+        lease.refresh_from_db()
+        filename = f"lease-{lease.id}-signed.pdf"
+        return serve_lease_pdf(lease.signed_pdf, filename, inline=True)

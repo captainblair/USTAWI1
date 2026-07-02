@@ -76,6 +76,9 @@ export type PropertyDetail = PropertyListItem & {
     avatar: string | null;
     is_phone_verified: boolean;
     is_verified_landlord: boolean;
+    is_online: boolean;
+    last_seen_at: string | null;
+    member_since: number | null;
   };
   is_saved: boolean;
   virtual_tour_url?: string;

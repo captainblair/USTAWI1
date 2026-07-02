@@ -55,6 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
     last_login_location = models.CharField(max_length=255, blank=True, default="")
+    last_seen_at = models.DateTimeField(null=True, blank=True, db_index=True)
 
     objects = UserManager()
 

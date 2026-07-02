@@ -2,26 +2,37 @@
 
 import { FileText, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { resolveLeaseDocUrl } from "@/lib/leases/documents";
+import { fetchLeaseDocumentPdf } from "@/lib/leases/download-document";
 
 type LeasePdfViewerProps = {
-  fileUrl: string | null;
+  leaseId: string;
+  accessToken: string;
+  docId: string;
+  signedPdf?: boolean;
+  asLandlord?: boolean;
   title: string;
   subtitle?: string;
 };
 
 /**
- * Loads PDF via same-origin fetch (Next /media rewrite) then embeds a blob URL.
- * Avoids X-Frame-Options: DENY on backend media responses blocking iframes.
+ * Loads lease PDF via authenticated API download, then embeds a blob URL.
+ * Avoids 401s from unauthenticated /media/ or API metadata URLs in new tabs.
  */
-export function LeasePdfViewer({ fileUrl, title, subtitle }: LeasePdfViewerProps) {
+export function LeasePdfViewer({
+  leaseId,
+  accessToken,
+  docId,
+  signedPdf = false,
+  asLandlord = false,
+  title,
+  subtitle,
+}: LeasePdfViewerProps) {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUrl = resolveLeaseDocUrl(fileUrl);
-    if (!fetchUrl) {
+    if (!leaseId || !accessToken || !docId) {
       setBlobUrl(null);
       setError(null);
       return;
@@ -29,7 +40,6 @@ export function LeasePdfViewer({ fileUrl, title, subtitle }: LeasePdfViewerProps
 
     let cancelled = false;
     let objectUrl: string | null = null;
-    const urlToFetch = fetchUrl;
 
     async function load() {
       setLoading(true);
@@ -37,11 +47,10 @@ export function LeasePdfViewer({ fileUrl, title, subtitle }: LeasePdfViewerProps
       setBlobUrl(null);
 
       try {
-        const response = await fetch(urlToFetch);
-        if (!response.ok) {
-          throw new Error("Could not load document");
-        }
-        const blob = await response.blob();
+        const { blob } = await fetchLeaseDocumentPdf(accessToken, leaseId, docId, {
+          asLandlord,
+          signedPdf,
+        });
         if (cancelled) return;
         objectUrl = URL.createObjectURL(blob);
         setBlobUrl(objectUrl);
@@ -60,9 +69,9 @@ export function LeasePdfViewer({ fileUrl, title, subtitle }: LeasePdfViewerProps
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [fileUrl]);
+  }, [accessToken, asLandlord, docId, leaseId, signedPdf]);
 
-  if (!fileUrl) {
+  if (!docId) {
     return (
       <div className="flex min-h-[220px] flex-col items-center justify-center p-4 sm:min-h-[280px] sm:p-6">
         <FileText className="h-16 w-16 text-[#1F2B6C]/20" strokeWidth={1.25} />

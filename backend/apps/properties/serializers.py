@@ -73,11 +73,37 @@ class LandlordBriefSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="profile.full_name", read_only=True)
     is_verified_landlord = serializers.BooleanField(source="profile.is_verified_landlord", read_only=True)
     avatar = serializers.SerializerMethodField()
+    is_online = serializers.SerializerMethodField()
+    last_seen_at = serializers.SerializerMethodField()
+    member_since = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "full_name", "avatar", "is_phone_verified", "is_verified_landlord"]
+        fields = [
+            "id",
+            "full_name",
+            "avatar",
+            "is_phone_verified",
+            "is_verified_landlord",
+            "is_online",
+            "last_seen_at",
+            "member_since",
+        ]
         read_only_fields = fields
+
+    def get_is_online(self, obj):
+        from apps.accounts.services.presence import is_user_online
+
+        return is_user_online(obj)
+
+    def get_last_seen_at(self, obj):
+        from apps.accounts.services.presence import reference_activity_at
+
+        reference = reference_activity_at(obj)
+        return reference.isoformat() if reference else None
+
+    def get_member_since(self, obj):
+        return obj.created_at.year if obj.created_at else None
 
     def get_avatar(self, obj):
         profile = getattr(obj, "profile", None)

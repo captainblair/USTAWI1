@@ -2,6 +2,7 @@ from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.models import LoginActivity, RegistrationSession, User
+from apps.accounts.services.presence import touch_last_seen
 from apps.accounts.utils import get_client_ip, get_location_from_ip, get_user_agent
 
 
@@ -55,7 +56,8 @@ def log_login_activity(request, user: User, success: bool = True) -> LoginActivi
     if success and user:
         user.last_login_ip = ip
         user.last_login_location = location
-        user.save(update_fields=["last_login_ip", "last_login_location", "updated_at"])
+        touch_last_seen(user)
+        user.save(update_fields=["last_login_ip", "last_login_location", "last_seen_at", "updated_at"])
 
     return LoginActivity.objects.create(
         user=user,

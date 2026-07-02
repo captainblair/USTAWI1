@@ -54,6 +54,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     hydrate();
   }, []);
 
+  // Keep last_seen_at fresh while the user has the app open (updates via authenticated API calls).
+  useEffect(() => {
+    const token = session?.accessToken;
+    if (!token) return;
+
+    function pingPresence() {
+      if (document.visibilityState !== "visible") return;
+      fetchCurrentUser(token).catch(() => {});
+    }
+
+    pingPresence();
+    const interval = window.setInterval(pingPresence, 5 * 60 * 1000);
+    const onVisible = () => pingPresence();
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [session?.accessToken]);
+
   const setSession = useCallback((next: AuthSession) => {
     setClientSession(next);
     setSessionState(next);

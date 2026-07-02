@@ -10,7 +10,6 @@ import { LeaseSummarySidebar } from "@/components/leases/lease-summary-sidebar";
 import { useAuth } from "@/components/providers/auth-provider";
 import { fetchLandlordLeaseDetail, signLandlordLease } from "@/lib/api/landlord-leases";
 import { isLandlord } from "@/lib/auth/constants";
-import { resolveLeaseDocUrl } from "@/lib/leases/documents";
 import { formatLeaseDate, isSignableLease } from "@/lib/leases/status";
 import { formatPrice, cn } from "@/lib/utils";
 import type { LeaseDetail } from "@/types/lease";
@@ -178,14 +177,12 @@ export function LandlordLeaseDetailPanel({ leaseId }: { leaseId: string }) {
 
           <LeaseDocumentsPanel
             lease={lease}
+            accessToken={accessToken!}
+            asLandlord
             status={status}
             monthsRemaining={monthsRemaining}
             counterpartyLabel="Tenant"
             counterpartyName={lease.tenant_name || lease.counterparty_name}
-            onDownload={() => {
-              const url = resolveLeaseDocUrl(lease.signed_pdf_url ?? lease.documents[0]?.file_url ?? null);
-              if (url) window.open(url, "_blank", "noopener,noreferrer");
-            }}
           />
 
           {actionMessage && (
