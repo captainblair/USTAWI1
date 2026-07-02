@@ -1,5 +1,7 @@
+import logging
 import secrets
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.utils import timezone
@@ -12,6 +14,8 @@ from apps.payments.models import (
 )
 from apps.payments.services.daraja import MpesaDarajaClient, MpesaDarajaError
 from apps.payments.services.invoice import get_or_create_current_invoice, mark_invoice_paid
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentWorkflowError(Exception):
@@ -82,17 +86,28 @@ def initiate_rent_payment(lease, tenant, phone: str) -> Payment:
 
     if result.get("status") == "dev_mode":
         dev_callback = _build_dev_success_callback(payment)
-        from django.conf import settings
-
-        # In DEBUG, complete synchronously so demos work without Celery.
+        # Only auto-complete in local DEBUG. Production demo flow completes on the confirm page.
         if settings.DEBUG:
-            process_mpesa_callback(str(payment.id), dev_callback)
-        else:
-            from apps.payments.tasks import process_mpesa_callback_task
-
-            process_mpesa_callback_task.delay(str(payment.id), dev_callback)
+            try:
+                process_mpesa_callback(str(payment.id), dev_callback)
+            except Exception:
+                logger.exception("Dev mode payment callback failed during initiate for %s", payment.id)
 
     return payment
+
+
+def schedule_mpesa_callback(payment_id: str, payload: dict) -> None:
+    """Queue callback processing without failing the HTTP request that initiated payment."""
+    from apps.payments.tasks import process_mpesa_callback_task
+
+    try:
+        process_mpesa_callback_task.delay(payment_id, payload)
+    except Exception:
+        logger.exception("Celery enqueue failed for payment %s; running callback in-process", payment_id)
+        try:
+            process_mpesa_callback(payment_id, payload)
+        except Exception:
+            logger.exception("In-process payment callback failed for %s", payment_id)
 
 
 def _build_dev_success_callback(payment: Payment) -> dict:
@@ -171,16 +186,25 @@ def process_mpesa_callback(payment_id: str, payload: dict) -> Payment:
     payment.save()
 
     mark_invoice_paid(payment.invoice)
-    _create_receipt(payment)
+    try:
+        _create_receipt(payment)
+    except Exception:
+        logger.exception("Receipt generation failed for payment %s", payment.id)
 
-    from apps.notifications.services.triggers import notify_payment_completed
+    try:
+        from apps.notifications.services.triggers import notify_payment_completed
 
-    payment.refresh_from_db()
-    notify_payment_completed(payment)
+        payment.refresh_from_db()
+        notify_payment_completed(payment)
+    except Exception:
+        logger.exception("Payment notification failed for %s", payment.id)
 
-    from apps.payments.tasks import send_payment_receipt_email_task
+    try:
+        from apps.payments.tasks import send_payment_receipt_email_task
 
-    send_payment_receipt_email_task.delay(str(payment.id))
+        send_payment_receipt_email_task.delay(str(payment.id))
+    except Exception:
+        logger.exception("Receipt email enqueue failed for payment %s", payment.id)
 
     return payment
 

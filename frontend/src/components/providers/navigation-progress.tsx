@@ -13,8 +13,8 @@ export function NavigationProgress() {
       height={3}
       showSpinner={false}
       crawl
-      crawlSpeed={180}
-      speed={280}
+      crawlSpeed={120}
+      speed={200}
       easing="ease"
       shadow="0 0 12px rgba(239,61,50,0.45)"
       zIndex={1600}

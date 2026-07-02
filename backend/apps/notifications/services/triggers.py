@@ -2,6 +2,13 @@ from apps.notifications.models import NotificationCategory
 from apps.notifications.services.dispatch import send_notification
 
 
+def _user_display_name(user) -> str:
+    profile = getattr(user, "profile", None)
+    if profile and getattr(profile, "full_name", None):
+        return profile.full_name.strip() or user.email
+    return user.email
+
+
 def notify_application_submitted(application):
     landlord = application.property.owner
     profile = getattr(application.tenant, "profile", None)
@@ -61,7 +68,7 @@ def notify_payment_completed(payment):
     )
     landlord_msg = (
         f"Rent of {payment.currency} {payment.amount} received from "
-        f"{payment.tenant.profile.full_name or payment.tenant.email} for {prop_title}."
+        f"{_user_display_name(payment.tenant)} for {prop_title}."
     )
     send_notification(
         payment.landlord,
@@ -109,7 +116,7 @@ def notify_maintenance_created(request_obj):
         reference_id=request_obj.id,
         action_path=f"/landlord/maintenance/{request_obj.id}",
         event_type="maintenance_created",
-        actor_name=request_obj.tenant.profile.full_name or request_obj.tenant.email,
+        actor_name=_user_display_name(request_obj.tenant),
         email_subject="New maintenance request",
         email_body=request_obj.description[:500],
         sms_body=f"Ustawi: Maintenance request at {request_obj.property.title}: {request_obj.title}.",

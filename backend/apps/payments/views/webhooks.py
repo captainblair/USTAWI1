@@ -4,12 +4,11 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.payments.services.workflow import find_payment_for_callback, process_mpesa_callback
-from apps.payments.tasks import process_mpesa_callback_task
+from apps.payments.services.workflow import find_payment_for_callback, process_mpesa_callback, schedule_mpesa_callback
 
 logger = logging.getLogger(__name__)
 
@@ -29,31 +28,36 @@ class MpesaCallbackView(APIView):
             logger.warning("M-Pesa callback: payment not found for payload")
             return Response({"ResultCode": 0, "ResultDesc": "Accepted"})
 
-        process_mpesa_callback_task.delay(str(payment.id), payload)
+        schedule_mpesa_callback(str(payment.id), payload)
         return Response({"ResultCode": 0, "ResultDesc": "Accepted"})
 
 
 class DevSimulateCallbackView(APIView):
-    """DEBUG-only endpoint to simulate M-Pesa callback when Daraja credentials are not configured."""
+    """Simulate M-Pesa callback when Daraja credentials are not configured (local/demo)."""
 
-    permission_classes = [AllowAny]
-    authentication_classes = []
+    permission_classes = [IsAuthenticated]
 
-    @extend_schema(tags=["Payments"], summary="[DEV] Simulate M-Pesa callback")
+    @extend_schema(tags=["Payments"], summary="Simulate M-Pesa callback (demo / unconfigured M-Pesa)")
     def post(self, request):
         from django.conf import settings
 
-        if not settings.DEBUG:
+        from apps.payments.services.daraja import MpesaDarajaClient
+
+        if not settings.DEBUG and MpesaDarajaClient().is_configured:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         from apps.payments.models import Payment, PaymentStatus
+        from apps.payments.permissions import IsTenantUser
         from apps.payments.serializers import DevSimulateCallbackSerializer
         from apps.payments.services.workflow import _build_dev_success_callback
+
+        if not IsTenantUser().has_permission(request, self):
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         serializer = DevSimulateCallbackSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        payment = Payment.objects.get(pk=serializer.validated_data["payment_id"])
+        payment = Payment.objects.get(pk=serializer.validated_data["payment_id"], tenant=request.user)
         if serializer.validated_data.get("success", True):
             payload = _build_dev_success_callback(payment)
         else:

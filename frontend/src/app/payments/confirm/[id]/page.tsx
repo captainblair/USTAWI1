@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { PaymentConfirmPanel } from "@/components/payments/payment-confirm-panel";
+import { RouteLoadingIndicator } from "@/components/ui/route-loading-indicator";
 import { TenantShell } from "@/components/tenant/tenant-shell";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
@@ -19,7 +20,7 @@ export default async function PaymentConfirmPage({ params }: Props) {
   const { id } = await params;
   return (
     <TenantShell title="Confirm payment">
-      <Suspense fallback={null}>
+      <Suspense fallback={<RouteLoadingIndicator label="Opening payment confirmation…" />}>
         <PaymentConfirmPanel paymentId={id} />
       </Suspense>
     </TenantShell>

@@ -15,7 +15,10 @@ def process_mpesa_callback_task(self, payment_id: str, payload: dict):
         process_mpesa_callback(payment_id, payload)
     except Exception as exc:
         logger.exception("M-Pesa callback processing failed for payment %s", payment_id)
-        raise self.retry(exc=exc) from exc
+        try:
+            raise self.retry(exc=exc) from exc
+        except self.MaxRetriesExceededError:
+            logger.error("M-Pesa callback retries exhausted for payment %s", payment_id)
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=30)

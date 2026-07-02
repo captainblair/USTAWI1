@@ -91,6 +91,14 @@ class TenantPayRentView(APIView):
                 {"success": False, "error": {"message": str(exc)}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        except Exception:
+            import logging
+
+            logging.getLogger(__name__).exception("Unexpected pay-rent failure")
+            return Response(
+                {"success": False, "error": {"message": "Could not start payment. Please try again."}},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         from apps.payments.services.daraja import MpesaDarajaClient
 
@@ -141,7 +149,9 @@ class TenantPaymentStatusView(APIView):
 
     @extend_schema(tags=["Payments"], summary="Check payment status")
     def get(self, request, pk):
-        payment = Payment.objects.select_related("invoice", "receipt").get(pk=pk, tenant=request.user)
+        payment = Payment.objects.select_related("invoice", "receipt", "invoice__lease", "invoice__lease__property").get(
+            pk=pk, tenant=request.user
+        )
         data = PaymentHistorySerializer(payment, context={"request": request}).data
         return Response({"success": True, "data": data})
 
