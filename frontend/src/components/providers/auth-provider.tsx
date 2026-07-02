@@ -56,12 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Keep last_seen_at fresh while the user has the app open (updates via authenticated API calls).
   useEffect(() => {
-    const token = session?.accessToken;
-    if (!token) return;
+    if (!session) return;
+    const accessToken = session.accessToken;
 
     function pingPresence() {
       if (document.visibilityState !== "visible") return;
-      fetchCurrentUser(token).catch(() => {});
+      fetchCurrentUser(accessToken).catch(() => {});
     }
 
     pingPresence();
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [session?.accessToken]);
+  }, [session]);
 
   const setSession = useCallback((next: AuthSession) => {
     setClientSession(next);
