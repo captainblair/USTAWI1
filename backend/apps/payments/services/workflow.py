@@ -75,6 +75,30 @@ def cancel_stuck_payment(payment: Payment, *, reason: str = "Payment cancelled."
     return payment
 
 
+def revert_payment_for_testing(payment: Payment, *, reason: str = "Reverted for testing.") -> Payment:
+    """Undo a completed payment so the tenant can run the pay flow again (staging/demo)."""
+    from apps.payments.models import PaymentReceipt
+
+    if payment.status not in (PaymentStatus.COMPLETED, PaymentStatus.PENDING, PaymentStatus.PROCESSING):
+        raise PaymentWorkflowError(f"Payment {payment.id} is {payment.status} and cannot be reverted.")
+
+    PaymentReceipt.objects.filter(payment=payment).delete()
+
+    payment.status = PaymentStatus.REFUNDED
+    payment.mpesa_result_desc = reason
+    if not payment.completed_at:
+        payment.completed_at = timezone.now()
+    payment.save(update_fields=["status", "mpesa_result_desc", "completed_at", "updated_at"])
+
+    invoice = payment.invoice
+    today = timezone.now().date()
+    invoice.status = InvoiceStatus.OVERDUE if today > invoice.due_date else InvoiceStatus.PENDING
+    invoice.paid_at = None
+    invoice.save(update_fields=["status", "paid_at", "updated_at"])
+
+    return payment
+
+
 def initiate_rent_payment(lease, tenant, phone: str) -> Payment:
     invoice = get_or_create_current_invoice(lease)
     expire_stale_in_progress_payments(invoice=invoice)

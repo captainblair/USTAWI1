@@ -21,7 +21,7 @@ def _is_valid_pdf_file(file_field) -> bool:
     try:
         with file_field.open("rb") as fh:
             return fh.read(5) == b"%PDF-"
-    except OSError:
+    except Exception:
         return False
 
 
@@ -156,5 +156,9 @@ def ensure_receipt_pdf_file(receipt) -> None:
     if receipt.receipt_file and _is_valid_pdf_file(receipt.receipt_file):
         return
 
-    pdf = generate_payment_receipt_pdf(payment)
-    receipt.receipt_file.save(f"{receipt_number}.pdf", pdf, save=True)
+    pdf = generate_payment_receipt_pdf(payment, receipt_number=receipt_number)
+    try:
+        receipt.receipt_file.save(f"{receipt_number}.pdf", pdf, save=True)
+    except Exception:
+        # Ephemeral storage may reject writes; download endpoint regenerates on the fly.
+        pass

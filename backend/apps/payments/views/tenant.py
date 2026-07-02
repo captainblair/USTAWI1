@@ -1,5 +1,5 @@
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from django.http import FileResponse
+from django.http import Http404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -15,6 +15,7 @@ from apps.payments.serializers import (
     PaymentReceiptSerializer,
 )
 from apps.payments.services.invoice import get_rent_due_summary
+from apps.payments.services.receipt_delivery import build_receipt_download_response
 from apps.payments.services.workflow import PaymentWorkflowError, initiate_rent_payment
 from core.pagination import StandardResultsSetPagination
 
@@ -161,19 +162,28 @@ class TenantReceiptDownloadView(APIView):
 
     @extend_schema(tags=["Payments"], summary="Download payment receipt PDF")
     def get(self, request, pk):
-        from apps.payments.services.receipt_pdf import ensure_receipt_pdf_file
-
         receipt = PaymentReceipt.objects.select_related(
             "payment",
             "payment__invoice",
+            "payment__invoice__lease",
+            "payment__invoice__lease__property",
             "payment__tenant",
+            "payment__tenant__profile",
+            "payment__landlord",
+            "payment__landlord__profile",
         ).get(pk=pk, payment__tenant=request.user)
-        ensure_receipt_pdf_file(receipt)
-
-        filename = f"{receipt.receipt_number}.pdf"
-        file_handle = receipt.receipt_file.open("rb")
-        response = FileResponse(file_handle, content_type="application/pdf", as_attachment=True, filename=filename)
-        return response
+        try:
+            return build_receipt_download_response(receipt)
+        except Http404:
+            raise
+        except Exception:
+            return Response(
+                {
+                    "success": False,
+                    "error": {"message": "Could not generate receipt PDF. Please try again."},
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class TenantReceiptDetailView(APIView):
