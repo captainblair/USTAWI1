@@ -11,6 +11,7 @@ import {
 } from "@/lib/leases/download-document";
 import { formatLeaseDate } from "@/lib/leases/status";
 import type { LeaseDetail, LeaseStatus } from "@/types/lease";
+import { ApiRequestError } from "@/types/api";
 import { cn } from "@/lib/utils";
 
 type TimelineEvent = {
@@ -44,6 +45,8 @@ export function LeaseDocumentsPanel({
 }: LeaseDocumentsPanelProps) {
   const docTabs = useMemo(() => buildLeaseDocTabs(lease), [lease]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  const [docActionError, setDocActionError] = useState<string | null>(null);
+  const [docActionLoading, setDocActionLoading] = useState<"download" | "open" | null>(null);
 
   useEffect(() => {
     if (docTabs.length && !activeTabId) {
@@ -76,23 +79,39 @@ export function LeaseDocumentsPanel({
     }
     const docId = lease.signed_pdf_url && !activeDocId ? "signed-pdf" : activeDocId;
     if (!docId) return;
+    setDocActionError(null);
+    setDocActionLoading("download");
     try {
       await downloadLeaseDocumentPdf(accessToken, lease.id, docId, {
         asLandlord,
         signedPdf: docId === "signed-pdf",
       });
-    } catch {
-      // Parent panels may surface errors via onDownload in future
+    } catch (err) {
+      setDocActionError(
+        err instanceof ApiRequestError ? err.message : "Could not download the lease document.",
+      );
+    } finally {
+      setDocActionLoading(null);
     }
   }
 
   async function handleOpenInNewTab() {
     const docId = lease.signed_pdf_url && !activeDocId ? "signed-pdf" : activeDocId;
     if (!docId) return;
-    await openLeaseDocumentInNewTab(accessToken, lease.id, docId, {
-      asLandlord,
-      signedPdf: docId === "signed-pdf",
-    });
+    setDocActionError(null);
+    setDocActionLoading("open");
+    try {
+      await openLeaseDocumentInNewTab(accessToken, lease.id, docId, {
+        asLandlord,
+        signedPdf: docId === "signed-pdf",
+      });
+    } catch (err) {
+      setDocActionError(
+        err instanceof ApiRequestError ? err.message : "Could not open the lease document.",
+      );
+    } finally {
+      setDocActionLoading(null);
+    }
   }
 
   async function handleShare() {
@@ -140,11 +159,18 @@ export function LeaseDocumentsPanel({
           <p className="mt-2 text-center sm:mt-3">
             <button
               type="button"
+              disabled={docActionLoading === "open"}
               onClick={() => void handleOpenInNewTab()}
-              className="text-xs font-semibold text-ustawi-navy underline-offset-2 hover:underline sm:text-sm"
+              className="text-xs font-semibold text-ustawi-navy underline-offset-2 hover:underline disabled:opacity-60 sm:text-sm"
             >
-              Open full document in new tab
+              {docActionLoading === "open" ? "Opening document…" : "Open full document in new tab"}
             </button>
+          </p>
+        )}
+
+        {docActionError && (
+          <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-xs text-red-700 sm:text-sm">
+            {docActionError}
           </p>
         )}
 
@@ -152,11 +178,11 @@ export function LeaseDocumentsPanel({
           <button
             type="button"
             onClick={() => void handleDownload()}
-            disabled={!activeDocId && !lease.signed_pdf_url}
+            disabled={(!activeDocId && !lease.signed_pdf_url) || docActionLoading === "download"}
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#E8EAF2] px-4 py-2.5 text-sm font-semibold text-ustawi-navy hover:bg-ustawi-cream disabled:opacity-50 sm:w-auto sm:py-2"
           >
             <Download className="h-4 w-4" />
-            Download PDF
+            {docActionLoading === "download" ? "Preparing PDF…" : "Download PDF"}
           </button>
           {onShare && (
             <button

@@ -25,7 +25,7 @@ def _is_valid_pdf_file(file_field) -> bool:
     try:
         with file_field.open("rb") as fh:
             return fh.read(5) == b"%PDF-"
-    except OSError:
+    except Exception:
         return False
 
 
@@ -288,7 +288,11 @@ def ensure_lease_agreement_document(lease: Lease, actor=None) -> None:
         return
 
     if not _is_valid_pdf_file(agreement.file):
-        agreement.file.save(pdf.name, pdf, save=True)
+        try:
+            agreement.file.save(pdf.name, pdf, save=True)
+        except Exception:
+            # Render/ephemeral storage may reject writes; download endpoint regenerates on the fly.
+            pass
 
 
 def ensure_signed_lease_pdf(lease: Lease) -> None:

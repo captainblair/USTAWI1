@@ -31,6 +31,15 @@ function parseFilename(contentDisposition: string | null, fallback: string) {
   return fallback;
 }
 
+async function readPdfBlob(response: Response): Promise<Blob> {
+  const blob = await response.blob();
+  const header = await blob.slice(0, 5).text();
+  if (!header.startsWith("%PDF")) {
+    throw new ApiRequestError("The server did not return a valid PDF document.", response.status);
+  }
+  return blob;
+}
+
 /** Fetch a lease PDF with auth (preview, download, or new-tab open). */
 export async function fetchLeaseDocumentPdf(
   token: string,
@@ -40,7 +49,10 @@ export async function fetchLeaseDocumentPdf(
 ): Promise<{ blob: Blob; filename: string }> {
   const path = leaseDocumentDownloadPath(leaseId, docId, options);
   const response = await fetch(`${API_BASE}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/pdf, application/octet-stream;q=0.9, */*;q=0.8",
+    },
   });
 
   if (!response.ok) {
@@ -49,12 +61,14 @@ export async function fetchLeaseDocumentPdf(
       const payload = await response.json();
       message = payload?.error?.message ?? message;
     } catch {
-      // non-JSON error body
+      if (response.status === 404) {
+        message = "Lease document not found. Refresh the page and try again.";
+      }
     }
     throw new ApiRequestError(message, response.status);
   }
 
-  const blob = await response.blob();
+  const blob = await readPdfBlob(response);
   const filename = parseFilename(
     response.headers.get("Content-Disposition"),
     options.signedPdf || docId === "signed-pdf" ? `lease-${leaseId}-signed.pdf` : `lease-${docId}.pdf`,

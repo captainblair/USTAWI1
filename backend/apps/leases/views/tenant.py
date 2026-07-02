@@ -1,3 +1,4 @@
+from django.http import Http404
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -12,7 +13,7 @@ from apps.leases.serializers import (
     LeaseListSerializer,
     LeaseSignSerializer,
 )
-from apps.leases.services.document_delivery import serve_lease_pdf
+from apps.leases.services.document_delivery import build_lease_document_response, build_signed_lease_pdf_response
 from apps.leases.services.pdf import ensure_lease_agreement_document, ensure_signed_lease_pdf
 from apps.leases.services.workflow import LeaseWorkflowError, refresh_lease_status, sign_lease
 from core.pagination import StandardResultsSetPagination
@@ -131,10 +132,31 @@ class TenantLeaseDocumentFileView(APIView):
 
     @extend_schema(tags=["Leases"], summary="Download lease document PDF")
     def get(self, request, pk, doc_id):
-        lease = Lease.objects.get(pk=pk, tenant=request.user)
+        lease = (
+            Lease.objects.select_related(
+                "property",
+                "property__neighborhood",
+                "tenant",
+                "tenant__profile",
+                "landlord",
+                "landlord__profile",
+                "application",
+            )
+            .get(pk=pk, tenant=request.user)
+        )
         doc = LeaseDocument.objects.get(pk=doc_id, lease=lease)
-        filename = f"{doc.title or doc.doc_type or 'lease-document'}.pdf".replace('"', "")
-        return serve_lease_pdf(doc.file, filename, inline=True)
+        try:
+            return build_lease_document_response(lease, doc, actor=request.user)
+        except Http404:
+            raise
+        except Exception:
+            return Response(
+                {
+                    "success": False,
+                    "error": {"message": "Could not generate the lease document. Please try again."},
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class TenantLeaseSignedPdfDownloadView(APIView):
@@ -142,8 +164,27 @@ class TenantLeaseSignedPdfDownloadView(APIView):
 
     @extend_schema(tags=["Leases"], summary="Download signed lease PDF")
     def get(self, request, pk):
-        lease = Lease.objects.get(pk=pk, tenant=request.user)
-        ensure_signed_lease_pdf(lease)
-        lease.refresh_from_db()
-        filename = f"lease-{lease.id}-signed.pdf"
-        return serve_lease_pdf(lease.signed_pdf, filename, inline=True)
+        lease = (
+            Lease.objects.select_related(
+                "property",
+                "property__neighborhood",
+                "tenant",
+                "tenant__profile",
+                "landlord",
+                "landlord__profile",
+                "application",
+            )
+            .get(pk=pk, tenant=request.user)
+        )
+        try:
+            return build_signed_lease_pdf_response(lease)
+        except Http404:
+            raise
+        except Exception:
+            return Response(
+                {
+                    "success": False,
+                    "error": {"message": "Could not generate the signed lease PDF. Please try again."},
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -1,6 +1,7 @@
 import { Poppins } from "next/font/google";
 import { SiteChrome } from "@/components/layout/site-chrome";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { NavigationProgress } from "@/components/providers/navigation-progress";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { rootMetadata } from "@/lib/seo/metadata";
 import "./globals.css";
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${poppins.variable} h-full scroll-smooth`}>
       <body className="min-h-full flex flex-col bg-white font-sans font-normal leading-relaxed text-ustawi-navy antialiased">
+        <NavigationProgress />
         <QueryProvider>
           <AuthProvider>
             <SiteChrome>{children}</SiteChrome>
