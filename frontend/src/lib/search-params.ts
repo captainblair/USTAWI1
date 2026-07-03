@@ -119,3 +119,21 @@ export function paramsToQueryString(params: PropertySearchParams) {
   const q = search.toString();
   return q ? `?${q}` : "";
 }
+
+/** Human-readable label for the current property search (e.g. Karen, Westlands). */
+export function getSearchContextLabel(
+  filters: PropertySearchParams,
+  metadata: FilterMetadata,
+): string | null {
+  if (filters.neighborhood) {
+    const n = metadata.neighborhoods.find((x) => x.slug === filters.neighborhood);
+    return n?.name ?? filters.neighborhood.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  if (filters.q?.trim()) {
+    return filters.q.trim();
+  }
+  if (filters.city?.trim()) {
+    return filters.city.trim();
+  }
+  return null;
+}

@@ -1,11 +1,9 @@
 import { Suspense } from "react";
+import { PropertySearchContextBar } from "@/components/properties/property-search-context-bar";
 import { PropertyFilters } from "@/components/properties/property-filters";
 import { PropertyGrid } from "@/components/properties/property-grid";
 import { PropertyMap } from "@/components/properties/property-map-loader";
-import {
-  PropertySearchEmptyState,
-  PropertySearchToolbar,
-} from "@/components/properties/property-search-empty-state";
+import { PropertySearchEmptyState } from "@/components/properties/property-search-empty-state";
 import { fetchFilterMetadata, fetchProperties } from "@/lib/api/properties";
 import { hasActiveSearch } from "@/lib/search-params";
 import { createPageMetadata } from "@/lib/seo/metadata";
@@ -84,8 +82,8 @@ export default async function PropertiesPage({ searchParams }: PageProps) {
           className="pointer-events-none absolute -right-24 top-[480px] h-64 w-64 rounded-full bg-ustawi-red/10 blur-3xl"
           aria-hidden
         />
-        <Suspense fallback={<div className="h-24 animate-pulse bg-ustawi-navy/20" />}>
-          <PropertySearchToolbar metadata={metadata} />
+        <Suspense fallback={<div className="h-28 animate-pulse bg-ustawi-navy/20" />}>
+          <PropertySearchContextBar metadata={metadata} variant="dark" />
         </Suspense>
         <div className="relative mx-auto px-4 py-10 sm:px-6 sm:py-14">
           <PropertySearchEmptyState
@@ -98,12 +96,17 @@ export default async function PropertiesPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="bg-ustawi-cream py-10 sm:py-14">
+    <div className="bg-ustawi-cream">
+      <Suspense fallback={<div className="h-28 animate-pulse border-b bg-white" />}>
+        <PropertySearchContextBar metadata={metadata} variant="light" />
+      </Suspense>
+
+      <div className="py-8 sm:py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10">
+        <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-ustawi-red">Search</p>
-          <h1 className="mt-2 text-3xl font-bold text-ustawi-navy sm:text-4xl">Find your next home</h1>
-          <p className="mt-2 text-ustawi-muted">
+          <h1 className="mt-2 text-2xl font-bold text-ustawi-navy sm:text-3xl">Find your next home</h1>
+          <p className="mt-2 text-sm text-ustawi-muted sm:text-base">
             Search by map area or radius, then filter by price, safety score, and neighborhood.
           </p>
         </div>
@@ -134,13 +137,14 @@ export default async function PropertiesPage({ searchParams }: PageProps) {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-          <aside className="lg:sticky lg:top-24 lg:self-start">
+          <aside className="lg:sticky lg:top-[13.5rem] lg:self-start">
             <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-white" />}>
               <PropertyFilters metadata={metadata} />
             </Suspense>
           </aside>
           <PropertyGrid properties={listings.results} count={listings.count} />
         </div>
+      </div>
       </div>
     </div>
   );

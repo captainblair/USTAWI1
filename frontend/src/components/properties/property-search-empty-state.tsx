@@ -1,117 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useTransition } from "react";
 import {
   ArrowRight,
-  Globe,
   Lightbulb,
   MapPin,
   RotateCcw,
-  Search,
   Shield,
   Sparkles,
-  X,
 } from "lucide-react";
 import { HouseSearchIcon } from "@/components/properties/search-empty-illustration";
+import { PropertySearchContextBar } from "@/components/properties/property-search-context-bar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  buildFilterChips,
-  paramsToQueryString,
-  removeFilterParams,
-} from "@/lib/search-params";
-import type { FilterMetadata, PropertySearchParams } from "@/types/property";
+import type { FilterMetadata } from "@/types/property";
 
-function parseFilters(searchParams: URLSearchParams): PropertySearchParams {
-  const filters: PropertySearchParams = {};
-  searchParams.forEach((value, key) => {
-    (filters as Record<string, string>)[key] = value;
-  });
-  return filters;
-}
-
-export function PropertySearchToolbar({ metadata }: { metadata: FilterMetadata }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-
-  const filters = parseFilters(searchParams);
-  const chips = buildFilterChips(filters, metadata);
-  const query = searchParams.get("q") ?? searchParams.get("city") ?? "Nairobi, Kenya";
-
-  function handleSearch(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const params = new URLSearchParams(searchParams.toString());
-    const q = String(form.get("q") ?? "").trim();
-    if (q) {
-      params.set("q", q);
-      params.set("city", "Nairobi");
-    } else {
-      params.delete("q");
-    }
-    params.delete("page");
-    startTransition(() => router.push(`/properties?${params.toString()}`));
-  }
-
-  function removeChip(paramKeys: string[]) {
-    const next = removeFilterParams(filters, paramKeys);
-    startTransition(() => router.push(`/properties${paramsToQueryString(next)}`));
-  }
-
-  return (
-    <div className="relative border-b border-white/10 bg-gradient-to-r from-[#0a1128] via-ustawi-navy to-[#1a2560]">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(239,61,50,0.12),transparent_45%)]"
-        aria-hidden
-      />
-      <div className="relative mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-6">
-        <form onSubmit={handleSearch} className="mx-auto flex max-w-2xl items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ustawi-muted" />
-            <Input
-              name="q"
-              defaultValue={query === "Nairobi, Kenya" ? "" : query}
-              placeholder="Nairobi, Kenya"
-              className="h-12 rounded-full border-white/20 bg-white pl-12 pr-4 text-sm shadow-[0_8px_32px_rgba(0,0,0,0.15)]"
-            />
-          </div>
-          <Button type="submit" disabled={isPending} className="hidden h-12 rounded-full px-6 sm:inline-flex">
-            Search
-          </Button>
-        </form>
-
-        {chips.length > 0 && (
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-            {chips.map((chip) => (
-              <span
-                key={chip.id}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm"
-              >
-                {chip.label}
-                <button
-                  type="button"
-                  onClick={() => removeChip(chip.paramKeys)}
-                  className="rounded-full p-0.5 text-white/70 transition hover:bg-white/20 hover:text-white"
-                  aria-label={`Remove ${chip.label} filter`}
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-xs text-white/60 sm:hidden">
-        <span>Filters</span>
-        <Globe className="h-4 w-4" />
-      </div>
-    </div>
-  );
-}
+/** @deprecated Use PropertySearchContextBar */
+export { PropertySearchContextBar as PropertySearchToolbar };
 
 type PropertySearchEmptyStateProps = {
   metadata: FilterMetadata;
