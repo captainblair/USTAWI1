@@ -1,19 +1,22 @@
-"""Normalize Redis URLs for Celery / redis-py TLS clients."""
+"""Normalize Redis URLs for Celery TLS clients.
+
+Celery expects ssl_cert_reqs=CERT_REQUIRED|CERT_OPTIONAL|CERT_NONE.
+Django's redis-py cache client does not — leave REDIS_URL untouched.
+"""
 
 from __future__ import annotations
 
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
-# Celery Redis backend refuses rediss:// unless ssl_cert_reqs is explicit.
 _DEFAULT_SSL_CERT_REQS = "CERT_REQUIRED"
 
 
 def ensure_redis_ssl_cert_reqs(url: str, cert_reqs: str = _DEFAULT_SSL_CERT_REQS) -> str:
     """
-    Append ssl_cert_reqs to rediss:// URLs when missing.
+    Append Celery-style ssl_cert_reqs to rediss:// URLs when missing.
 
-    Celery raises ValueError on rediss:// without this query param
-    (broker and result backend). Plain redis:// URLs are returned unchanged.
+    Use only for CELERY_BROKER_URL / CELERY_RESULT_BACKEND.
+    Plain redis:// URLs are returned unchanged.
     """
     if not url or not url.startswith("rediss://"):
         return url

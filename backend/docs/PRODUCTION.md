@@ -27,7 +27,7 @@ Set these on the **web** and **worker** services in Render:
 | `REDIS_URL` | *(from Render Redis / Upstash)* | Django cache. Use `rediss://` for TLS. |
 | `CELERY_BROKER_URL` | *(same Redis)* | Celery message broker |
 | `CELERY_RESULT_BACKEND` | *(same Redis)* | Task results |
-| `REDIS_SSL_CERT_REQS` | `CERT_REQUIRED` | Auto-appended to `rediss://` URLs for Celery |
+| `REDIS_SSL_CERT_REQS` | `CERT_REQUIRED` | Auto-appended to Celery broker/result `rediss://` URLs only (not Django cache) |
 | `CELERY_TASK_ALWAYS_EAGER` | `true` (default) | Set `false` only when a Celery worker is running |
 | `ALLOWED_HOSTS` | `ustawi-api.onrender.com` | Comma-separated |
 | `CORS_ALLOWED_ORIGINS` | `https://your-app.vercel.app` | Vercel frontend URL |

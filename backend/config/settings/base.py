@@ -199,13 +199,10 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=CORS_ALLOWED_ORI
 
 from config.redis_url import ensure_redis_ssl_cert_reqs
 
-# Upstash / managed Redis use rediss://; Celery requires ssl_cert_reqs on those URLs.
-_REDIS_SSL_CERT_REQS = env("REDIS_SSL_CERT_REQS", default="CERT_REQUIRED")
-
-REDIS_URL = ensure_redis_ssl_cert_reqs(
-    env("REDIS_URL", default="redis://localhost:6379/0"),
-    cert_reqs=_REDIS_SSL_CERT_REQS,
-)
+# Django RedisCache (redis-py) accepts rediss:// as-is. Do NOT append Celery's
+# ssl_cert_reqs=CERT_* here — redis-py rejects that flag and every throttled
+# request 500s.
+REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 
 CACHES = {
     "default": {
@@ -214,13 +211,15 @@ CACHES = {
     }
 }
 
+# Celery requires ssl_cert_reqs=CERT_REQUIRED|OPTIONAL|NONE on rediss:// URLs.
+_CELERY_REDIS_SSL_CERT_REQS = env("REDIS_SSL_CERT_REQS", default="CERT_REQUIRED")
 CELERY_BROKER_URL = ensure_redis_ssl_cert_reqs(
     env("CELERY_BROKER_URL", default="redis://localhost:6379/1"),
-    cert_reqs=_REDIS_SSL_CERT_REQS,
+    cert_reqs=_CELERY_REDIS_SSL_CERT_REQS,
 )
 CELERY_RESULT_BACKEND = ensure_redis_ssl_cert_reqs(
     env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/2"),
-    cert_reqs=_REDIS_SSL_CERT_REQS,
+    cert_reqs=_CELERY_REDIS_SSL_CERT_REQS,
 )
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
