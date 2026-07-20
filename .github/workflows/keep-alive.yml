@@ -1,0 +1,41 @@
+# Keep Render + Neon warm so I don't hit a cold start.
+# Pings the API health endpoint (SELECT 1 on Neon) on a schedule.
+#
+# Notes:
+# - Render free/hibernating services sleep after ~15 min idle; 5 min interval is safer.
+# - GitHub cron can drift under load; if wakes are still slow, use UptimeRobot instead.
+# - Scheduled workflows only run on the default branch (main).
+
+name: Keep-alive
+
+on:
+  schedule:
+    # Every 5 minutes
+    - cron: "*/5 * * * *"
+  workflow_dispatch: # manual run from Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping API health (wakes Render + Neon)
+        env:
+          # Override via repo variable KEEP_ALIVE_URL if the host changes.
+          HEALTH_URL: ${{ vars.KEEP_ALIVE_URL || 'https://ustawi-api.onrender.com/api/health/' }}
+        run: |
+          set -euo pipefail
+          echo "Pinging $HEALTH_URL"
+          # Long timeout: a cold wake can take 30–90s; this run itself may cold-start.
+          code=$(curl -sS -o /tmp/health.json -w "%{http_code}" \
+            --connect-timeout 30 \
+            --max-time 120 \
+            "$HEALTH_URL" || true)
+          echo "HTTP $code"
+          cat /tmp/health.json || true
+          echo
+          if [ "$code" != "200" ] && [ "$code" != "503" ]; then
+            echo "Unexpected status (service may still be waking)."
+            exit 1
+          fi
+          echo "Keep-alive OK"
