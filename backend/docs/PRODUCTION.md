@@ -24,9 +24,11 @@ Set these on the **web** and **worker** services in Render:
 | `DEBUG` | `false` | Never `true` in production |
 | `USE_POSTGIS` | `false` | Use `true` only if PostGIS extension is enabled |
 | `DATABASE_URL` | *(from Render Postgres)* | Linked via blueprint |
-| `REDIS_URL` | *(from Render Redis)* | Django cache |
+| `REDIS_URL` | *(from Render Redis / Upstash)* | Django cache. Use `rediss://` for TLS. |
 | `CELERY_BROKER_URL` | *(same Redis)* | Celery message broker |
 | `CELERY_RESULT_BACKEND` | *(same Redis)* | Task results |
+| `REDIS_SSL_CERT_REQS` | `CERT_REQUIRED` | Auto-appended to `rediss://` URLs for Celery |
+| `CELERY_TASK_ALWAYS_EAGER` | `true` (default) | Set `false` only when a Celery worker is running |
 | `ALLOWED_HOSTS` | `ustawi-api.onrender.com` | Comma-separated |
 | `CORS_ALLOWED_ORIGINS` | `https://your-app.vercel.app` | Vercel frontend URL |
 | `CSRF_TRUSTED_ORIGINS` | `https://your-app.vercel.app` | Match CORS origins |

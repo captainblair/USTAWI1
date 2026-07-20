@@ -13,7 +13,8 @@ if _render_url:
     if render_host and render_host not in ALLOWED_HOSTS:  # noqa: F405
         ALLOWED_HOSTS = [*ALLOWED_HOSTS, render_host]  # noqa: F405
 
-# Render web service typically has no Celery worker — run tasks inline so submits/notifications succeed.
+# Render web service often has no Celery worker — run tasks inline so mail/SMS still send.
+# Set CELERY_TASK_ALWAYS_EAGER=false when ustawi-worker (or equivalent) is running.
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=True)  # noqa: F405
 
 # Free-tier Render often has no Redis — avoid 500s on every API call (DRF throttling uses cache).

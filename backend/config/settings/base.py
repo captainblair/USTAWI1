@@ -197,7 +197,15 @@ CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localho
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=CORS_ALLOWED_ORIGINS)
 
-REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
+from config.redis_url import ensure_redis_ssl_cert_reqs
+
+# Upstash / managed Redis use rediss://; Celery requires ssl_cert_reqs on those URLs.
+_REDIS_SSL_CERT_REQS = env("REDIS_SSL_CERT_REQS", default="CERT_REQUIRED")
+
+REDIS_URL = ensure_redis_ssl_cert_reqs(
+    env("REDIS_URL", default="redis://localhost:6379/0"),
+    cert_reqs=_REDIS_SSL_CERT_REQS,
+)
 
 CACHES = {
     "default": {
@@ -206,12 +214,20 @@ CACHES = {
     }
 }
 
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/1")
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/2")
+CELERY_BROKER_URL = ensure_redis_ssl_cert_reqs(
+    env("CELERY_BROKER_URL", default="redis://localhost:6379/1"),
+    cert_reqs=_REDIS_SSL_CERT_REQS,
+)
+CELERY_RESULT_BACKEND = ensure_redis_ssl_cert_reqs(
+    env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/2"),
+    cert_reqs=_REDIS_SSL_CERT_REQS,
+)
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+# Notifications / receipts are fire-and-forget; avoid requiring a working result store.
+CELERY_TASK_IGNORE_RESULT = True
 
 # M-Pesa Daraja — leave blank for dev-mode STK simulation
 MPESA_CONSUMER_KEY = env("MPESA_CONSUMER_KEY", default="")

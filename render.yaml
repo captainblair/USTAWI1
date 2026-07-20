@@ -34,6 +34,8 @@ services:
           type: redis
           name: ustawi-redis
           property: connectionString
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "false"
       - key: ALLOWED_HOSTS
         sync: false
       - key: CORS_ALLOWED_ORIGINS
@@ -85,6 +87,8 @@ services:
           type: redis
           name: ustawi-redis
           property: connectionString
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "false"
 
   - type: redis
     name: ustawi-redis
