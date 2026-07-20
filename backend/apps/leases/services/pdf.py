@@ -5,6 +5,7 @@ Generate property-specific lease agreement PDFs (real PDF bytes, not plain text)
 from __future__ import annotations
 
 import io
+import logging
 from decimal import Decimal
 
 from django.core.files.base import ContentFile
@@ -17,6 +18,8 @@ from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from apps.leases.models import Lease
+
+logger = logging.getLogger(__name__)
 
 
 def _is_valid_pdf_file(file_field) -> bool:
@@ -301,7 +304,12 @@ def ensure_signed_lease_pdf(lease: Lease) -> None:
         return
     if lease.signed_pdf and _is_valid_pdf_file(lease.signed_pdf):
         return
-    regenerate_signed_lease_pdf(lease)
+    try:
+        regenerate_signed_lease_pdf(lease)
+    except Exception:
+        # Detail/download views must not 500 if Cloudinary/storage write fails;
+        # download endpoints can still stream a freshly generated PDF.
+        logger.exception("Failed to persist signed lease PDF for lease %s", lease.pk)
 
 
 def regenerate_signed_lease_pdf(lease: Lease) -> None:
@@ -312,9 +320,10 @@ def regenerate_signed_lease_pdf(lease: Lease) -> None:
         return
 
     pdf = generate_lease_agreement_pdf(lease, signed=True)
+    # ContentFile is consumed by storage.save; seek before each upload.
     lease.signed_pdf.save(pdf.name, pdf, save=True)
 
-    signed_doc, created = LeaseDocument.objects.get_or_create(
+    signed_doc, _created = LeaseDocument.objects.get_or_create(
         lease=lease,
         doc_type=LeaseDocumentType.SIGNED_COPY,
         defaults={
@@ -322,7 +331,5 @@ def regenerate_signed_lease_pdf(lease: Lease) -> None:
             "uploaded_by": lease.landlord,
         },
     )
-    if not created:
-        signed_doc.file.save(pdf.name, pdf, save=True)
-    else:
-        signed_doc.file.save(pdf.name, pdf, save=True)
+    pdf.seek(0)
+    signed_doc.file.save(pdf.name, pdf, save=True)
