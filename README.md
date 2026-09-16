@@ -6,7 +6,7 @@
 
 Ustawi is a verified rental and housing platform (PropTech) built for Nairobi and Kenya's broader housing market. It helps tenants find safe, verified homes while giving landlords and agents reliable tools for property management, tenant screening, and rent collection.
 
-This repository contains the full-stack Ustawi platform. **All 11 backend phases are complete.** The Next.js frontend is next — built page-by-page against the wireframes and API endpoints below.
+This repository contains the full-stack Ustawi platform. **All 11 backend phases are complete.** The Next.js frontend is also complete — built page-by-page against the wireframes and API endpoint.
 
 ---
 
