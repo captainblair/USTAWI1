@@ -81,9 +81,7 @@ This repository contains the full-stack Ustawi platform. **All 11 backend phases
 | Real-time | WebSockets / polling (Phase 8+) |
 | Deploy target | Vercel |
 
-### Design Language
 
-Inspired by Nenasasa: **navy hero sections**, **red accent CTAs**, generous whitespace, mobile-first responsive layout.
 
 ---
 
